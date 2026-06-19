@@ -2,98 +2,212 @@ body {
   background-color: rgb(243, 233, 233);
   margin: 0;
 }
-.tv{
-  width: 40vw;
-  border:1px solid #ccc;
-  margin-left:29vw;
-  padding:10px;
-  margin-bottom: 10px;
-}
 
 .h1painel {
   text-align: center; 
   color: #6abf59;
 }
 
-button{
-  margin:5px;
-  background-color: #2f9e40;
+.layout{
+  display:grid;
+  grid-template-columns:
+    220px
+    1fr
+    180px;
+  gap:25px;
+  align-items:start;
+
 }
+
+/* fields esquerda - menu fixo de funcionalidades */
+
+#menu-funcionalidades{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.field-personalizar{
+  width: 10vw;
+  height: 50vh;
+  display:flex;
+  flex-direction:column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 3vh;
+  margin-left: 1.5vw;
+  margin-bottom: 3vh;
+  border-radius: 1vw ;
+  border:1px solid #ccc;
+}
+
+.field-playlists {
+  width: 10vw;
+  height: 50vh;
+  align-items: center;
+  justify-content: center;
+  padding-top: 3vh;
+  margin-left: 2vw;
+  margin-bottom: 3vh;
+  border-radius: 1vw ;
+  border:1px solid #ccc;
+}
+
+fieldset legend {
+  text-align: center;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1vw;
+  font-weight:bold;
+  color:#1c7f13
+}
+
+/* botões de funcionalidades */
+.playlist-btn {
+  text-decoration:none;
+  text-align:center;
+  width:7vw;
+  padding:0.5vw;
+  color:white;
+  background:#6abf59;
+  border-radius:0.7vw;
+  font-weight:bold;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1vw;
+  margin-bottom: 3vh;
+}
+
+.playlist-btn:hover {
+  background-color: #90df7c;
+  transform:scale(1.05);
+}
+
+.adicionar-btn{
+  text-decoration:underline;
+  color:#1c7f13;
+  font-weight: bold;
+  font-size: 1vw;
+}
+
+#inputconteudo {
+  display: none;
+  margin-top: 1vh;
+  border-radius: 1vw;
+}
+
+#inputconteudo::active {
+  border: 1vw solid rgb(182, 180, 180);
+}
+
+
+#inputplaylist {
+  display: none;
+  margin-top: 1vh;
+}
+
+#criarconteudo {
+  display: none;
+}
+
+#criarplaylist {
+  display: none;
+}
+
+/* field TV central */
+.tv{ 
+  width: 25vw;
+  height: 50vh;
+  justify-content: center;
+  border:1px solid #ccc;
+  border-radius:1vw;
+  padding:15px;
+  
+} 
 
 .mensagemtv{
   font-size: 24px;
   color: #1c7f13;
   font-weight: bold;
   margin-top: 5vw;
-  margin-left: 5vw;
-}
-
-.tv h2 {
-  color: #6abf59;  /* Azul */
-  font-size:1.5vw;
-  text-decoration: underline;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-transform: uppercase;  /* Ex: "TV1" em maiúsculo */
-}
-
-
-.aplicar-btn {
-  background-color: #439f36; /* Verde mais escuro */
-  width: 10vw;
-  height: 5vh;
-  border: none;
-  text-align: center;
-  display: inline-block;
-  border-radius: 4px;
-  margin-left: 45vw;
-}
-
-/* CSS DE PLAYLISTS E CAMPO DAS TVS */
-
-.tv-content {
-  height: 20vw;
-  display: flex;
-  gap: 2vw;
-  
 }
 
 .tv-preview-frame {
   display: flex;
-  width: 20vw;
-  height: 14vw;
-  border: 0.2vw solid #000;
+  width: 22vw;
+  height: 16vw;
+  border: 0.1vw solid #000;
   margin-top: 3vh;
-  margin-left: 2vw ;
+  margin-left: 1.5vw;
 }
 
-.tv-buttons {
-  width: 8vw;
-  height: 1vw;
-  float: right;
+#tv-atual{
+  display:flex;
+  justify-content:center;
+}
+
+/* título TV */
+.tv h2 {
+  color: #6abf59; 
+  font-size:1.5vw;
+  text-decoration: underline;
+  font-weight: bold;
+  text-transform: uppercase;  
+}
+
+
+.playlist-header {
   display: flex;
-  flex-direction: column;
-  margin-left: 5vw;
-  gap: 1vw;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1vw;
 }
 
-.titulosplaylists {
-  text-align: center;
-}
-.playlist-btn {
-  padding: 0.3vw;
-  font-size: 0.9vw;
-  border-radius: 0.7vw;
-  color:white;
-  font-weight:bold;
+.btn-editar {
+  width: 5vw;
+  border: none;
+  background-color: rgb(243, 233, 233);
+  color: #6abf59;
   cursor: pointer;
-  border-color: #6abf59;
-  background-color: #6abf59;
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-  
 }
-.playlist-btn:hover {
+
+.btn-editar:hover {
+  text-decoration:underline;
+}
+
+
+.titulo-playlist-atual {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1c7f13;
+}
+
+
+/* menu da direita - tvs conectados */
+#menu-tvs{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  position:sticky;
+  top:20px;
+}
+
+.botao-tv{
+  text-decoration:none;
+  text-align:center;
+  width:7vw;
+  padding:0.5vw;
+  color:white;
+  background:#6abf59;
+  border: #6abf59;
+  border-radius:0.7vw;
+  font-weight:bold;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1vw;
+  margin-bottom: 3vh;
+  cursor: pointer;
+  text-transform: uppercase;  
+}
+
+.botao-tv:hover {
   background-color: #90df7c;
   transform:scale(1.05);
 }
@@ -208,4 +322,15 @@ transition: all 0.3s ease;
   font-weight: 800;
   color: #1c5f9a;
   margin-top: 8px;
+}
+
+.aplicar-btn {
+  background-color: #439f36; 
+  width: 10vw;
+  height: 5vh;
+  border: none;
+  text-align: center;
+  display: inline-block;
+  border-radius: 4px;
+  margin-left: 45vw;
 }

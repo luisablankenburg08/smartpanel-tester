@@ -281,42 +281,10 @@
   },
   "videosCustomizados": [
     {
-      "id": "DrE_tVg5VcI",
-      "titulo": "CANADÁ X BÓSNIA AO VIVO | FASE DE GRUPOS | GRUPO B | RODADA 01 | PRÉ-JOGO DA COPA AO VIVO",
-      "iframe": "https://www.youtube.com/embed/DrE_tVg5VcI?autoplay=1&mute=1&playsinline=1",
-      "thumb": "https://img.youtube.com/vi/DrE_tVg5VcI/hqdefault.jpg",
-      "duracao": 60,
-      "live": false
-    },
-    {
-      "id": "w9vPdxL7RIg",
-      "titulo": "CANADÁ X BÓSNIA AO VIVO | LIVE - REACT DE JOGO AO VIVO DA COPA",
-      "iframe": "https://www.youtube.com/embed/w9vPdxL7RIg?autoplay=1&mute=1&playsinline=1",
-      "thumb": "https://img.youtube.com/vi/w9vPdxL7RIg/hqdefault.jpg",
-      "duracao": 60,
-      "live": false
-    },
-    {
-      "id": "CRtjePKnGvA",
-      "titulo": "AO VIVO: CANADÁ X BÓSNIA | COPA DO MUNDO FIFA™ 2026 | 1ª RODADA | FASE DE GRUPOS",
-      "iframe": "https://www.youtube.com/embed/CRtjePKnGvA?autoplay=1&mute=1&playsinline=1",
-      "thumb": "https://img.youtube.com/vi/CRtjePKnGvA/hqdefault.jpg",
-      "duracao": 60,
-      "live": false
-    },
-    {
-      "id": "r3-kPP3Uths",
-      "titulo": "CANADÁ X BÓSNIA AO VIVO GRUPO B RODADA 1 | MUNDIAL 2026 | REACT PRÉ-JOGO",
-      "iframe": "https://www.youtube.com/embed/r3-kPP3Uths?autoplay=1&mute=1&playsinline=1",
-      "thumb": "https://img.youtube.com/vi/r3-kPP3Uths/hqdefault.jpg",
-      "duracao": 60,
-      "live": false
-    },
-    {
-      "id": "FtPR4-OYU0E",
-      "titulo": "MÉXICO X AFRICA DO SUL AO VIVO | REACT DE JOGO AO VIVO DA COPA",
-      "iframe": "https://www.youtube.com/embed/FtPR4-OYU0E?autoplay=1&mute=1&playsinline=1",
-      "thumb": "https://img.youtube.com/vi/FtPR4-OYU0E/hqdefault.jpg",
+      "id": "lFlxFg9u2OA",
+      "titulo": "teste",
+      "iframe": "https://www.youtube.com/embed/lFlxFg9u2OA?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/lFlxFg9u2OA/hqdefault.jpg",
       "duracao": 60,
       "live": false
     }

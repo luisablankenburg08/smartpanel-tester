@@ -1,118 +1,119 @@
 let pendingSelections = {};
+let tvSelecionada = null;
 
-async function carregar(){
+function adicionarConteudo(event) {
 
-  let container = document.getElementById("tvs");
+  event.preventDefault(); 
+  
+  var input = document.getElementById("inputconteudo");
 
-  let state;
-  try{
-    let res = await fetch("/state");
-    state = await res.json();
-  }catch(e){
-    console.error("Erro ao buscar state:", e);
-    container.innerHTML = "<p>Erro ao carregar TVs</p>";
-    return;
+  if (input.style.display === "none") {
+      input.style.display = "block";
+      input.focus(); 
+  } else {
+      input.style.display = "none";
   }
 
-  if(!state || Object.keys(state).length === 0){
-    container.innerHTML = "<p class='mensagemtv'>• Nenhuma TV conectada</p>";
-    return;
+  var criarconteudo =  document.getElementById("criarconteudo");
+
+  if (criarconteudo.style.display === "none") {
+      criarconteudo.style.display = "block";
+      criarconteudo.focus(); 
+  } else {
+      criarconteudo.style.display = "none";
+  }
+}
+
+function adicionarPlaylist(event) {
+
+  event.preventDefault(); 
+  
+  var input = document.getElementById("inputplaylist");
+
+  if (input.style.display === "none") {
+      input.style.display = "block";
+      input.focus(); 
+  } else {
+      input.style.display = "none";
   }
 
-  // preserva o estado aberto dos detalhes enquanto faz refresh
-  let openState = {};
-  let savedStates = JSON.parse(localStorage.getItem('tvDetailsStates') || '{}');
+  var criarplaylist =  document.getElementById("criarplaylist");
 
-  container.querySelectorAll(".tv").forEach(tvDiv => {
-    let tvName = tvDiv.querySelector("h2")?.innerText;
-    if(!tvName) return;
+  if (criarplaylist.style.display === "none") {
+      criarplaylist.style.display = "block";
+      criarplaylist.focus(); 
+  } else {
+      criarplaylist.style.display = "none";
+  }
+}
 
-    tvDiv.querySelectorAll("details.details-block").forEach(d=>{
-      let legend = d.querySelector("summary")?.innerText;
-      if(legend) {
-        let key = tvName + "|" + legend;
-        openState[key] = d.open;
-        // Atualiza savedStates com estado atual
-        savedStates[key] = d.open;
-      }
-    });
-  });
-  // Salva no localStorage
-  localStorage.setItem('tvDetailsStates', JSON.stringify(savedStates));
+//function criarCategoria() {}
 
-  container.innerHTML = "";
+function criarMenuTVs(lista){
+  const menu = document.getElementById("menu-tvs");
+  menu.innerHTML = "";
 
-  Object.keys(state)
-  .sort((a,b)=>{
+  lista.forEach(tv=>{
+    const botao = document.createElement("button");
+    botao.innerText = tv;
+    botao.className = "botao-tv";
 
-    let na = parseInt(a.replace("tv",""));
-    let nb = parseInt(b.replace("tv",""));
-
-    return na - nb;
-
-  })
-  .forEach(tv => {
-
-    let div = document.createElement("div");
-    div.className = "tv";
-
-    // título da TV
-    let titulo = document.createElement("h2");
-    titulo.innerText = tv;
-    div.appendChild(titulo);
-
-    // container principal (imagem + botões)
-    let mainArea = document.createElement("div");
-    mainArea.className = "tv-content";
-
-    // -------------------------
-    // PREVIEW
-    // -------------------------
-
-    let iframe = document.createElement("iframe");
-    iframe.className = "tv-preview-frame";
-    iframe.src = "/viewer-tester.html?tv=" + tv + "&preview=true";
-
-    // -------------------------
-    // BOTÕES
-    // -------------------------
-
-    let botoes = document.createElement("div");
-    botoes.className = "tv-buttons";
-
-    function criarBotao(nome, rota){
-
-      let btn = document.createElement("button");
-
-      btn.innerText = nome;
-      btn.className = "playlist-btn";
-
-      btn.onclick = () => {
-        window.location.href = rota + "?tv=" + tv;
-      };
-
-      return btn;
+    botao.onclick = ()=>{
+        tvSelecionada = tv;
+        mostrarTV(tv);
     }
-
-    botoes.appendChild(criarBotao("Vídeos", "playlists/playlists-videos.html"));
-    botoes.appendChild(criarBotao("Avisos", "playlists/playlists-avisos.html"));
-    botoes.appendChild(criarBotao("Mapa do Campus", "playlists/playlists-mapa.html"));
-    botoes.appendChild(criarBotao("Ensalamento", "playlists/playlists-ensalamento.html"));
-    botoes.appendChild(criarBotao("Modo Padrão", "playlists/playlists-padrao.html"));
-
-    // -------------------------
-    // 🔗 JUNTA TUDO
-    // -------------------------
-
-    mainArea.appendChild(iframe);
-    mainArea.appendChild(botoes);
-
-    div.appendChild(mainArea);
-
-    container.appendChild(div);
-
+    menu.appendChild(botao);
   });
 }
+
+function mostrarTV(tv){
+  const container = document.getElementById("tv-atual");
+
+  container.innerHTML = "";
+  const field = document.createElement("fieldset");
+  field.className = "tv";
+
+  field.innerHTML = `
+    <h2>${tv}</h2>
+    <iframe
+      class="tv-preview-frame"
+      src="/viewer-tester.html?tv=${tv}&preview=true">
+    </iframe>
+
+    <div id="playlist">
+      <div class="playlist-header">
+        <h3 class="titulo-playlist-atual">Playlist Atual</h3>
+        <button class="btn-editar" onclick="editarPlaylist()">Editar</button>
+      </div>
+
+      <ol id="playlist-${tv}"></ol>
+    </div>
+  `;
+
+  container.appendChild(field);
+}
+
+async function carregar(){
+  const res = await fetch("/state");
+  const state = await res.json();
+
+  const tvs = Object.keys(state).sort();
+
+  if(tvs.length === 0){
+    document.getElementById("tv-atual").innerHTML =
+      "<p class='mensagemtv'>Nenhuma TV conectada</p>";
+    return;
+  }
+
+  if(!tvSelecionada){
+    tvSelecionada = tvs[0];
+  }
+
+  criarMenuTVs(tvs);
+  mostrarTV(tvSelecionada);
+}
+
+
 async function mudar(tv, pagina, intervalo){
 
   await fetch("/update", {
@@ -126,5 +127,4 @@ async function mudar(tv, pagina, intervalo){
   });
 
 }
-
 carregar();

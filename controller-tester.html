@@ -16,7 +16,43 @@
 
 <h1 class="h1painel">TESTER</h1>
 
-<div id="tvs"></div>
+<div class="layout">
+
+    <div id="menu-funcionalidades">
+        <fieldset class="field-personalizar">
+            <legend>Personalizar</legend>
+            <a class="playlist-btn" href="playlists/videos.html">Vídeos</a>
+            <a class="playlist-btn" href="playlists/avisos.html">Avisos</a>
+            <a class="playlist-btn" href="playlists/mapa.html">Mapa do Campus</a>
+            <a class="playlist-btn" href="playlists/ensalamento.html">Ensalamento</a>
+            <a class="playlist-btn" href="playlists/calendario.html">Calendário</a>
+
+            <a href="#" class="adicionar-btn "onclick="adicionarConteudo(event)">Novo Conteúdo</a>
+            <input type="text" id="inputconteudo" placeholder="Nome da nova categoria...">
+            <button id="criarconteudo" onclick="criarCategoria()">Criar</button>
+
+        </fieldset>
+
+        <fieldset class="field-personalizar">
+            <legend>Playlists</legend>
+            <a class="playlist-btn" href="playlists/playlists-padrao.html">Modo Padrão</a>
+            <a class="playlist-btn" href="playlists/calendario.html">Manhã</a>
+            <a class="playlist-btn" href="playlists/calendario.html">Tarde</a>
+            <a class="playlist-btn" href="playlists/calendario.html">Noite</a>
+            <a class="playlist-btn" href="playlists/calendario.html">Eventos</a>
+
+            <a href="#" class="adicionar-btn "onclick="adicionarPlaylist(event)"> Nova Playlist</a>
+            <input type="text" id="inputplaylist" placeholder="Nome da nova playlist...">
+            <button id="criarplaylist" onclick="criarCategoria()">Criar</button>
+
+        </fieldset>
+    </div>
+
+    <div id="tv-atual"></div>
+    
+    <div id="menu-tvs"></div>
+
+</div>
 
 <script src="controller-tester.js"></script>
 

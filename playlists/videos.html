@@ -12,7 +12,6 @@
 <button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
 <h1 class="titulosplaylists">Vídeos</h1>
 
-<div id="info-tv"></div>
 
 <div class="add-video-box">
   <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui">
@@ -47,8 +46,7 @@ function voltarMenu() {
 const params = new URLSearchParams(window.location.search);
 const tv = params.get("tv");
 
-document.getElementById("info-tv").innerText =
-"Configurando vídeos da " + tv;
+
 
 //========================
 // VARIÁVEIS
