@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário Semanal</title>
+    <link rel="stylesheet" href="style-playlists.css">
+    <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+<body>
+    <button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
+    <h2 class="titulosplaylists">Calendário Semanal</h2>
+<div> 
+    <iframe 
+    id="calendario" 
+    src="https://calendar.app.google/k9PBMSEQGbYdtkgz8"
+    >
+    </iframe>
+</div>
+
+  <div class="acoes-playlist">
+
+    <button
+      class="btn-playlist"
+      onclick="salvarCalendario()"
+    >
+      Aplicar e Salvar
+    </button>
+
+    <button
+      class="btn-playlist destaque"
+      onclick="aplicarTodas()"
+    >
+      Aplicar em todas as telas
+    </button>
+
+  </div>
+
+<script>
+
+let params = new URLSearchParams(window.location.search);
+let tv = params.get("tv");
+
+function voltarMenu() {
+  window.location.href = "/controller-tester.html"; }
+
+  
+async function aplicarTodas(){
+
+  let playlist = [
+    {
+      src: "https://calendar.app.google/k9PBMSEQGbYdtkgz8",
+      duracao: 60
+    }
+  ];
+
+  await fetch("/update-all", {
+
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      pagina: "calendario",
+      type: "calendario",
+      intervalo: 0,
+      items: playlist
+    })
+  });
+
+  alert("Calendário aplicado em todas as TVs");
+}
+
+
+async function salvarCalendario(){
+
+  let playlist = [
+    {
+      src: "https://calendar.app.google/k9PBMSEQGbYdtkgz8",
+      duracao: 60
+    }
+  ];
+
+  // salva playlist
+  await fetch("/save-playlist", {
+  
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tv: tv,
+      type: "calendario",
+      items: playlist
+    })
+  });
+
+  // muda viewer
+  await fetch("/update", {
+
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+    tv: tv,
+    pagina: "calendario",
+    intervalo: 0,
+    })
+  });
+
+  alert("Calendário enviado!");
+  window.location.href = "/controller-tester.html";
+}
+
+</script>
+</body>
+</html>

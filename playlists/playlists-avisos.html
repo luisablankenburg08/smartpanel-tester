@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avisos</title>
+<link rel="stylesheet" href="style-avisos.css">
+<link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+
+<body>
+<button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
+<h2 class="titulosplaylists">
+  Avisos
+</h2>
+
+<!-- NOVO AVISO -->
+<h3>Novo Aviso</h3>
+
+<textarea
+  id="aviso-texto"
+  placeholder="Digite a mensagem..."
+></textarea>
+
+<input
+  id="aviso-link"
+  type="text"render
+  placeholder="(Opcional) Cole aqui o link do Canva ou URL para exibir como imagem/apresentação"
+  style="width:100%;margin-top:8px;padding:8px;"
+>
+
+<input
+  id="aviso-duracao"
+  type="number"
+  min="1"
+  placeholder="Duração em segundos (opcional)"
+  style="width:100%;margin-top:8px;padding:8px;"
+>
+
+<button
+  class="btn-playlist"
+  onclick="adicionarAvisoPersonalizado()"
+>
+  Adicionar à Playlist
+</button>
+
+<div class="cards-avisos" id="cards-avisos"></div>
+<!-- AÇÕES -->
+<div class="acoes-playlist">
+
+  <button
+    class="btn-playlist"
+    onclick="salvarPlaylist()"
+  >
+    Salvar Playlist
+  </button>
+
+  <button
+    class="btn-playlist destaque"
+    onclick="aplicarTV()"
+  >
+    Aplicar nesta TV
+  </button>
+
+  <button
+    class="btn-playlist destaque"
+    onclick="aplicarTodas()"
+  >
+    Aplicar em Todas
+  </button>
+
+</div>
+
+<script>
+
+function voltarMenu() {
+  window.location.href = "/controller-tester.html"; }
+
+let params =
+  new URLSearchParams(window.location.search);
+let tv = params.get("tv");
+let avisos = [];
+
+// =====================================
+// AVISOS PRONTOS
+// =====================================
+
+const avisosProntos = [
+
+  {
+    titulo:"Horários dos Treinos",
+    texto:
+      "Treinos de handebol: quartas às 13h30h e sexta às 8h.",
+    tipo:"pronto",
+    selecionado:false
+  },
+
+ {
+    titulo:"Mensagem Padrão",
+    texto:
+      "Smart Digital Panel Project",
+    tipo:"pronto",
+    selecionado:false
+  },
+  {
+    titulo:"Oportunidades IFSC",
+    texto:
+      "Inscrições abertas para bolsas e monitorias.",
+    tipo:"pronto",
+    selecionado:false
+  },
+
+  {
+    titulo:"Biblioteca",
+    texto:
+      "Renove seus livros pelo portal acadêmico.",
+    tipo:"pronto",
+    selecionado:false
+  }
+
+];
+
+// adiciona prontos
+avisos.push(...avisosProntos);
+
+// =====================================
+// CARREGA AVISOS SALVOS
+// =====================================
+
+function avisoJaExiste(novoAviso){
+  return avisos.some(aviso =>
+    aviso.titulo === novoAviso.titulo &&
+    aviso.texto === novoAviso.texto
+  );
+}
+
+async function carregarAvisos(){
+  if(!tv){
+    renderizarAvisos();
+    return;
+  }
+
+  try {
+    let res = await fetch(`/playlist?tv=${tv}&type=avisos`);
+
+    if(res.ok){
+      let items = await res.json();
+
+      if(Array.isArray(items)){
+        items.forEach(item => {
+          if(!avisoJaExiste(item)){
+            // preserve all fields from stored item
+            let novo = Object.assign({
+              titulo: "Aviso Personalizado",
+              texto: "",
+              tipo: "personalizado",
+              selecionado: false
+            }, item);
+
+            if(item.url) novo.url = item.url;
+            if(item.embed) novo.embed = item.embed;
+            if(item.embedRaw) novo.embedRaw = item.embedRaw;
+
+            avisos.push(novo);
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar avisos salvos:", error);
+  }
+
+  renderizarAvisos();
+}
+
+// =====================================
+// RENDERIZA
+// =====================================
+
+function renderizarAvisos(){
+
+  let container =
+    document.getElementById("cards-avisos");
+
+  container.innerHTML = "";
+
+  avisos
+    .filter(a=>a.tipo==="pronto")
+    .forEach((aviso,index)=>{
+
+      container.innerHTML += `
+
+        <div
+          class="
+            card-aviso
+            ${aviso.selecionado ? "selecionado" : ""}
+          "
+          onclick="toggleAviso(${index})"
+        >
+          <h3>${aviso.titulo}</h3>
+          <p>${aviso.texto}</p>
+
+        </div>
+      `;
+    });
+
+  // =========================
+  // PERSONALIZADOS
+  // =========================
+
+  let personalizados =
+    avisos.filter(a=>a.tipo!=="pronto");
+
+  if(personalizados.length > 0){
+
+    personalizados.forEach((aviso,index)=>{
+
+      let realIndex = avisos.indexOf(aviso);
+
+      // detecta se é um link
+      let isLink = aviso.embed || aviso.url || (typeof aviso.texto === 'string' && aviso.texto.startsWith('http'));
+
+      // prefer embedRaw, depois embed/url/texto
+      let previewEmbed = aviso.embedRaw || aviso.embed || aviso.url || aviso.texto;
+
+      // normaliza embed do canva
+      if(isLink && typeof previewEmbed === 'string' && previewEmbed.includes('canva.com') && !/embed/.test(previewEmbed)){
+        if(previewEmbed.includes('?')) previewEmbed = previewEmbed + '&embed';
+        else previewEmbed = previewEmbed + '?embed';
+        aviso.embed = previewEmbed;
+        aviso.url = aviso.url || aviso.texto;
+      }
+
+      container.innerHTML += `
+        <div
+          class="card-aviso card-personalizado ${aviso.selecionado ? "selecionado" : ""}"
+          onclick="toggleAviso(${realIndex})"
+        >
+          <h3>${aviso.titulo}</h3>
+          ${isLink
+            ? (aviso.embedRaw
+                ? `<div class="link-preview">${aviso.embedRaw}</div><p><a href="${aviso.url || aviso.texto}" target="_blank">Abrir link</a></p>`
+                : `<div class="link-preview">
+                  <iframe 
+                  src="${previewEmbed}"
+                  frameborder="0"
+                  style="width:100%; 
+                  height:100%; 
+                  border:none; 
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-fullscreen allow-autoplay allow-clipboard-read allow-clipboard-write"
+                  ></iframe>
+                    </div>
+                    <p><a href="${aviso.url || aviso.texto}" target="_blank">Abrir link</a></p>`)
+            : `<p>${aviso.texto}</p>`
+          }
+        </div>
+      `;
+    });
+  }
+}
+
+// =====================================
+// TOGGLE
+// =====================================
+
+function toggleAviso(index){
+  avisos[index].selecionado =
+    !avisos[index].selecionado;
+  renderizarAvisos();
+}
+
+// =====================================
+// ADICIONA PERSONALIZADO
+// =====================================
+
+function adicionarAvisoPersonalizado(){
+
+  let texto = document.getElementById("aviso-texto").value.trim();
+  let link = document.getElementById("aviso-link").value.trim();
+  let duracao = parseInt(document.getElementById("aviso-duracao").value) || null;
+
+  if(!texto && !link){
+    alert("Digite um aviso ou cole um link");
+    return;
+  }
+
+  if(link){
+    // se o usuário colou um iframe HTML completo, armazena embedRaw
+    if(link.trim().startsWith('<iframe')){
+      avisos.push({
+        titulo: texto || "Aviso (embed)",
+        texto: link,
+        embedRaw: link,
+        url: null,
+        duracao: duracao,
+        tipo: "canva",
+        selecionado: true
+      });
+    } else {
+      // prepare embed/url for known providers (Canva)
+      let embed = link;
+      try{
+        if(link.includes('canva.com') && !/embed/.test(link)){
+          embed = link + (link.includes('?') ? '&embed' : '?embed');
+        }
+      }catch(e){ console.warn('Erro ao montar embed:', e); }
+
+      avisos.push({
+        titulo: texto || "Aviso (link)",
+        texto: link,
+        url: link,
+        embed: embed,
+        duracao: duracao,
+        tipo: "canva",
+        selecionado: true
+      });
+    }
+  } else {
+    avisos.push({
+      titulo: "Aviso Personalizado",
+      texto: texto,
+      duracao: duracao,
+      tipo: "personalizado",
+      selecionado: true
+    });
+  }
+
+  document.getElementById("aviso-texto").value = "";
+  document.getElementById("aviso-link").value = "";
+  document.getElementById("aviso-duracao").value = "";
+
+  renderizarAvisos();
+}
+
+// =====================================
+// PLAYLIST SELECIONADA
+// =====================================
+
+function obterSelecionados(){
+  return avisos.filter(a=>a.selecionado);
+}
+
+// =====================================
+// APLICAR TV
+// =====================================
+
+async function aplicarTV(){
+
+  let selecionados = obterSelecionados();
+
+  if(selecionados.length === 0){
+    alert("Selecione ao menos um aviso");
+    return;
+  }
+
+  // salva
+  await fetch("/save-playlist", {
+
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      tv:tv,
+      type:"avisos",
+      items:selecionados
+    })
+  });
+
+  // ativa
+  await fetch("/update", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      tv:tv,
+      pagina:"modo:avisos",
+      intervalo:0
+    })
+  });
+
+  alert("Avisos aplicados");
+
+  window.location.href = "/controller-tester.html";
+}
+
+// =====================================
+// APLICAR TODAS
+// =====================================
+
+async function aplicarTodas(){
+
+  let selecionados = obterSelecionados();
+
+  if(selecionados.length === 0){
+    alert("Selecione ao menos um aviso");
+    return;
+  }
+
+  await fetch("/update-all", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      pagina:"modo:avisos",
+      type:"avisos",
+      intervalo:0,
+      items:selecionados
+    })
+  });
+
+  alert("Avisos aplicados em todas");
+
+  window.location.href = "/controller-tester.html";
+}
+// =====================================
+// APLICAR TODAS
+// =====================================
+
+async function salvarPlaylist(){
+
+  let personalizados = avisos.filter(a => a.tipo !== "pronto");
+
+  if(personalizados.length === 0){
+    alert("Não há avisos personalizados para salvar");
+    return;
+  }
+
+  if(!tv){
+    alert("TV não identificada. Abra esta página a partir do painel.");
+    return;
+  }
+
+  await fetch("/save-playlist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tv: tv,
+      type: "avisos",
+      items: personalizados
+    })
+  });
+
+  alert("Avisos personalizados salvos permanentemente");
+}
+
+carregarAvisos();
+
+</script>
+
+</body>
+</html>

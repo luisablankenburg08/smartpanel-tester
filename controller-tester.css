@@ -1,0 +1,211 @@
+body {
+  background-color: rgb(243, 233, 233);
+  margin: 0;
+}
+.tv{
+  width: 40vw;
+  border:1px solid #ccc;
+  margin-left:29vw;
+  padding:10px;
+  margin-bottom: 10px;
+}
+
+.h1painel {
+  text-align: center; 
+  color: #6abf59;
+}
+
+button{
+  margin:5px;
+  background-color: #2f9e40;
+}
+
+.mensagemtv{
+  font-size: 24px;
+  color: #1c7f13;
+  font-weight: bold;
+  margin-top: 5vw;
+  margin-left: 5vw;
+}
+
+.tv h2 {
+  color: #6abf59;  /* Azul */
+  font-size:1.5vw;
+  text-decoration: underline;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-transform: uppercase;  /* Ex: "TV1" em maiúsculo */
+}
+
+
+.aplicar-btn {
+  background-color: #439f36; /* Verde mais escuro */
+  width: 10vw;
+  height: 5vh;
+  border: none;
+  text-align: center;
+  display: inline-block;
+  border-radius: 4px;
+  margin-left: 45vw;
+}
+
+/* CSS DE PLAYLISTS E CAMPO DAS TVS */
+
+.tv-content {
+  height: 20vw;
+  display: flex;
+  gap: 2vw;
+  
+}
+
+.tv-preview-frame {
+  display: flex;
+  width: 20vw;
+  height: 14vw;
+  border: 0.2vw solid #000;
+  margin-top: 3vh;
+  margin-left: 2vw ;
+}
+
+.tv-buttons {
+  width: 8vw;
+  height: 1vw;
+  float: right;
+  display: flex;
+  flex-direction: column;
+  margin-left: 5vw;
+  gap: 1vw;
+}
+
+.titulosplaylists {
+  text-align: center;
+}
+.playlist-btn {
+  padding: 0.3vw;
+  font-size: 0.9vw;
+  border-radius: 0.7vw;
+  color:white;
+  font-weight:bold;
+  cursor: pointer;
+  border-color: #6abf59;
+  background-color: #6abf59;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  
+}
+.playlist-btn:hover {
+  background-color: #90df7c;
+  transform:scale(1.05);
+}
+
+/* CSS UTILIZADO NA VERSÃO 1
+
+.tela-select {
+  padding: 8px;
+  font-size: 16px;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 4px 2px;
+  background-color: #fff;
+}
+
+.tela-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.preview-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 8px;
+  width: fit-content;
+}
+
+.preview-title {
+  font-size: 14px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #1c5f9a;
+}
+
+.layout-preview {
+  border: 1px dashed #888;
+  background: #f8faff;
+  padding: 6px;
+  min-height: 60px;
+  display: grid;
+  gap: 4px;
+  width: fit-content;
+}
+.layout-preview.one { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.layout-preview.two { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+.layout-preview.three {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.layout-preview.four { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.layout-preview .preview-screen {
+  border: 1px dashed #2a689a;
+  background: #e5f2ff;
+  font-size: 13px;
+  color: #13426c;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+.layout-preview.three .preview-screen:nth-child(1) { grid-column: 1; grid-row: 1; }
+.layout-preview.three .preview-screen:nth-child(2) { grid-column: 1; grid-row: 2; }
+.layout-preview.three .preview-screen:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; }
+
+.titulo-exibir {
+  font-weight: bold;
+  color: #000000;
+  font-size: 20px;
+}
+
+.figura {
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  height: 100vh;  }      
+  
+.details-block{
+margin:8px 0;
+padding:8px;
+border:1px solid #ddd;
+background:#fafafa;
+transition: all 0.3s ease;
+}
+
+
+.update-group{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.input-update {
+  width: 8vw;
+  padding: 8px;
+  font-size: 16px;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.update-title {
+  width: 17%;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1c5f9a;
+  margin-top: 8px;
+}

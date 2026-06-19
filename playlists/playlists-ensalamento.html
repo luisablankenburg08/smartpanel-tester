@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ensalamento 2026</title>
+    <link rel="stylesheet" href="style-playlists.css">
+    <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+
+<body>
+ <button id="aplicar">
+Aplicar Ensalamento
+</button>
+
+<button id="atualizar">
+Atualizar do EduPage
+</button>
+
+<script>
+
+const tv =
+  new URLSearchParams(location.search)
+  .get("tv");
+
+document
+.getElementById("aplicar")
+.onclick = async () => {
+
+  await fetch("/update", {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json"
+    },
+    body: JSON.stringify({
+      tv,
+      pagina:"ensalamento"
+    })
+  });
+
+  
+  alert("Aplicado");
+};
+
+document
+.getElementById("atualizar")
+.onclick = async () => {
+
+  const res =
+    await fetch(
+      "/atualizar-ensalamento",
+      {
+        method: "POST"
+      }
+    );
+
+  const dados =
+    await res.json();
+
+  alert(
+    "Atualizado!"
+  );
+};
+
+</script>
+</body>
+</html>

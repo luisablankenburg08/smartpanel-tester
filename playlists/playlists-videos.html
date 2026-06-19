@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vídeos</title>
+  <link rel="stylesheet" href="/playlists/style-playlists.css">
+  <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+
+<body>
+<button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
+<h1 class="titulosplaylists">Vídeos</h1>
+
+<div id="info-tv"></div>
+
+<div class="add-video-box">
+  <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui">
+  <input type="text" id="youtube-titulo" placeholder="Digite o título do vídeo">
+  <button class="btn-playlist" onclick="adicionarVideo()">Adicionar Vídeo</button>
+</div>
+
+<div id="lista-videos"></div>
+
+<div class="acoes-playlist">
+  <button class="btn-playlist" onclick="salvarPlaylist()">
+    Aplicar Playlist
+  </button>
+
+  <button class="btn-playlist destaque" onclick="aplicarTodas()">
+    Aplicar em todas as telas
+  </button>
+</div>
+
+<script>
+
+//========================
+// VOLTAR
+//========================
+function voltarMenu() {
+  window.location.href = "/controller-tester.html";
+}
+
+//========================
+// TV ATUAL
+//========================
+const params = new URLSearchParams(window.location.search);
+const tv = params.get("tv");
+
+document.getElementById("info-tv").innerText =
+"Configurando vídeos da " + tv;
+
+//========================
+// VARIÁVEIS
+//========================
+let videosDisponiveis = [];
+let playlist = [];
+
+//========================
+// EXTRAIR ID
+//========================
+function extrairVideoId(url) {
+  try {
+    let parsedUrl = new URL(url);
+
+    if (parsedUrl.searchParams.get("v")) {
+      return parsedUrl.searchParams.get("v");
+    }
+
+    if (parsedUrl.hostname.includes("youtu.be")) {
+      return parsedUrl.pathname.slice(1);
+    }
+
+    if (parsedUrl.pathname.includes("/embed/")) {
+      return parsedUrl.pathname.split("/embed/")[1]?.split("?")[0];
+    }
+
+    if (parsedUrl.pathname.includes("/live/")) {
+      return parsedUrl.pathname.split("/live/")[1]?.split("?")[0];
+    }
+
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+//========================
+// DETECTAR LIVESTREAM
+//========================
+function ehLivestream(url) {
+  if (!url) return false;
+  
+  try {
+    let parsedUrl = new URL(url);
+    // YouTube live: /live/ ou /watch?v=xxxxx (precisa ser validado por API)
+    return parsedUrl.pathname.includes("/live/") || 
+           url.includes("youtube.com/live/");
+  } catch {
+    return false;
+  }
+}
+
+function extrairIdDoIframe(iframe) {
+  try {
+    let url = new URL(iframe);
+    
+    // Para embed: /embed/ID?...
+    if (url.pathname.includes("/embed/")) {
+      return url.pathname.split("/embed/")[1]?.split("?")[0];
+    }
+    
+    // Para watch (livestream): /watch?v=ID
+    if (url.pathname.includes("/watch")) {
+      return url.searchParams.get("v");
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+//========================
+// CARREGAR VÍDEOS
+//========================
+async function carregarVideos(){
+
+  const fixos = [
+  {
+    id: "1GiXd3lAjrE",
+    titulo: "Institucional do IFSC - REDE",
+    iframe: "https://www.youtube.com/embed/1GiXd3lAjrE?autoplay=1&mute=1",
+    thumb: "https://img.youtube.com/vi/1GiXd3lAjrE/hqdefault.jpg",
+    duracao: 60
+  }
+];
+
+  try {
+    const res = await fetch("/playlist?type=videos");
+    let dinamicos = [];
+
+    if(res.ok){
+      dinamicos = await res.json();
+    }
+
+    videosDisponiveis = [...fixos, ...dinamicos];
+
+  } catch (e) {
+    console.error("Erro ao carregar vídeos:", e);
+    videosDisponiveis = fixos;
+  }
+
+  renderVideos();
+}
+
+//========================
+// RENDER
+//========================
+function renderVideos(){
+
+  const lista = document.getElementById("lista-videos");
+  lista.innerHTML = "";
+
+  videosDisponiveis.forEach(video => {
+
+    let videoId = video.id || extrairIdDoIframe(video.iframe);
+
+    let card = document.createElement("div");
+    card.className = "video-card";
+
+    let jaSelecionado = playlist.find(v =>
+      (v.id || extrairIdDoIframe(v.iframe)) === videoId
+    );
+
+    if(jaSelecionado){
+      card.classList.add("video-selecionado");
+    }
+
+    card.innerHTML = `
+      ${video.live ? '<div class="live-badge">AO VIVO</div>' : ''}
+      <img src="${video.thumb}" class="video-thumb">
+      <div class="video-info">
+        <h3>${video.titulo}</h3>
+        <button class="selecionar-btn">
+          ${jaSelecionado ? "Selecionado" : "Selecionar"}
+        </button>
+      </div>
+    `;
+
+    let btn = card.querySelector(".selecionar-btn");
+
+    btn.onclick = () => {
+
+      let existe = playlist.find(v =>
+        (v.id || extrairIdDoIframe(v.iframe)) === videoId
+      );
+
+      if(existe){
+        playlist = playlist.filter(v =>
+          (v.id || extrairIdDoIframe(v.iframe)) !== videoId
+        );
+        card.classList.remove("video-selecionado");
+        btn.innerText = "Selecionar";
+
+      }else{
+        playlist.push(video);
+        card.classList.add("video-selecionado");
+        btn.innerText = "Selecionado";
+      }
+    };
+
+    lista.appendChild(card);
+  });
+}
+
+//========================
+// ADICIONAR VÍDEO
+//========================
+async function adicionarVideo(){
+
+  const url = document.getElementById("youtube-url").value.trim();
+  const titulo = document.getElementById("youtube-titulo").value.trim();
+
+  if (!url) {
+    alert("Cole uma URL válida");
+    return;
+  }
+
+  if (!titulo) {
+    alert("Digite um título");
+    return;
+  }
+
+  const videoId = extrairVideoId(url);
+
+  if (!videoId) {
+    alert("URL inválida");
+    return;
+  }
+
+  let jaExiste = videosDisponiveis.find(v =>
+    (v.id || extrairIdDoIframe(v.iframe)) === videoId
+  );
+
+  if (jaExiste) {
+    alert("Esse vídeo já existe");
+    return;
+  }
+
+  // Detectar livestream
+  const isLive = ehLivestream(url);
+
+  // Livestreams e vídeos normais usam /embed/ (funciona para ambos)
+  let iframe = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1`;
+
+  let thumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+  const novoVideo = {
+    id: videoId,
+    titulo,
+    iframe,
+    thumb,
+    duracao: 60
+};
+
+  const res = await fetch("/videos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(novoVideo)
+  });
+
+  if(!res.ok){
+    alert("Erro ao salvar vídeo");
+    return;
+  }
+
+  document.getElementById("youtube-url").value = "";
+  document.getElementById("youtube-titulo").value = "";
+
+  carregarVideos();
+}
+
+//========================
+// SALVAR PLAYLIST
+//========================
+async function salvarPlaylist(){
+
+  if(playlist.length === 0){
+    alert("Selecione ao menos um vídeo");
+    return;
+  }
+
+  await fetch("/save-playlist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tv: tv,
+      type: "videos",
+      items: playlist
+    })
+  });
+
+  await fetch("/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tv: tv,
+      pagina: "videos",
+      intervalo: 0
+    })
+  });
+
+  alert("Playlist aplicada!");
+  window.location.href = "/controller-tester.html";
+}
+
+//========================
+// APLICAR EM TODAS
+//========================
+async function aplicarTodas(){
+
+  if(playlist.length === 0){
+    alert("Selecione ao menos um vídeo");
+    return;
+  }
+
+  await fetch("/update-all", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      pagina: "videos",
+      type: "videos",
+      intervalo: 0,
+      items: playlist
+    })
+  });
+
+  alert("Vídeos aplicados em todas as TVs");
+}
+
+//========================
+// INIT
+//========================
+carregarVideos();
+
+</script>
+
+</body>
+</html>

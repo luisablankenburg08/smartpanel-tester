@@ -1,0 +1,101 @@
+body{
+  margin:0;
+  overflow:hidden;
+  background-color: rgb(243, 233, 233);
+}
+
+#content{
+  width:100%;
+  height:100%;
+  display:none;
+}
+
+/* EXIBIÇÃO DO AVISO */
+
+@keyframes piscar {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+
+.aviso{
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  justify-content:center;
+  text-align:center;
+  font-size: 5vw;
+  font-family:'Times New Roman', Times, serif;
+  color:black;
+}
+
+.field-texto {
+  width: 80vw;
+  height: 90vh;
+  display: flex;               
+  justify-content: center;      
+  align-items: center;          
+  margin-left: 5vw;
+  border-color: #6abf59;
+}
+.field-texto legend {
+  text-align: left;
+}
+
+.warning-image {
+  width: 15vw;
+  height: 4vw;
+  margin-top: 1vh;
+}
+
+
+/* EXIBIÇÃO DO MAPA (IMAGEM) */
+.imagemViewer{
+  width: 70vw;
+  height: 100vh;
+  margin-left: 15vw;
+  background:black;
+}
+
+/* EXIBIÇÃO DO ENSALAMENTO */
+.ensalamento {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.ensalamento h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.ultima-atualizacao {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.sala {
+    margin-bottom: 40px;
+}
+
+.sala table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sala th,
+.sala td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.sala th {
+    background: #004a8f;
+    color: white;
+}

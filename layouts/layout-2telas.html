@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:grid;
+
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+
+  grid-template-areas:
+  "tela1 tela2"
+  "tela1 tela2";
+}
+
+iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+.tela1 { grid-area: tela1; }
+.tela2 { grid-area: tela2; }
+</style>
+</head>
+
+<body>
+
+<iframe id="tela1" class="tela1"></iframe>
+<iframe id="tela2" class="tela2"></iframe>
+
+<script>
+function getParam(name){
+  const params = new URLSearchParams(window.location.search)
+  return params.get(name)
+}
+
+const t1 = getParam("t1") || 1
+const t2 = getParam("t2") || 2
+
+document.getElementById("tela1").src = "tela" + t1 + ".html"
+document.getElementById("tela2").src = "tela" + t2 + ".html"
+</script>
+
+</body>
+</html>

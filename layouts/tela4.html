@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TELA 4</title>
+
+<style>
+body {
+  margin: 0;
+  background: rgb(230, 173, 225);
+  font-family: Arial, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+}
+
+.video-container {
+  width: 80vw;
+  aspect-ratio: 16 / 9;
+}
+
+#player {
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Vídeo Institucional</h1>
+
+<div class="video-container">
+  <div id="player"></div>
+</div>
+
+<!-- API do YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+
+let player;
+
+// =========================
+// CRIA PLAYER
+// =========================
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    videoId: '1GiXd3lAjrE',
+    playerVars: {
+      autoplay: 1,
+      mute: 0,
+      volume: 10,
+      controls: 0,
+      rel: 0,
+      modestbranding: 1
+    },
+    events: {
+      'onReady': (event) => {
+        event.target.playVideo();
+      },
+      'onStateChange': onPlayerStateChange
+    }
+  });
+}
+
+// =========================
+// LOOP DO VÍDEO
+// =========================
+function onPlayerStateChange(event) {
+
+  // 0 = terminou
+  if (event.data === YT.PlayerState.ENDED) {
+    console.log("Vídeo terminou");
+
+    // reinicia automaticamente
+    player.seekTo(0);
+    player.playVideo();
+  }
+}
+
+// =========================
+// PARA VÍDEO AO TROCAR TELA
+// =========================
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && player) {
+    try {
+      player.pauseVideo();
+    } catch(e){}
+  }
+});
+
+// =========================
+// GARANTE PARADA TOTAL
+// =========================
+window.addEventListener("beforeunload", () => {
+  if (player) {
+    try {
+      player.stopVideo();
+    } catch(e){}
+  }
+});
+
+</script>
+
+</body>
+</html>

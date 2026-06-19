@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa do Campus</title>
+    <link rel="stylesheet" href="style-playlists.css">
+    <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+<body>
+  <button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
+  <h2 class="titulosplaylists"> Mapa do Campus (Floripa) </h2>
+
+  <img
+    src="/playlists/mapa-floripa.jpg"
+    id="mapa-campus"
+    alt="Mapa do Campus"
+  >
+
+  <div class="acoes-playlist">
+
+    <button
+      class="btn-playlist"
+      onclick="salvarMapa()"
+    >
+      Aplicar Mapa
+    </button>
+
+    <button
+      class="btn-playlist destaque"
+      onclick="aplicarTodas()"
+    >
+      Aplicar em todas as telas
+    </button>
+
+  </div>
+
+<script>
+
+let params = new URLSearchParams(window.location.search);
+
+let tv = params.get("tv");
+
+
+function voltarMenu() {
+  window.location.href = "/controller-tester.html"; }
+
+async function aplicarTodas(){
+
+  let playlist = [
+    {
+      src: "/playlists/mapa-floripa.jpg",
+      duracao: 60
+    }
+  ];
+
+  await fetch("/update-all", {
+
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      pagina: "mapa",
+      type: "mapa",
+      intervalo: 0,
+      items: playlist
+    })
+  });
+  alert("Mapa aplicado em todas as TVs");
+}
+
+
+async function salvarMapa(){
+
+  let playlist = [
+    {
+      src: "/playlists/mapa-floripa.jpg",
+      duracao: 60
+    }
+  ];
+
+  // salva playlist
+  await fetch("/save-playlist", {
+
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tv: tv,
+      type: "mapa",
+      items: playlist
+    })
+  });
+
+  // muda viewer
+  await fetch("/update", {
+
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+    tv: tv,
+    pagina: "mapa",
+    intervalo: 0,
+  })
+  });
+
+  alert("Mapa enviado!");
+  window.location.href = "/controller-tester.html";
+}
+</script>
+
+</body>
+</html>

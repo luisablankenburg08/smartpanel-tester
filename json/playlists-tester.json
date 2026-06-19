@@ -1,0 +1,324 @@
+{
+  "conteudos": {
+    "videos": [
+      {
+        "id": "CJ5KS-WKE6w",
+        "titulo": "JIFSC 2025 - Apresentação",
+        "iframe": "https://www.youtube.com/embed/CJ5KS-WKE6w?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/CJ5KS-WKE6w/hqdefault.jpg",
+        "duracao": 140
+      },
+      {
+        "id": "LdmEIAy5VdU",
+        "titulo": "JIFSC 2014 - Reportagem",
+        "iframe": "https://www.youtube.com/embed/LdmEIAy5VdU?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/LdmEIAy5VdU/hqdefault.jpg",
+        "duracao": 195
+      },
+      {
+        "id": "RaAqmjb6D2Y",
+        "titulo": "SEPEI 2025 - Institucional",
+        "iframe": "https://www.youtube.com/embed/RaAqmjb6D2Y?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/RaAqmjb6D2Y/hqdefault.jpg",
+        "duracao": 190
+      },
+      {
+        "id": "OXIAp2zgips",
+        "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+        "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+        "duracao": 230
+      },
+      {
+        "id": "qCFeUspzav8",
+        "titulo": "TURISMO DE BASE COMUNITÁRIA EM GAROPABA",
+        "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+        "duracao": 490
+      },
+      {
+        "id": "7nWX6DL_x10",
+        "titulo": "INSTITUCIONAL IFSC 2019",
+        "iframe": "https://www.youtube.com/embed/7nWX6DL_x10?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/7nWX6DL_x10/hqdefault.jpg",
+        "duracao": 120
+      },
+      {
+        "id": "TjxfN_tIv6o",
+        "titulo": "MCC INFO24: Apresentações Montagem e Manutenção",
+        "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+        "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+        "duracao": 60,
+        "live": false
+      },
+      {
+        "id": "miJGB2gULDM",
+        "titulo": "Final Handebol Masc JIFSC 2026",
+        "iframe": "https://www.youtube.com/embed/miJGB2gULDM?autoplay=1&mute=1&playsinline=1",
+        "thumb": "https://img.youtube.com/vi/miJGB2gULDM/hqdefault.jpg",
+        "duracao": 60,
+        "live": false
+      }
+    ],
+    "mapa": [
+      {
+        "src": "/playlists/mapa-floripa.jpg",
+        "duracao": 60
+      }
+    ],
+    "padrao": [
+      {
+        "titulo": "Aviso (link)",
+        "texto": "CLUBE DO LIVRO",
+        "tipo": "avisos",
+        "selecionado": false,
+        "url": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
+        "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+        "duracao": 30
+      },
+      {
+        "titulo": "Aviso (link)",
+        "texto": "FESTA JUNINA",
+        "url": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+        "embed": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+        "duracao": 30,
+        "tipo": "avisos",
+        "selecionado": false
+      },
+      {
+        "id": "CJ5KS-WKE6w",
+        "titulo": "JIFSC 2025 - Apresentação",
+        "iframe": "https://www.youtube.com/embed/CJ5KS-WKE6w?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/CJ5KS-WKE6w/hqdefault.jpg",
+        "duracao": 140,
+        "tipo": "videos"
+      },
+      {
+        "id": "TjxfN_tIv6o",
+        "titulo": "MCC INFO24: Apresentações Montagem e Manutenção",
+        "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+        "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+        "duracao": 60,
+        "live": false,
+        "tipo": "videos"
+      },
+      {
+        "id": "qCFeUspzav8",
+        "titulo": "TURISMO DE BASE COMUNITÁRIA EM GAROPABA",
+        "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+        "duracao": 490,
+        "tipo": "videos"
+      },
+      {
+        "id": "OXIAp2zgips",
+        "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+        "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+        "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+        "duracao": 230,
+        "tipo": "videos"
+      }
+    ],
+    "avisos": [
+      {
+        "titulo": "Aviso (link)",
+        "texto": "IFSC NO CANVA",
+        "tipo": "canva",
+        "selecionado": false,
+        "url": "https://www.canva.com/design/DAHLiE-kHu4/Sca6kSgVaqvqKJs4KdDviQ/view",
+        "embed": "https://www.canva.com/design/DAHLiE-kHu4/Sca6kSgVaqvqKJs4KdDviQ/view?embed",
+        "duracao": 30
+      },
+      {
+        "titulo": "Aviso (link)",
+        "texto": "CLUBE DO LIVRO",
+        "tipo": "avisos",
+        "selecionado": false,
+        "url": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
+        "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+        "duracao": 30
+      },
+      {
+        "titulo": "Aviso (link)",
+        "texto": "FESTA JUNINA",
+        "url": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+        "embed": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+        "duracao": 30,
+        "tipo": "canva",
+        "selecionado": false
+      }
+    ],
+    "ensalamento": [
+      {
+        "tipo": "ensalamento"
+      }
+    ]
+  },
+  "tvPlaylists": {
+    "tv3": {
+      "videos": [
+        {
+          "id": "CRtjePKnGvA",
+          "titulo": "AO VIVO: CANADÁ X BÓSNIA | COPA DO MUNDO FIFA™ 2026 | 1ª RODADA | FASE DE GRUPOS",
+          "iframe": "https://www.youtube.com/embed/CRtjePKnGvA?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/CRtjePKnGvA/hqdefault.jpg",
+          "duracao": 60,
+          "live": false
+        }
+      ],
+      "padrao": [
+        {
+          "titulo": "Aviso (link)",
+          "texto": "CLUBE DO LIVRO",
+          "tipo": "avisos",
+          "selecionado": false,
+          "url": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
+          "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+          "duracao": 30
+        },
+        {
+          "titulo": "Aviso (link)",
+          "texto": "FESTA JUNINA",
+          "url": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+          "embed": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+          "duracao": 30,
+          "tipo": "avisos",
+          "selecionado": false
+        },
+        {
+          "id": "CJ5KS-WKE6w",
+          "titulo": "JIFSC 2025 - Apresentação",
+          "iframe": "https://www.youtube.com/embed/CJ5KS-WKE6w?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/CJ5KS-WKE6w/hqdefault.jpg",
+          "duracao": 140,
+          "tipo": "videos"
+        },
+        {
+          "id": "OXIAp2zgips",
+          "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+          "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+          "duracao": 230,
+          "tipo": "videos"
+        }
+      ]
+    },
+    "tv1": {
+      "padrao": [
+        {
+          "titulo": "Aviso (link)",
+          "texto": "CLUBE DO LIVRO",
+          "tipo": "avisos",
+          "selecionado": false,
+          "url": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
+          "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+          "duracao": 30
+        },
+        {
+          "titulo": "Aviso (link)",
+          "texto": "FESTA JUNINA",
+          "url": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+          "embed": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
+          "duracao": 30,
+          "tipo": "avisos",
+          "selecionado": false
+        },
+        {
+          "id": "CJ5KS-WKE6w",
+          "titulo": "JIFSC 2025 - Apresentação",
+          "iframe": "https://www.youtube.com/embed/CJ5KS-WKE6w?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/CJ5KS-WKE6w/hqdefault.jpg",
+          "duracao": 140,
+          "tipo": "videos"
+        },
+        {
+          "id": "TjxfN_tIv6o",
+          "titulo": "MCC INFO24: Apresentações Montagem e Manutenção",
+          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+          "duracao": 60,
+          "live": false,
+          "tipo": "videos"
+        },
+        {
+          "id": "qCFeUspzav8",
+          "titulo": "TURISMO DE BASE COMUNITÁRIA EM GAROPABA",
+          "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+          "duracao": 490,
+          "tipo": "videos"
+        },
+        {
+          "id": "OXIAp2zgips",
+          "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+          "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+          "duracao": 230,
+          "tipo": "videos"
+        }
+      ],
+      "videos": [
+        {
+          "id": "1GiXd3lAjrE",
+          "titulo": "Institucional do IFSC - REDE",
+          "iframe": "https://www.youtube.com/embed/1GiXd3lAjrE?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/1GiXd3lAjrE/hqdefault.jpg",
+          "duracao": 60
+        }
+      ],
+      "avisos": [
+        {
+          "titulo": "Aviso (link)",
+          "texto": "IFSC NO CANVA",
+          "tipo": "canva",
+          "selecionado": true,
+          "url": "https://www.canva.com/design/DAHLiE-kHu4/Sca6kSgVaqvqKJs4KdDviQ/view",
+          "embed": "https://www.canva.com/design/DAHLiE-kHu4/Sca6kSgVaqvqKJs4KdDviQ/view?embed",
+          "duracao": 30
+        }
+      ]
+    }
+  },
+  "videosCustomizados": [
+    {
+      "id": "DrE_tVg5VcI",
+      "titulo": "CANADÁ X BÓSNIA AO VIVO | FASE DE GRUPOS | GRUPO B | RODADA 01 | PRÉ-JOGO DA COPA AO VIVO",
+      "iframe": "https://www.youtube.com/embed/DrE_tVg5VcI?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/DrE_tVg5VcI/hqdefault.jpg",
+      "duracao": 60,
+      "live": false
+    },
+    {
+      "id": "w9vPdxL7RIg",
+      "titulo": "CANADÁ X BÓSNIA AO VIVO | LIVE - REACT DE JOGO AO VIVO DA COPA",
+      "iframe": "https://www.youtube.com/embed/w9vPdxL7RIg?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/w9vPdxL7RIg/hqdefault.jpg",
+      "duracao": 60,
+      "live": false
+    },
+    {
+      "id": "CRtjePKnGvA",
+      "titulo": "AO VIVO: CANADÁ X BÓSNIA | COPA DO MUNDO FIFA™ 2026 | 1ª RODADA | FASE DE GRUPOS",
+      "iframe": "https://www.youtube.com/embed/CRtjePKnGvA?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/CRtjePKnGvA/hqdefault.jpg",
+      "duracao": 60,
+      "live": false
+    },
+    {
+      "id": "r3-kPP3Uths",
+      "titulo": "CANADÁ X BÓSNIA AO VIVO GRUPO B RODADA 1 | MUNDIAL 2026 | REACT PRÉ-JOGO",
+      "iframe": "https://www.youtube.com/embed/r3-kPP3Uths?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/r3-kPP3Uths/hqdefault.jpg",
+      "duracao": 60,
+      "live": false
+    },
+    {
+      "id": "FtPR4-OYU0E",
+      "titulo": "MÉXICO X AFRICA DO SUL AO VIVO | REACT DE JOGO AO VIVO DA COPA",
+      "iframe": "https://www.youtube.com/embed/FtPR4-OYU0E?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/FtPR4-OYU0E/hqdefault.jpg",
+      "duracao": 60,
+      "live": false
+    }
+  ]
+}
