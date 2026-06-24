@@ -94,7 +94,10 @@ async function render(item) {
     ){
       tipo = "avisos";
     }
+  }
 
+  if(tipo === "canva"){
+    tipo = "avisos";
   }
 
   // ================= VIDEO =================
@@ -120,7 +123,7 @@ async function render(item) {
   if (tipo === "avisos" || tipo === "aviso") {
 
     // Canva
-    if (item.embed || item.tipoConteudo === "canva") {
+    if (item.embed || item.tipoConteudo === "avisos") {
 
       const src =
         item.embed ||
