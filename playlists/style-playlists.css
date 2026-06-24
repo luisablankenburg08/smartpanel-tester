@@ -11,6 +11,10 @@ body {
   color: #6abf59;
 }
 
+.titulosh2 {
+  font-family: Arial, Helvetica, sans-serif ;
+  color:#43a047
+}
 .btn-voltar {
   padding:14px 24px;
   border:none;
@@ -27,6 +31,45 @@ body {
   opacity:0.9;
 }
 /* CSS DA PÁGINA PLAYLIST-VIDEOS */
+
+.modal-tv{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+
+  justify-content:center;
+  align-items:center;
+
+  z-index:9999;
+}
+
+.modal-tv-content{
+  background:white;
+  padding:30px;
+  border-radius:15px;
+  min-width:300px;
+  text-align:center;
+}
+
+.btn-tv-modal{
+  display:block;
+  width:100%;
+  margin:10px 0;
+  padding:12px;
+
+  border:none;
+  border-radius:10px;
+
+  background:#6abf59;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.btn-tv-modal:hover{
+  background:#90df7c;
+}
 
 #lista-videos{
   display:flex;
@@ -61,23 +104,22 @@ body {
 }
 
 #youtube-url {
-  display: flex;
-  width: 30vw;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  margin-top: 2vw;
-}
-
-#youtube-titulo {
-
   width: 20vw;
   padding: 10px;
   font-size: 16px;
   border-radius: 4px;
   margin-top: 2vw;
+  margin-left: 20vw;
 }
 
+#youtube-titulo {
+  width: 20vw;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  margin-top: 1vw;
+  margin-left: 2vw;
+}
 
 .selecionar-btn{
   width:100%;
@@ -175,6 +217,7 @@ body {
     font-weight:bold;
     cursor:pointer;
     transition:0.2s;
+    margin-left: 2vw;
 }
 
 .btn-playlist:hover{

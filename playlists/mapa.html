@@ -35,12 +35,69 @@
 
   </div>
 
+  <div id="tv-modal" class="modal-tv">
+  <div class="modal-tv-content">
+
+    <h2>Escolha uma TV</h2>
+
+    <div id="lista-tvs-modal"></div>
+
+    <button
+      class="btn-playlist"
+      onclick="fecharModalTV()">
+      Cancelar
+    </button>
+
+  </div>
+</div>
+
 <script>
 
 let params = new URLSearchParams(window.location.search);
 
 let tv = params.get("tv");
 
+async function obterTVs(){
+  const res = await fetch("/state");
+  const state = await res.json();
+  return Object.keys(state);
+}
+
+function fecharModalTV(){
+  document.getElementById("tv-modal").style.display = "none";
+}
+
+async function escolherTV(){
+
+  return new Promise(async resolve => {
+
+    const tvs = await obterTVs();
+
+    const lista =
+      document.getElementById("lista-tvs-modal");
+
+    lista.innerHTML = "";
+
+    tvs.forEach(tv => {
+
+      const btn =
+        document.createElement("button");
+
+      btn.className = "btn-tv-modal";
+      btn.textContent = tv;
+
+      btn.onclick = () => {
+        fecharModalTV();
+        resolve(tv);
+      };
+
+      lista.appendChild(btn);
+    });
+
+    document.getElementById("tv-modal").style.display =
+      "flex";
+  });
+}
 
 function voltarMenu() {
   window.location.href = "/controller-tester.html"; }
@@ -49,8 +106,10 @@ async function aplicarTodas(){
 
   let playlist = [
     {
+      tipo: "mapa",
+      titulo: "Mapa do Campus",
       src: "/playlists/mapa-floripa.jpg",
-      duracao: 60
+      duracao: 30
     }
   ];
 
@@ -61,56 +120,57 @@ async function aplicarTodas(){
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      pagina: "mapa",
-      type: "mapa",
-      intervalo: 0,
-      items: playlist
-    })
-  });
-  alert("Mapa aplicado em todas as TVs");
-}
-
-
-async function salvarMapa(){
-
-  let playlist = [
-    {
-      src: "/playlists/mapa-floripa.jpg",
-      duracao: 60
-    }
-  ];
-
-  // salva playlist
-  await fetch("/save-playlist", {
-
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      tv: tv,
-      type: "mapa",
-      items: playlist
-    })
-  });
-
-  // muda viewer
-  await fetch("/update", {
-
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-    tv: tv,
-    pagina: "mapa",
-    intervalo: 0,
+    pagina: "playlist",
+    intervalo: 30,
+    items: playlist
   })
   });
-
-  alert("Mapa enviado!");
+  alert("Mapa aplicado em todas as TVs");
   window.location.href = "/controller-tester.html";
 }
+
+
+async function salvarMapa() {
+
+  const res = await fetch("/state");
+  const state = await res.json();
+
+  const tvs = Object.keys(state);
+
+  if(tvs.length === 0){
+    alert("Nenhuma TV conectada");
+    return;
+  }
+
+  const escolhida = await escolherTV();
+
+  if(!escolhida){
+    return;
+  }
+
+  let playlist = [{
+    tipo:"mapa",
+    titulo:"Mapa do Campus",
+    src:"/playlists/mapa-floripa.jpg",
+    duracao:30
+  }];
+
+  await fetch("/playlist/add",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      tv:escolhida,
+      items:playlist
+    })
+  });
+
+  alert("Mapa enviado para " + escolhida);
+  window.location.href = "/controller-tester.html";
+}
+
+
 </script>
 
 </body>

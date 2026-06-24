@@ -26,7 +26,7 @@
 
 <input
   id="aviso-link"
-  type="text"render
+  type="text"
   placeholder="(Opcional) Cole aqui o link do Canva ou URL para exibir como imagem/apresentação"
   style="width:100%;margin-top:8px;padding:8px;"
 >
@@ -38,6 +38,22 @@
   placeholder="Duração em segundos (opcional)"
   style="width:100%;margin-top:8px;padding:8px;"
 >
+
+<div id="tv-modal" class="modal-tv">
+  <div class="modal-tv-content">
+
+    <h2>Escolha uma TV</h2>
+
+    <div id="lista-tvs-modal"></div>
+
+    <button
+      class="btn-playlist"
+      onclick="fecharModalTV()">
+      Cancelar
+    </button>
+
+  </div>
+</div>
 
 <button
   class="btn-playlist"
@@ -78,10 +94,55 @@
 function voltarMenu() {
   window.location.href = "/controller-tester.html"; }
 
-let params =
-  new URLSearchParams(window.location.search);
+let params = new URLSearchParams(window.location.search);
 let tv = params.get("tv");
 let avisos = [];
+let playlistAvisos = [];
+
+async function obterTVs(){
+
+  const res = await fetch("/state");
+  const state = await res.json();
+
+  return Object.keys(state);
+}
+
+
+function fecharModalTV(){
+  document.getElementById("tv-modal").style.display = "none";
+}
+
+async function escolherTV(){
+
+  return new Promise(async resolve => {
+
+    const tvs = await obterTVs();
+
+    const lista =
+      document.getElementById("lista-tvs-modal");
+
+    lista.innerHTML = "";
+
+    tvs.forEach(tv => {
+
+      const btn =
+        document.createElement("button");
+
+      btn.className = "btn-tv-modal";
+      btn.textContent = tv;
+
+      btn.onclick = () => {
+        fecharModalTV();
+        resolve(tv);
+      };
+
+      lista.appendChild(btn);
+    });
+
+    document.getElementById("tv-modal").style.display =
+      "flex";
+  });
+}
 
 // =====================================
 // AVISOS PRONTOS
@@ -266,8 +327,10 @@ function renderizarAvisos(){
 // =====================================
 
 function toggleAviso(index){
+
   avisos[index].selecionado =
     !avisos[index].selecionado;
+
   renderizarAvisos();
 }
 
@@ -355,38 +418,33 @@ async function aplicarTV(){
     return;
   }
 
-  // salva
-  await fetch("/save-playlist", {
+  const tv = await escolherTV();
 
+  if(!tv){
+    return;
+  }
+
+  await fetch("/playlist/add",{
     method:"POST",
     headers:{
       "Content-Type":"application/json"
     },
     body:JSON.stringify({
-      tv:tv,
-      type:"avisos",
-      items:selecionados
+      tv,
+      items: selecionados.map(aviso => ({
+        ...aviso,
+        tipo:"avisos"
+      }))
     })
   });
 
-  // ativa
-  await fetch("/update", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      tv:tv,
-      pagina:"modo:avisos",
-      intervalo:0
-    })
-  });
+  alert(
+    `Avisos adicionados à playlist da ${tv}`
+  );
 
-  alert("Avisos aplicados");
-
-  window.location.href = "/controller-tester.html";
+  window.location.href =
+    "/controller-tester.html";
 }
-
 // =====================================
 // APLICAR TODAS
 // =====================================
@@ -418,7 +476,7 @@ async function aplicarTodas(){
   window.location.href = "/controller-tester.html";
 }
 // =====================================
-// APLICAR TODAS
+// SALVAR PLAYLIST
 // =====================================
 
 async function salvarPlaylist(){
@@ -443,7 +501,10 @@ async function salvarPlaylist(){
     body: JSON.stringify({
       tv: tv,
       type: "avisos",
-      items: personalizados
+      items: personalizados.map(item => ({
+        ...item,
+        tipo: "avisos"
+      }))
     })
   });
 

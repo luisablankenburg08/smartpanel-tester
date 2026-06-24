@@ -14,11 +14,12 @@
 
 
 <div class="add-video-box">
+  <h2 class="titulosh2">Adicionar Novo Vídeo</h2>
   <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui">
   <input type="text" id="youtube-titulo" placeholder="Digite o título do vídeo">
   <button class="btn-playlist" onclick="adicionarVideo()">Adicionar Vídeo</button>
 </div>
-
+<h2 class="titulosh2">Vídeos Adicionados</h2>
 <div id="lista-videos"></div>
 
 <div class="acoes-playlist">
@@ -29,6 +30,22 @@
   <button class="btn-playlist destaque" onclick="aplicarTodas()">
     Aplicar em todas as telas
   </button>
+</div>
+
+<div id="tv-modal" class="modal-tv">
+  <div class="modal-tv-content">
+
+    <h2>Escolha uma TV</h2>
+
+    <div id="lista-tvs-modal"></div>
+
+    <button
+      class="btn-playlist"
+      onclick="fecharModalTV()">
+      Cancelar
+    </button>
+
+  </div>
 </div>
 
 <script>
@@ -46,8 +63,51 @@ function voltarMenu() {
 const params = new URLSearchParams(window.location.search);
 const tv = params.get("tv");
 
+async function obterTVs(){
 
+  const res = await fetch("/state");
+  const state = await res.json();
 
+  return Object.keys(state);
+}
+
+function fecharModalTV(){
+  document.getElementById("tv-modal").style.display = "none";
+}
+
+async function escolherTV(){
+
+  return new Promise(async resolve => {
+
+    const tvs = await obterTVs();
+
+    const lista =
+      document.getElementById("lista-tvs-modal");
+
+    lista.innerHTML = "";
+
+    tvs.forEach(tv => {
+
+      const btn =
+        document.createElement("button");
+
+      btn.className = "btn-tv-modal";
+      btn.textContent = tv;
+
+      btn.onclick = () => {
+        fecharModalTV();
+        resolve(tv);
+      };
+
+      lista.appendChild(btn);
+
+    });
+
+    document.getElementById("tv-modal").style.display =
+      "flex";
+  });
+
+}
 //========================
 // VARIÁVEIS
 //========================
@@ -125,15 +185,7 @@ function extrairIdDoIframe(iframe) {
 //========================
 async function carregarVideos(){
 
-  const fixos = [
-  {
-    id: "1GiXd3lAjrE",
-    titulo: "Institucional do IFSC - REDE",
-    iframe: "https://www.youtube.com/embed/1GiXd3lAjrE?autoplay=1&mute=1",
-    thumb: "https://img.youtube.com/vi/1GiXd3lAjrE/hqdefault.jpg",
-    duracao: 60
-  }
-];
+  const fixos = [];
 
   try {
     const res = await fetch("/playlist?type=videos");
@@ -292,31 +344,28 @@ async function salvarPlaylist(){
     return;
   }
 
-  await fetch("/save-playlist", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
+  const tv = await escolherTV();
+
+  if(!tv){
+    return;
+  }
+
+  await fetch("/playlist/add",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
     },
-    body: JSON.stringify({
-      tv: tv,
-      type: "videos",
-      items: playlist
+    body:JSON.stringify({
+      tv,
+      items: playlist.map(video => ({
+        tipo:"video",
+        ...video
+      }))
     })
   });
 
-  await fetch("/update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      tv: tv,
-      pagina: "videos",
-      intervalo: 0
-    })
-  });
+  alert(`Vídeos adicionados à playlist da ${tv}`);
 
-  alert("Playlist aplicada!");
   window.location.href = "/controller-tester.html";
 }
 
@@ -330,22 +379,26 @@ async function aplicarTodas(){
     return;
   }
 
-  await fetch("/update-all", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      pagina: "videos",
-      type: "videos",
-      intervalo: 0,
-      items: playlist
-    })
-  });
+  const tvs = await obterTVs();
 
-  alert("Vídeos aplicados em todas as TVs");
+  for(const tv of tvs){
+    await fetch("/playlist/add",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        tv,
+        items: playlist.map(video => ({
+          tipo:"video",
+          ...video
+        }))
+      })
+    });
+  }
+
+  alert("Vídeos adicionados às playlists de todas as TVs");
 }
-
 //========================
 // INIT
 //========================

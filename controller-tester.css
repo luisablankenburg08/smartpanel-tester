@@ -115,7 +115,9 @@ fieldset legend {
 /* field TV central */
 .tv{ 
   width: 25vw;
-  height: 50vh;
+  height: auto;
+  min-height: 50vh;
+  overflow: visible;
   justify-content: center;
   border:1px solid #ccc;
   border-radius:1vw;
@@ -159,6 +161,9 @@ fieldset legend {
   justify-content: space-between;
   align-items: center;
   margin: 1vw;
+  height: auto;
+  overflow: visible;
+
 }
 
 .btn-editar {
@@ -180,6 +185,38 @@ fieldset legend {
   color: #1c7f13;
 }
 
+.listaPlaylistAtual{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listaPlaylistAtual li{
+  display: flex;
+  align-items: center;
+  min-height: 0.8vw;
+  margin: 1vh;
+  padding: 1vw;
+  background: #c4d4ab ;
+  border-radius: 1vw;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+.btn-remover{
+  margin-left:auto;
+  border:none;
+  background:#d32f2f;
+  color:white;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+.btn-remover:hover{
+  background:#b71c1c;
+}
 
 /* menu da direita - tvs conectados */
 #menu-tvs{
@@ -211,6 +248,9 @@ fieldset legend {
   background-color: #90df7c;
   transform:scale(1.05);
 }
+
+
+
 
 /* CSS UTILIZADO NA VERSÃO 1
 

@@ -1,5 +1,8 @@
 let pendingSelections = {};
 let tvSelecionada = null;
+let playlistAtual = [];
+let modoEdicao = false;
+let dragIndex = null;
 
 function adicionarConteudo(event) {
 
@@ -58,39 +61,236 @@ function criarMenuTVs(lista){
     botao.innerText = tv;
     botao.className = "botao-tv";
 
-    botao.onclick = ()=>{
-        tvSelecionada = tv;
-        mostrarTV(tv);
+    botao.onclick = async ()=>{
+      tvSelecionada = tv;
+      await mostrarTV(tv);
     }
     menu.appendChild(botao);
   });
 }
 
-function mostrarTV(tv){
-  const container = document.getElementById("tv-atual");
+function renderizarPlaylist(tv){
 
+  const lista = document.getElementById(`playlist-${tv}`);
+  lista.innerHTML = "";
+  playlistAtual.forEach((item,index)=>{
+
+  const li =document.createElement("li");
+
+  li.dataset.index = index;
+
+  li.innerHTML = `
+
+    <span class="playlist-titulo">
+      ${
+        item.titulo ||
+        item.nome ||
+        item.tipo ||
+        "Item"
+      }
+    </span>
+
+    ${
+      modoEdicao
+      ? `
+        <button
+          class="btn-remover"
+          onclick="removerItem(${index})">
+          ✖
+        </button>
+      `
+      : ""
+    }
+  `;
+
+  if(modoEdicao){
+
+    li.draggable = true;
+
+    li.addEventListener(
+      "dragstart",
+      dragStart
+    );
+
+    li.addEventListener(
+      "dragover",
+      dragOver
+    );
+
+    li.addEventListener(
+      "drop",
+      dropItem
+    );
+  }
+
+  lista.appendChild(li);
+  });
+}
+
+
+async function mostrarTV(tv){
+
+  const container = document.getElementById("tv-atual");
   container.innerHTML = "";
   const field = document.createElement("fieldset");
   field.className = "tv";
 
   field.innerHTML = `
     <h2>${tv}</h2>
+
     <iframe
       class="tv-preview-frame"
       src="/viewer-tester.html?tv=${tv}&preview=true">
     </iframe>
 
     <div id="playlist">
+
       <div class="playlist-header">
-        <h3 class="titulo-playlist-atual">Playlist Atual</h3>
-        <button class="btn-editar" onclick="editarPlaylist()">Editar</button>
+
+        <h3 class="titulo-playlist-atual">
+          Playlist Atual
+        </h3>
+
+        <button
+          class="btn-editar"
+          onclick="editarPlaylist()">
+          Editar
+        </button>
+
       </div>
 
-      <ol id="playlist-${tv}"></ol>
+      <ol
+        id="playlist-${tv}"
+        class="listaPlaylistAtual">
+      </ol>
+
     </div>
   `;
 
   container.appendChild(field);
+
+  try{
+
+    const res =
+      await fetch(`/playlist-tv/${tv}`);
+
+    playlistAtual =
+      await res.json();
+
+    renderizarPlaylist(tv);
+
+  }catch(err){
+
+    console.error(
+      "Erro ao carregar playlist da TV:",
+      err
+    );
+
+  }
+}
+
+function editarPlaylist(){
+
+  modoEdicao = !modoEdicao;
+  renderizarPlaylist(tvSelecionada);
+  const btn =document.querySelector(".btn-editar");
+
+  btn.textContent =
+    modoEdicao
+      ? "Salvar"
+      : "Editar";
+
+  if(!modoEdicao){
+    salvarPlaylistEditada();
+  }
+}
+
+function removerItem(index){
+  if(
+    !confirm(
+      "Remover este item da playlist?"
+    )
+  ){
+    return;
+  }
+
+  playlistAtual.splice(index,1);
+
+  renderizarPlaylist(tvSelecionada);
+
+  salvarPlaylistEditada();
+}
+
+function dragStart(e){
+
+  dragIndex =
+    Number(
+      e.target.dataset.index
+    );
+}
+
+function dragOver(e){
+
+  e.preventDefault();
+}
+
+function dropItem(e){
+
+  e.preventDefault();
+
+  const dropIndex =
+    Number(
+      e.currentTarget.dataset.index
+    );
+
+  const item =
+    playlistAtual.splice(
+      dragIndex,
+      1
+    )[0];
+
+  playlistAtual.splice(
+    dropIndex,
+    0,
+    item
+  );
+
+  renderizarPlaylist(tvSelecionada);
+
+  salvarPlaylistEditada();
+}
+
+async function salvarPlaylistEditada(){
+
+  try{
+
+    await fetch("/playlist/reorder",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        tv: tvSelecionada,
+        items: playlistAtual
+      })
+    });
+
+    await fetch("/update",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        tv: tvSelecionada,
+        refresh: Date.now()
+      })
+    });
+
+  }catch(err){
+
+    console.error(err);
+
+  }
 }
 
 async function carregar(){
@@ -110,21 +310,22 @@ async function carregar(){
   }
 
   criarMenuTVs(tvs);
-  mostrarTV(tvSelecionada);
+  await mostrarTV(tvSelecionada);
 }
 
 
 async function mudar(tv, pagina, intervalo){
 
-  await fetch("/update", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      tv,
-      pagina,
-      intervalo
-    })
-  });
+  await fetch("/update",{
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json"
+  },
+  body:JSON.stringify({
+    tv,
+    refresh: Date.now()
+  })
+});
 
 }
 carregar();

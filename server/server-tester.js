@@ -99,10 +99,142 @@ function readPlaylists(){
     return {};
   }
 }
+
+function migrarPlaylists() {
+
+  const playlists = readPlaylists();
+
+  if (!playlists.tvPlaylists) {
+    return;
+  }
+
+  let alterado = false;
+
+  Object.keys(playlists.tvPlaylists).forEach(tv => {
+
+    const atual =
+      playlists.tvPlaylists[tv];
+
+    // formato antigo:
+    // tv1:[...]
+
+    if (Array.isArray(atual)) {
+
+      playlists.tvPlaylists[tv] = {
+        items: atual
+      };
+
+      alterado = true;
+    }
+
+  });
+
+  if (alterado) {
+
+    fs.writeFileSync(
+      PLAYLIST_FILE,
+      JSON.stringify(playlists, null, 2)
+    );
+
+    console.log(
+      "✅ Playlists migradas para novo formato"
+    );
+  }
+}
+
 // SALVAR PLAYLISTS
 function savePlaylists(data){
   fs.writeFileSync(PLAYLIST_FILE, JSON.stringify(data, null, 2));
 }
+
+// ADICIONAR ÀS PLAYLISTS
+app.post("/playlist/add",(req,res)=>{
+
+  const { tv, items } = req.body;
+  const playlists = readPlaylists();
+
+  if(!playlists.tvPlaylists){
+    playlists.tvPlaylists = {};
+  }
+
+  if(!playlists.tvPlaylists[tv]){
+    playlists.tvPlaylists[tv] = {
+      items:[]
+    };
+  }
+
+  playlists.tvPlaylists[tv].items.push(...items);
+
+  savePlaylists(playlists);
+  res.json({success:true});
+});
+
+// IDENTIFICAR PLAYLIST ATUAL DE CADA TV 
+app.get("/playlist-tv/:tv", (req,res)=>{
+
+  const playlists = readPlaylists();
+
+  res.json(
+    playlists.tvPlaylists?.[
+      req.params.tv
+    ]?.items || []
+  );
+
+});
+// REORDENAR PLAYLIST ATUAL
+app.post("/playlist/reorder", (req,res)=>{
+
+  const { tv, items } = req.body;
+
+  if(!tv || !Array.isArray(items)){
+    return res.status(400).json({
+      erro:"Dados inválidos"
+    });
+  }
+
+  try{
+
+    const playlists = readPlaylists();
+
+    if(!playlists.tvPlaylists){
+      playlists.tvPlaylists = {};
+    }
+
+    if(!playlists.tvPlaylists[tv]){
+      playlists.tvPlaylists[tv] = {
+        items:[]
+      };
+    }
+
+    playlists.tvPlaylists[tv].items = items;
+
+    fs.writeFileSync(
+      PLAYLIST_FILE,
+      JSON.stringify(
+        playlists,
+        null,
+        2
+      )
+    );
+
+    res.json({
+      sucesso:true
+    });
+
+  }catch(err){
+
+    console.error(
+      "Erro ao salvar playlist:",
+      err
+    );
+
+    res.status(500).json({
+      erro:"Falha ao salvar playlist"
+    });
+
+  }
+
+});
 
 // REGISTRO
 app.post("/register", (req, res) => {
@@ -169,9 +301,10 @@ app.post("/update", verificarAuth, (req, res) => {
   }
 
   state[tv] = {
-    pagina: pagina ?? state[tv].pagina,
-    intervalo: intervalo ?? state[tv].intervalo
-  }
+  pagina: pagina ?? state[tv].pagina,
+  intervalo: intervalo ?? state[tv].intervalo,
+  refresh: Date.now()
+}
 
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
 
@@ -330,6 +463,7 @@ app.post("/videos", verificarAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+migrarPlaylists();
 
 app.listen(3005, "0.0.0.0", () => {
   console.log("Servidor rodando")
@@ -368,81 +502,63 @@ app.get("/playlist", (req,res)=>{
 // SAVE PLAYLIST 🔒
 app.post("/save-playlist", verificarAuth, (req,res)=>{
 
-  let { type, items, tv } = req.body;
+  const { tv, items } = req.body;
 
-  let playlists = {};
+  let playlists = readPlaylists();
 
-  if (fs.existsSync(PLAYLIST_FILE)) {
-    playlists = JSON.parse(fs.readFileSync(PLAYLIST_FILE));
+  if (!playlists.tvPlaylists) {
+    playlists.tvPlaylists = {};
   }
 
-  // Garantir que conteudos globais existem e nunca são apagados
-  if (!playlists.conteudos) playlists.conteudos = {};
-  
-  // Se TV foi especificada, salva a seleção da TV sem afetar conteudos globais
-  if (tv) {
-    if (!playlists.tvPlaylists) playlists.tvPlaylists = {};
-    if (!playlists.tvPlaylists[tv]) playlists.tvPlaylists[tv] = {};
-    playlists.tvPlaylists[tv][type] = Array.isArray(items) ? items : [];
-  } else {
-    // Se não houver TV especificada, salva como conteúdo global (append, não sobrescreve)
-    if (type === "videos" && Array.isArray(items)) {
-      if (!playlists.conteudos.videos) playlists.conteudos.videos = [];
-      const seen = new Set(playlists.conteudos.videos.map(v => v.id || v.iframe));
-      items.forEach(item => {
-        const key = item.id || item.iframe;
-        if (!seen.has(key)) {
-          playlists.conteudos.videos.push(item);
-          seen.add(key);
-        }
-      });
-    } else if (type === "avisos" && Array.isArray(items)) {
-      if (!playlists.conteudos.avisos) playlists.conteudos.avisos = [];
-      const seen = new Set(playlists.conteudos.avisos.map(a => a.texto || a.titulo));
-      items.forEach(item => {
-        const key = item.texto || item.titulo;
-        if (!seen.has(key)) {
-          playlists.conteudos.avisos.push(item);
-          seen.add(key);
-        }
-      });
-    } else {
-      // Para outros tipos, substitui apenas se necessário
-      playlists.conteudos[type] = Array.isArray(items) ? items : [];
-    }
+  if (!playlists.tvPlaylists[tv]) {
+    playlists.tvPlaylists[tv] = {
+      items:[]
+    };
   }
 
-  fs.writeFileSync(PLAYLIST_FILE, JSON.stringify(playlists, null, 2));
+  playlists.tvPlaylists[tv].items =
+    Array.isArray(items)
+      ? items
+      : [];
 
-  res.json({ ok: true });
+  savePlaylists(playlists);
+
+  res.json({ ok:true });
+
 });
 
 app.use("/uploads", express.static("uploads"));
 
-// UPDATE ALL 🔒
+// UPDATE ALL 
 app.post("/update-all", verificarAuth, (req, res) => {
 
-  let { pagina, type, items, intervalo } = req.body;
+  const { items } = req.body;
 
   let state = JSON.parse(fs.readFileSync(STATE_FILE));
   let playlists = readPlaylists();
 
-  // Atualiza state de todas as TVs
+  if (!playlists.tvPlaylists) {
+    playlists.tvPlaylists = {};
+  }
+
   Object.keys(state).forEach(tv => {
-    state[tv] = {
-      pagina,
-      intervalo: intervalo ?? 2000,
-      refresh: Date.now()
-    };
-    
-    // Salva a playlist em cada TV (cópia da seleção)
-    if (!playlists.tvPlaylists) playlists.tvPlaylists = {};
-    if (!playlists.tvPlaylists[tv]) playlists.tvPlaylists[tv] = {};
-    playlists.tvPlaylists[tv][type] = Array.isArray(items) ? items : [];
+
+    if (!playlists.tvPlaylists[tv]) {
+      playlists.tvPlaylists[tv] = {
+        items:[]
+      };
+    }
+    playlists.tvPlaylists[tv].items.push(
+      ...(Array.isArray(items) ? items : [])
+    );
+    state[tv].refresh = Date.now();
   });
 
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
-  savePlaylists(playlists);
+  fs.writeFileSync(
+    STATE_FILE,
+    JSON.stringify(state, null, 2)
+  );
 
-  res.json({ ok: true });
+  savePlaylists(playlists);
+  res.json({ ok:true });
 });
