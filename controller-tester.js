@@ -50,7 +50,6 @@ function adicionarPlaylist(event) {
   }
 }
 
-//function criarCategoria() {}
 
 function criarMenuTVs(lista){
   const menu = document.getElementById("menu-tvs");
@@ -73,22 +72,48 @@ function renderizarPlaylist(tv){
 
   const lista = document.getElementById(`playlist-${tv}`);
   lista.innerHTML = "";
-  playlistAtual.forEach((item,index)=>{
 
-  const li =document.createElement("li");
+  const totalSegundos = playlistAtual.reduce((total, item) => total + (item.duracao ?? 30),0);
 
-  li.dataset.index = index;
+  const minutos = Math.floor(totalSegundos / 60);
+  const segundos = totalSegundos % 60;
 
-  li.innerHTML = `
+  document.getElementById("titulo-playlist").textContent = `Playlist Atual (${playlistAtual.length} itens • ${minutos} min ${segundos}s)`;
 
-    <span class="playlist-titulo">
-      ${
-        item.titulo ||
-        item.nome ||
-        item.tipo ||
-        "Item"
-      }
-    </span>
+  playlistAtual.forEach((item, index) => {
+
+    const li = document.createElement("li");
+
+    li.dataset.index = index;
+
+    const numero = String(index + 1).padStart(2, "0");
+    const duracao = item.duracao ?? 30;
+
+    li.innerHTML = `
+
+      <div class="playlist-item">
+        <div class="playlist-esquerda">
+
+          <span class="playlist-numero">
+            ${numero}.
+          </span>
+
+          <span class="playlist-titulo">
+            ${
+              item.titulo ||
+              item.nome ||
+              item.tipo ||
+              "Item"
+            }
+          </span>
+
+        </div>
+
+      <span class="playlist-duracao">
+        ${duracao}s
+      </span>
+
+      </div>
 
     ${
       modoEdicao
@@ -127,7 +152,6 @@ function renderizarPlaylist(tv){
   });
 }
 
-
 async function mostrarTV(tv){
 
   const container = document.getElementById("tv-atual");
@@ -138,31 +162,19 @@ async function mostrarTV(tv){
   field.innerHTML = `
     <h2>${tv}</h2>
 
-    <iframe
-      class="tv-preview-frame"
-      src="/viewer-tester.html?tv=${tv}&preview=true">
-    </iframe>
+    <iframe class="tv-preview-frame" src="/viewer-tester.html?tv=${tv}&preview=true"></iframe>
 
     <div id="playlist">
 
       <div class="playlist-header">
 
-        <h3 class="titulo-playlist-atual">
-          Playlist Atual
-        </h3>
+        <h3 class="titulo-playlist-atual" id="titulo-playlist"> Playlist Atual </h3>
 
-        <button
-          class="btn-editar"
-          onclick="editarPlaylist()">
-          Editar
-        </button>
+        <button class="btn-editar" onclick="editarPlaylist()">Editar</button>
 
       </div>
 
-      <ol
-        id="playlist-${tv}"
-        class="listaPlaylistAtual">
-      </ol>
+      <ol id="playlist-${tv}" class="listaPlaylistAtual"></ol>
 
     </div>
   `;
@@ -171,11 +183,9 @@ async function mostrarTV(tv){
 
   try{
 
-    const res =
-      await fetch(`/playlist-tv/${tv}`);
+    const res = await fetch(`/playlist-tv/${tv}`);
 
-    playlistAtual =
-      await res.json();
+    playlistAtual = await res.json();
 
     renderizarPlaylist(tv);
 
@@ -207,17 +217,13 @@ function editarPlaylist(){
 
 function removerItem(index){
   if(
-    !confirm(
-      "Remover este item da playlist?"
-    )
+    !confirm("Remover este item da playlist?")
   ){
     return;
   }
 
   playlistAtual.splice(index,1);
-
   renderizarPlaylist(tvSelecionada);
-
   salvarPlaylistEditada();
 }
 
@@ -312,7 +318,6 @@ async function carregar(){
   criarMenuTVs(tvs);
   await mostrarTV(tvSelecionada);
 }
-
 
 async function mudar(tv, pagina, intervalo){
 

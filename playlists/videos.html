@@ -10,52 +10,67 @@
 
 <body>
 <button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
-<h1 class="titulosplaylists">Vídeos</h1>
 
+ <div id="add-video-box">
 
-<div class="add-video-box">
-  <h2 class="titulosh2">Adicionar Novo Vídeo</h2>
-  <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui">
-  <input type="text" id="youtube-titulo" placeholder="Digite o título do vídeo">
-  <button class="btn-playlist" onclick="adicionarVideo()">Adicionar Vídeo</button>
+  <button
+    class="tituloAdicionar"
+    onclick="mostrarInputs()">
+    Adicionar Novo Vídeo
+  </button>
+
+  <div id="novo-video-form">
+
+    <input
+      type="text"
+      id="youtube-url"
+      placeholder="Cole a URL do YouTube aqui..."
+    >
+
+    <input
+      type="text"
+      id="youtube-titulo"
+      placeholder="Digite o título do vídeo..."
+    >
+
+    <button
+      id="btn-playlist"
+      class="btn-playlist"
+      onclick="adicionarVideo()">
+      Adicionar Vídeo
+    </button>
+
+  </div>
+
 </div>
+
 <h2 class="titulosh2">Vídeos Adicionados</h2>
+
 <div id="lista-videos"></div>
 
-<div class="acoes-playlist">
-  <button class="btn-playlist" onclick="salvarPlaylist()">
-    Aplicar Playlist
-  </button>
-
-  <button class="btn-playlist destaque" onclick="aplicarTodas()">
-    Aplicar em todas as telas
-  </button>
+<div class="acoes-playlist" id="acoes-playlist">
+  <button class="btn-playlist" onclick="aplicarPlaylist()">Aplicar Playlist</button>
+  <button class="btn-playlist" onclick="aplicarTodas()">Aplicar em todas as telas</button>
+  <button class="btn-delete" onclick="deletar()">Deletar</button>
+  <button class="btn-editar" onclick="editar()">Editar</button>
 </div>
 
 <div id="tv-modal" class="modal-tv">
   <div class="modal-tv-content">
-
     <h2>Escolha uma TV</h2>
 
     <div id="lista-tvs-modal"></div>
 
-    <button
-      class="btn-playlist"
-      onclick="fecharModalTV()">
-      Cancelar
-    </button>
-
+    <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
   </div>
 </div>
 
 <script>
-
 //========================
-// VOLTAR
+// VARIÁVEIS
 //========================
-function voltarMenu() {
-  window.location.href = "/controller-tester.html";
-}
+let videosDisponiveis = [];
+let playlist = [];
 
 //========================
 // TV ATUAL
@@ -81,15 +96,13 @@ async function escolherTV(){
 
     const tvs = await obterTVs();
 
-    const lista =
-      document.getElementById("lista-tvs-modal");
+    const lista = document.getElementById("lista-tvs-modal");
 
     lista.innerHTML = "";
 
     tvs.forEach(tv => {
 
-      const btn =
-        document.createElement("button");
+      const btn = document.createElement("button");
 
       btn.className = "btn-tv-modal";
       btn.textContent = tv;
@@ -98,21 +111,15 @@ async function escolherTV(){
         fecharModalTV();
         resolve(tv);
       };
-
+       mostrarAcoesPlaylist(); 
       lista.appendChild(btn);
 
     });
 
-    document.getElementById("tv-modal").style.display =
-      "flex";
+    document.getElementById("tv-modal").style.display = "flex";
   });
 
 }
-//========================
-// VARIÁVEIS
-//========================
-let videosDisponiveis = [];
-let playlist = [];
 
 //========================
 // EXTRAIR ID
@@ -241,16 +248,13 @@ function renderVideos(){
 
     let btn = card.querySelector(".selecionar-btn");
 
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
 
-      let existe = playlist.find(v =>
-        (v.id || extrairIdDoIframe(v.iframe)) === videoId
-      );
+      let existe = playlist.find(v => (v.id || extrairIdDoIframe(v.iframe)) === videoId );
 
       if(existe){
-        playlist = playlist.filter(v =>
-          (v.id || extrairIdDoIframe(v.iframe)) !== videoId
-        );
+        playlist = playlist.filter(v => (v.id || extrairIdDoIframe(v.iframe)) !== videoId );
         card.classList.remove("video-selecionado");
         btn.innerText = "Selecionar";
 
@@ -259,10 +263,12 @@ function renderVideos(){
         card.classList.add("video-selecionado");
         btn.innerText = "Selecionado";
       }
+      mostrarAcoesPlaylist(); 
     };
-
+    
     lista.appendChild(card);
   });
+  mostrarAcoesPlaylist(); 
 }
 
 //========================
@@ -335,9 +341,38 @@ async function adicionarVideo(){
 }
 
 //========================
-// SALVAR PLAYLIST
+// MOSTRAR BOTÕES
 //========================
-async function salvarPlaylist(){
+function mostrarAcoesPlaylist(){
+
+  const acoes = document.getElementById("acoes-playlist");
+
+  if(playlist.length > 0){
+      acoes.style.display = "flex";
+  }else{
+      acoes.style.display = "none";
+  }
+}
+
+//========================
+// MOSTRAR INPUTS
+//========================
+function mostrarInputs(){
+
+  const form = document.getElementById("novo-video-form");
+
+  if(form.style.display === "flex"){
+      form.style.display = "none";
+  }else{
+      form.style.display = "flex";
+  }
+
+}
+
+//========================
+// APLICAR/SALVAR PLAYLIST
+//========================
+async function aplicarPlaylist(){
 
   if(playlist.length === 0){
     alert("Selecione ao menos um vídeo");
@@ -367,6 +402,8 @@ async function salvarPlaylist(){
   alert(`Vídeos adicionados à playlist da ${tv}`);
 
   window.location.href = "/controller-tester.html";
+  playlist = [];
+  renderVideos();
 }
 
 //========================
@@ -384,9 +421,7 @@ async function aplicarTodas(){
   for(const tv of tvs){
     await fetch("/playlist/add",{
       method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
         tv,
         items: playlist.map(video => ({
@@ -398,7 +433,102 @@ async function aplicarTodas(){
   }
 
   alert("Vídeos adicionados às playlists de todas as TVs");
+  playlist = [];
+  renderVideos();
 }
+
+//========================
+// DELETAR
+//========================
+async function deletar() {
+
+  if (playlist.length === 0) {
+    alert("Selecione um vídeo para excluir.");
+    return;
+  }
+
+  if (playlist.length > 1) {
+    alert("Selecione apenas um vídeo para excluir.");
+    return;
+  }
+
+  const video = playlist[0];
+  const id = video.id || extrairIdDoIframe(video.iframe);
+  const confirmar = confirm(`Deseja realmente excluir "${video.titulo}"?`);
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`/videos/${id}`, {method: "DELETE"});
+
+    if (!res.ok) {
+      alert("Erro ao excluir o vídeo.");
+      return;
+    }
+
+    videosDisponiveis = videosDisponiveis.filter(v => (v.id || extrairIdDoIframe(v.iframe)) !== id);
+
+    playlist = [];
+    renderVideos();
+    alert("Vídeo removido com sucesso.");
+
+  } catch (erro) {
+    console.error(erro);
+    alert("Erro ao excluir o vídeo.");
+  }
+
+}
+
+//========================
+// SALVAR EDIÇÃO
+//========================
+async function salvarEdicao(video){
+
+  await fetch(`/videos/${video.id}`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        titulo: video.titulo,
+        duracao: video.duracao
+      })
+  });
+
+}
+
+//========================
+// EDITAR
+//========================
+async function editar() {
+
+    if (playlist.length === 0) {
+      alert("Selecione um vídeo para editar.");
+      return;
+    }
+
+    if (playlist.length > 1) {
+      alert("Selecione apenas um vídeo para editar.");
+      return;
+    }
+
+    const video = playlist[0];
+
+    const novoTitulo = prompt("Novo título do vídeo:", video.titulo);
+
+    if(novoTitulo === null) return;
+
+    video.titulo = novoTitulo.trim();
+    
+    await salvarEdicao(video);
+
+    renderVideos();
+}
+
+//========================
+// VOLTAR
+//========================
+function voltarMenu() {
+  window.location.href = "/controller-tester.html";
+}
+
 //========================
 // INIT
 //========================

@@ -3,58 +3,31 @@
     "tv1": {
       "items": [
         {
-          "titulo": "CLUBE DO LIVRO",
-          "texto": "CLUBE DO LIVRO",
-          "tipo": "avisos",
-          "selecionado": false,
-          "url": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
-          "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
-          "duracao": 30
+          "tipo": "video",
+          "id": "OXIAp2zgips",
+          "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+          "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+          "duracao": 230,
+          "live": false
         },
         {
-          "titulo": "FESTA JUNINA",
-          "texto": "FESTA JUNINA",
-          "url": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
-          "embed": "https://www.canva.com/design/DAHMNPYc3-U/35I90RxoREV2YfaQMNl1QA/view?embed",
-          "duracao": 30,
-          "tipo": "canva",
-          "selecionado": false
+          "tipo": "video",
+          "id": "TjxfN_tIv6o",
+          "titulo": "MCC INFO25: Apresentações",
+          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+          "duracao": 67,
+          "live": false
         },
         {
-          "titulo": "CORREIO ELEGANTE",
-          "texto": "CORREIO ELEGANTE",
-          "tipo": "canva",
-          "selecionado": false,
-          "url": "https://www.canva.com/design/DAHNB-4agd8/rjmYLWkymAPp95FoWvSRTw/view?embed",
-          "embed": "https://www.canva.com/design/DAHNB-4agd8/rjmYLWkymAPp95FoWvSRTw/view?embed",
-          "duracao": 15
-        },
-        {
-          "titulo": "CORREIO ELEGANTE - PREÇOS",
-          "texto": "CORREIO ELEGANTE - PREÇOS",
-          "tipo": "canva",
-          "selecionado": false,
-          "url": "https://www.canva.com/design/DAHNB7lk07A/LPBerGAl-gkJRDtvLPmozw/view?embed",
-          "embed": "https://www.canva.com/design/DAHNB7lk07A/LPBerGAl-gkJRDtvLPmozw/view?embed",
-          "duracao": 15
-        },
-        {
-          "titulo": "JOAQUIM - SALGADOS",
-          "texto": "JOAQUIM - SALGADOS",
-          "tipo": "canva",
-          "selecionado": true,
-          "url": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view",
-          "embed": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
-          "duracao": 30
-        },
-        {
-          "titulo": "JOAQUIM - COMBO",
-          "texto": "JOAQUIM - COMBO",
-          "tipo": "canva",
-          "selecionado": true,
-          "url": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view",
-          "embed": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
+          "tipo": "video",
+          "id": "4m7xcDovykU",
+          "titulo": "Curso Técnico em Informática Garopaba",
+          "iframe": "https://www.youtube.com/embed/4m7xcDovykU?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/4m7xcDovykU/hqdefault.jpg",
+          "duracao": 202,
+          "live": false
         }
       ]
     },
@@ -65,16 +38,16 @@
   "videosCustomizados": [
     {
       "id": "TjxfN_tIv6o",
-      "titulo": "MCC INFO24: Apresentações Montagem e Manutenção",
+      "titulo": "MCC INFO25: Apresentações",
       "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
       "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
-      "duracao": 60,
+      "duracao": 67,
       "tipo": "video",
       "live": false
     },
     {
       "id": "qCFeUspzav8",
-      "titulo": "TURISMO DE BASE COMUNITÁRIA EM GAROPABA",
+      "titulo": "TURISMO BASE COMUNITÁRIA GAROPABA",
       "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
       "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
       "duracao": 490,
@@ -109,6 +82,13 @@
       "live": false
     },
     {
+      "id": "RaAqmjb6D2Y",
+      "titulo": "SEPEI 2025 - Institucional",
+      "iframe": "https://www.youtube.com/embed/RaAqmjb6D2Y?autoplay=1&mute=1",
+      "thumb": "https://img.youtube.com/vi/RaAqmjb6D2Y/hqdefault.jpg",
+      "duracao": 190
+    },
+    {
       "id": "LdmEIAy5VdU",
       "titulo": "JIFSC 2014 - Reportagem",
       "iframe": "https://www.youtube.com/embed/LdmEIAy5VdU?autoplay=1&mute=1",
@@ -116,11 +96,28 @@
       "duracao": 195
     },
     {
-      "id": "RaAqmjb6D2Y",
-      "titulo": "SEPEI 2025 - Institucional",
-      "iframe": "https://www.youtube.com/embed/RaAqmjb6D2Y?autoplay=1&mute=1",
-      "thumb": "https://img.youtube.com/vi/RaAqmjb6D2Y/hqdefault.jpg",
-      "duracao": 190
+      "id": "tD2tECmRbTQ",
+      "titulo": "Curso superior em Sistemas para Internet",
+      "iframe": "https://www.youtube.com/embed/tD2tECmRbTQ?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/tD2tECmRbTQ/hqdefault.jpg",
+      "duracao": 320,
+      "live": false
+    },
+    {
+      "id": "ZjC2rCLbIVc",
+      "titulo": "Institucional do Câmpus Garopaba do IFSC",
+      "iframe": "https://www.youtube.com/embed/ZjC2rCLbIVc?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/ZjC2rCLbIVc/hqdefault.jpg",
+      "duracao": 425,
+      "live": false
+    },
+    {
+      "id": "4m7xcDovykU",
+      "titulo": "Curso Técnico em Informática Garopaba",
+      "iframe": "https://www.youtube.com/embed/4m7xcDovykU?autoplay=1&mute=1&playsinline=1",
+      "thumb": "https://img.youtube.com/vi/4m7xcDovykU/hqdefault.jpg",
+      "duracao": 202,
+      "live": false
     }
   ],
   "conteudos": {
