@@ -1,4 +1,5 @@
-const path = require("path")
+const multer = require("multer");
+const path = require("path");
 const express = require("express")
 const fs = require("fs")
 const app = express()
@@ -11,7 +12,7 @@ const tvHeartbeats = new Map()
 const session = require("express-session");
 
 app.use("/login", express.static(LOGIN_DIR))
-app.use("/uploads", express.static("uploads"));
+
 
 //AUTENTICAÇÃO
 app.use(express.json());
@@ -22,9 +23,31 @@ app.use(session({
     saveUninitialized: false
 }));
 
+//USAR UPLOADS
+app.use("/uploads",express.static("public/uploads"));
 
 if (!fs.existsSync(STATE_FILE)) { fs.writeFileSync(STATE_FILE, "{}") }
 
+
+
+const storage = multer.diskStorage({
+
+destination(req,file,cb){
+  cb(null,"public/uploads");
+},
+
+filename(req,file,cb){
+  cb(
+    null,
+    Date.now()+
+    path.extname(file.originalname)
+  );
+}
+});
+
+const upload = multer({
+    storage
+});
 //==================
 // FUNÇÕES
 //==================
@@ -147,29 +170,25 @@ function getAllVideoItems(playlists) {
   });
 }
 
-function getAllAvisoItems(playlists) {
+function getAllAvisoItems(playlists){
+
   const items = [];
 
-  if (playlists.conteudos && Array.isArray(playlists.conteudos.avisos)) {
+  if(Array.isArray(playlists.avisosCustomizados)){
+    items.push(...playlists.avisosCustomizados);
+  }
+
+  if(playlists.conteudos &&
+    Array.isArray(playlists.conteudos.avisos)){
     items.push(...playlists.conteudos.avisos);
   }
 
-  if (playlists.conteudos && Array.isArray(playlists.conteudos.padrao)) {
-    items.push(...playlists.conteudos.padrao.filter(item => !isVideoItem(item)));
-  }
-
-  const seen = new Set();
-  return items.filter(item => {
-    const key = normalizeItemKey(item);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return items;
 }
 
 setInterval(() => {
   const agora = Date.now()
-  const timeout = 30000
+  const timeout = 3000000
 
   for (const [tvId, ultimoHeartbeat] of tvHeartbeats.entries()) {
     if (agora - ultimoHeartbeat > timeout) {
@@ -223,27 +242,30 @@ app.use(express.static("/home/pi/tester"))
 // ROTAS
 //==================
 
-
 // ADICIONAR ÀS PLAYLISTS
-app.post("/playlist/add",(req,res)=>{
+app.post("/playlist/add", (req,res)=>{
 
-  const { tv, items } = req.body;
-  const playlists = readPlaylists();
+    const { tv, items } = req.body;
+    let playlists = readPlaylists();
 
-  if(!playlists.tvPlaylists){
-    playlists.tvPlaylists = {};
-  }
+    if(!playlists.tvPlaylists){
+      playlists.tvPlaylists = {};
+    }
 
-  if(!playlists.tvPlaylists[tv]){
-    playlists.tvPlaylists[tv] = {
-      items:[]
-    };
-  }
+    if(!playlists.tvPlaylists[tv]){
+      playlists.tvPlaylists[tv] = {
+        items:[]
+      };
+    }
 
-  playlists.tvPlaylists[tv].items.push(...items);
+    if(!Array.isArray(playlists.tvPlaylists[tv].items)){
+      playlists.tvPlaylists[tv].items = [];
+    }
 
-  savePlaylists(playlists);
-  res.json({success:true});
+    playlists.tvPlaylists[tv].items.push(...items);
+    savePlaylists(playlists);
+    res.json({ok:true});
+
 });
 
 // IDENTIFICAR PLAYLIST ATUAL DE CADA TV 
@@ -509,6 +531,83 @@ app.put("/videos/:id", verificarAuth, (req, res) => {
 
 });
 
+// LISTAR AVISOS
+app.get("/avisos", verificarAuth, (req,res)=>{
+  const playlists = readPlaylists();
+  res.json(getAllAvisoItems(playlists));
+});
+
+//SALVAR AVISOS
+app.post(
+  "/avisos",
+  verificarAuth,
+  upload.single("arquivo"),
+  (req,res)=>{
+
+    let playlists=readPlaylists();
+    if(!playlists.avisosCustomizados){
+      playlists.avisosCustomizados=[];
+    }
+
+    const aviso={
+      id:Date.now().toString(),
+      titulo:req.body.titulo,
+      texto:req.body.texto,
+      link:req.body.link,
+      embed:req.body.embed,
+      duracao:Number(req.body.duracao)||15
+    };
+
+      if(req.file){
+        aviso.arquivo="/uploads/"+req.file.filename;
+      }
+
+      playlists.avisosCustomizados.push(aviso);
+      savePlaylists(playlists);
+      res.json({ok:true});
+});
+
+// EDITAR AVISOS
+app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
+  const playlists = readPlaylists();
+  const aviso = playlists.avisosCustomizados.find(
+    a => a.id === req.params.id
+  );
+
+  if(!aviso){
+    return res.status(404).json({
+      erro:"Aviso não encontrado"
+    });
+  }
+
+  aviso.titulo = req.body.titulo;
+  aviso.texto = req.body.texto;
+  aviso.link = req.body.link;
+  aviso.embed = req.body.embed;
+  aviso.duracao = Number(req.body.duracao) || 15;
+
+  if(req.file){
+    aviso.arquivo = "/uploads/" + req.file.filename;
+  }
+
+  savePlaylists(playlists);
+  res.json({ok:true});
+});
+
+//EXCLUIR AVISOS
+app.delete("/avisos/:id", verificarAuth, (req,res)=>{
+
+    const playlists = readPlaylists();
+
+    playlists.avisosCustomizados = playlists.avisosCustomizados.filter(
+      a => a.id !== req.params.id
+    );
+
+    savePlaylists(playlists);
+    res.json({ok:true});
+
+});
+
 // PLAYLIST
 app.get("/playlist", (req,res)=>{
 
@@ -534,31 +633,30 @@ app.get("/playlist", (req,res)=>{
 });
 
 // SAVE PLAYLIST 
-app.post("/save-playlist", verificarAuth, (req,res)=>{
+app.post("/save-playlist", verificarAuth, (req, res) => {
 
-  const { tv, items } = req.body;
+    const { tv, items } = req.body;
+    if (!tv) {
+      return res.status(400).json({
+        erro: "TV não informada"
+      });
+    }
 
-  let playlists = readPlaylists();
+    let playlists = readPlaylists();
 
-  if (!playlists.tvPlaylists) {
-    playlists.tvPlaylists = {};
-  }
+    if (!playlists.tvPlaylists) {
+      playlists.tvPlaylists = {};
+    }
 
-  if (!playlists.tvPlaylists[tv]) {
-    playlists.tvPlaylists[tv] = {
-      items:[]
-    };
-  }
+    if (!playlists.tvPlaylists[tv]) {
+      playlists.tvPlaylists[tv] = {
+        items: []
+      };
+    }
 
-  playlists.tvPlaylists[tv].items =
-    Array.isArray(items)
-      ? items
-      : [];
-
-  savePlaylists(playlists);
-
-  res.json({ ok:true });
-
+    playlists.tvPlaylists[tv].items = Array.isArray(items) ? items : [];
+    savePlaylists(playlists);
+    res.json({ok: true});
 });
 
 // UPDATE ALL 
@@ -580,9 +678,15 @@ app.post("/update-all", verificarAuth, (req, res) => {
         items:[]
       };
     }
-    playlists.tvPlaylists[tv].items.push(
-      ...(Array.isArray(items) ? items : [])
-    );
+
+    const { type, items } = req.body;
+
+    if (!playlists.tvPlaylists[tv][type]) {
+        playlists.tvPlaylists[tv][type] = [];
+    }
+
+    playlists.tvPlaylists[tv][type].push(...items);
+
     state[tv].refresh = Date.now();
   });
 
@@ -594,8 +698,6 @@ app.post("/update-all", verificarAuth, (req, res) => {
   savePlaylists(playlists);
   res.json({ ok:true });
 });
-
-
 
 migrarPlaylists();
 

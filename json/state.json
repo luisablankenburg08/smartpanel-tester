@@ -1,1 +1,6 @@
-{}
+{
+  "tv1": {
+    "pagina": "layouts/tela2.html",
+    "intervalo": 2000
+  }
+}

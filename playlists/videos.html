@@ -13,32 +13,13 @@
 
  <div id="add-video-box">
 
-  <button
-    class="tituloAdicionar"
-    onclick="mostrarInputs()">
-    Adicionar Novo Vídeo
-  </button>
+  <button class="tituloAdicionar" onclick="mostrarInputs()">Adicionar Novo Vídeo</button>
 
   <div id="novo-video-form">
 
-    <input
-      type="text"
-      id="youtube-url"
-      placeholder="Cole a URL do YouTube aqui..."
-    >
-
-    <input
-      type="text"
-      id="youtube-titulo"
-      placeholder="Digite o título do vídeo..."
-    >
-
-    <button
-      id="btn-playlist"
-      class="btn-playlist"
-      onclick="adicionarVideo()">
-      Adicionar Vídeo
-    </button>
+    <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui...">
+    <input type="text" id="youtube-titulo" placeholder="Digite o título do vídeo...">
+    <button id="btn-playlist" class="btn-playlist" onclick="adicionarVideo()">Adicionar Vídeo</button>
 
   </div>
 
@@ -66,9 +47,8 @@
 </div>
 
 <script>
-//========================
+
 // VARIÁVEIS
-//========================
 let videosDisponiveis = [];
 let playlist = [];
 
@@ -121,9 +101,7 @@ async function escolherTV(){
 
 }
 
-//========================
 // EXTRAIR ID
-//========================
 function extrairVideoId(url) {
   try {
     let parsedUrl = new URL(url);
@@ -187,9 +165,7 @@ function extrairIdDoIframe(iframe) {
   }
 }
 
-//========================
 // CARREGAR VÍDEOS
-//========================
 async function carregarVideos(){
 
   const fixos = [];
@@ -212,9 +188,7 @@ async function carregarVideos(){
   renderVideos();
 }
 
-//========================
-// RENDER
-//========================
+// RENDERIZAR
 function renderVideos(){
 
   const lista = document.getElementById("lista-videos");
@@ -271,9 +245,7 @@ function renderVideos(){
   mostrarAcoesPlaylist(); 
 }
 
-//========================
 // ADICIONAR VÍDEO
-//========================
 async function adicionarVideo(){
 
   const url = document.getElementById("youtube-url").value.trim();
@@ -340,9 +312,7 @@ async function adicionarVideo(){
   carregarVideos();
 }
 
-//========================
 // MOSTRAR BOTÕES
-//========================
 function mostrarAcoesPlaylist(){
 
   const acoes = document.getElementById("acoes-playlist");
@@ -354,24 +324,19 @@ function mostrarAcoesPlaylist(){
   }
 }
 
-//========================
 // MOSTRAR INPUTS
-//========================
 function mostrarInputs(){
 
   const form = document.getElementById("novo-video-form");
 
   if(form.style.display === "flex"){
-      form.style.display = "none";
+    form.style.display = "none";
   }else{
-      form.style.display = "flex";
+    form.style.display = "flex";
   }
-
 }
 
-//========================
 // APLICAR/SALVAR PLAYLIST
-//========================
 async function aplicarPlaylist(){
 
   if(playlist.length === 0){
@@ -406,9 +371,7 @@ async function aplicarPlaylist(){
   renderVideos();
 }
 
-//========================
 // APLICAR EM TODAS
-//========================
 async function aplicarTodas(){
 
   if(playlist.length === 0){
@@ -437,9 +400,7 @@ async function aplicarTodas(){
   renderVideos();
 }
 
-//========================
 // DELETAR
-//========================
 async function deletar() {
 
   if (playlist.length === 0) {
@@ -478,9 +439,7 @@ async function deletar() {
 
 }
 
-//========================
 // SALVAR EDIÇÃO
-//========================
 async function salvarEdicao(video){
 
   await fetch(`/videos/${video.id}`,{
@@ -494,9 +453,7 @@ async function salvarEdicao(video){
 
 }
 
-//========================
 // EDITAR
-//========================
 async function editar() {
 
     if (playlist.length === 0) {
@@ -522,16 +479,12 @@ async function editar() {
     renderVideos();
 }
 
-//========================
 // VOLTAR
-//========================
 function voltarMenu() {
   window.location.href = "/controller-tester.html";
 }
 
-//========================
 // INIT
-//========================
 carregarVideos();
 
 </script>

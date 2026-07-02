@@ -30,9 +30,6 @@
           "live": false
         }
       ]
-    },
-    "tv2": {
-      "items": []
     }
   },
   "videosCustomizados": [
@@ -120,14 +117,59 @@
       "live": false
     }
   ],
-  "conteudos": {
-    "undefined": [
-      {
-        "tipo": "mapa",
-        "titulo": "Mapa do Campus",
-        "src": "/playlists/mapa-floripa.jpg",
-        "duracao": 30
-      }
-    ]
-  }
+  "mapa": [
+    {
+      "tipo": "mapa",
+      "titulo": "Mapa do Campus",
+      "src": "/playlists/mapa-floripa.jpg",
+      "duracao": 30
+    }
+  ],
+  "avisosCustomizados": [
+    {
+      "id": "1783019096803",
+      "titulo": "Projeto",
+      "texto": "Smart Digital Panel Project",
+      "link": "",
+      "embed": "",
+      "duracao": 15,
+      "tipo": "avisos"
+    },
+    {
+      "id": "1783019134219",
+      "titulo": "Clube do Livro",
+      "texto": "",
+      "link": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
+      "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+      "duracao": 30,
+      "tipo": "avisos"
+    },
+    {
+      "id": "1783019212484",
+      "titulo": "Solicitação de Mídia",
+      "texto": "",
+      "link": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view",
+      "embed": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+      "duracao": 30,
+      "tipo": "avisos"
+    },
+    {
+      "id": "1783019292229",
+      "titulo": "Joaquim - Salgados",
+      "texto": "",
+      "link": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view",
+      "embed": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
+      "duracao": 30,
+      "tipo": "avisos"
+    },
+    {
+      "id": "1783019337445",
+      "titulo": "Joaquim - Combo",
+      "texto": "",
+      "link": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view",
+      "embed": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+      "duracao": 30,
+      "tipo": "avisos"
+    }
+  ]
 }

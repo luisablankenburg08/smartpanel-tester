@@ -4,9 +4,7 @@
 let params = new URLSearchParams(window.location.search);
 let preview = params.get("preview") === "true";
 
-let tvId = preview
-  ? params.get("tv")
-  : localStorage.getItem("tvId");
+let tvId = preview ? params.get("tv") : localStorage.getItem("tvId");
 
 let ultimaPagina = null;
 let modoAtual = "iframe";
@@ -28,9 +26,7 @@ let playlistAtual = [];
 const frame = document.getElementById("frame");
 const content = document.getElementById("content");
 
-// =========================
 // NORMALIZAR YOUTUBE
-// =========================
 function normalizarYoutube(src) {
   try {
     let url = new URL(src);
@@ -62,21 +58,16 @@ function normalizarYoutube(src) {
   }
 }
 
-// =========================
 // TEMPO
-// =========================
 function getTempoItem(item){
-
   return (
     item.duracao ||
     item.intervalo ||
     10
   ) * 1000;
-
 }
-// =========================
+
 // RENDER
-// =========================
 async function render(item) {
 
   let tipo = item.tipo;
@@ -111,7 +102,6 @@ async function render(item) {
     if (frame.src !== src) {
       frame.src = src;
     }
-
     return;
   }
 
@@ -131,49 +121,16 @@ async function render(item) {
         item.texto;
 
       content.innerHTML = `
-        <div style="
-          width:100vw;
-          height:100vh;
-          display:flex;
-          justify-content:center;
-          align-items:center;
-          background:#000;
-        ">
-          <iframe
-            src="${src}"
-            style="
-              width:100vw;
-              height:100vh;
-              border:none;
-            "
-            allowfullscreen
-            allow="
-              autoplay;
-              fullscreen;
-              clipboard-read;
-              clipboard-write
-            ">
+        <div style="width:100vw; height:100vh; display:flex; justify-content:center; align-items:center;background:#000;">
+          <iframe src="${src}" style="width:100vw; height:100vh; border:none;" allowfullscreen allow="autoplay; fullscreen; clipboard-read; clipboard-write">
           </iframe>
-        </div>
-      `;
-
+        </div>`;
       return;
     }
 
     // PDF
     if (item.arquivo && item.arquivo.endsWith(".pdf")) {
-
-      content.innerHTML = `
-        <iframe
-          src="${item.arquivo}"
-          style="
-            width:100vw;
-            height:100vh;
-            border:none;
-          ">
-        </iframe>
-      `;
-
+      content.innerHTML = `<iframe src="${item.arquivo}" style="width:100vw; height:100vh; border:none;"></iframe>`;
       return;
     }
 
@@ -187,18 +144,7 @@ async function render(item) {
         item.arquivo.endsWith(".webp")
       )
     ) {
-
-      content.innerHTML = `
-        <img
-          src="${item.arquivo}"
-          style="
-            width:100vw;
-            height:100vh;
-            object-fit:contain;
-          "
-        >
-      `;
-
+      content.innerHTML = `<img src="${item.arquivo}" style="width:100vw; height:100vh; object-fit:contain;">`;
       return;
     }
 
@@ -207,12 +153,8 @@ async function render(item) {
       <div class="aviso">
         <fieldset class="field-texto">
           <legend>
-            <img
-              src="/layouts/logo-ifsc.png"
-              class="warning-image"
-            >
+            <img src="/layouts/logo-ifsc.png" class="warning-image">
           </legend>
-
           ${item.texto || ""}
         </fieldset>
       </div>
@@ -223,98 +165,13 @@ async function render(item) {
 
   // ================= MAPA =================
   if (tipo === "mapa") {
-
-    content.innerHTML = `
-      <img
-        src="${item.src}"
-        class="imagemViewer"
-      >
-    `;
-    return;
-  }
-
-  // ================= ENSALAMENTO =================
-  if (tipo === "ensalamento") {
-
-    const res = await fetch("/ensalamento");
-    const dados = await res.json();
-
-    let html = `
-      <div class="ensalamento">
-        <h1>Ensalamento IFSC Garopaba</h1>
-
-        <div class="ultima-atualizacao">
-          ${dados.ultimaAtualizacao || ""}
-        </div>
-    `;
-
-    dados.salas.forEach(sala => {
-
-      html += `
-        <div class="sala">
-
-          <h2>${sala.nome}</h2>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Horário</th>
-                <th>Seg</th>
-                <th>Ter</th>
-                <th>Qua</th>
-                <th>Qui</th>
-                <th>Sex</th>
-              </tr>
-            </thead>
-
-            <tbody>
-      `;
-
-      sala.periodos.forEach(periodo => {
-
-        html += `
-          <tr>
-            <td>${periodo.nome}</td>
-            <td>${periodo.seg || ""}</td>
-            <td>${periodo.ter || ""}</td>
-            <td>${periodo.qua || ""}</td>
-            <td>${periodo.qui || ""}</td>
-            <td>${periodo.sex || ""}</td>
-          </tr>
-        `;
-      });
-
-      html += `
-            </tbody>
-          </table>
-
-        </div>
-      `;
-    });
-
-    html += `
-      </div>
-    `;
-
-    content.innerHTML = html;
-
+    content.innerHTML = ` <img src="${item.src}" class="imagemViewer">`;
     return;
   }
 
   // ================= CALENDÁRIO =================
   if (tipo === "calendario") {
-
-    content.innerHTML = `
-      <iframe
-        src="${item.src}"
-        style="
-          width:100vw;
-          height:100vh;
-          border:none;
-        ">
-      </iframe>
-    `;
-
+    content.innerHTML = `<iframe src="${item.src}" style="width:100vw; height:100vh; border:none;"> </iframe>`;
     return;
   }
 
@@ -327,12 +184,8 @@ async function render(item) {
       width:100vw;
       height:100vh;
       font-size:2rem;
-    ">
-      Conteúdo não suportado
-    </div>
-  `;
+    ">Conteúdo não suportado</div>`;
 }
-
 
 // =========================
 // PLAYLIST
@@ -344,55 +197,36 @@ async function rodarPlaylistTV(items){
   }
 
   const item = items[playlistIndex];
-
   await render(item);
-
   const tempo = getTempoItem(item);
 
-  playlistIndex =
-    (playlistIndex + 1) % items.length;
+  playlistIndex = (playlistIndex + 1) % items.length;
 
   clearTimeout(playlistTimer);
-
   playlistTimer = setTimeout(()=>{
-
     rodarPlaylistTV(items);
-
   }, tempo);
 }
 
 async function mostrarPlaylistTV(){
 
   try{
-
-    const res =
-      await fetch(`/playlist-tv/${tvId}`);
-
-    const items =
-      await res.json();
+    const res = await fetch(`/playlist-tv/${tvId}`);
+    const items = await res.json();
 
     if(!items.length){
       return;
     }
 
     playlistIndex = 0;
-
     clearTimeout(playlistTimer);
-
     await rodarPlaylistTV(items);
-
   }catch(err){
-
     console.error(err);
-
   }
-
 }
 
-
-// =========================
 // REGISTRO
-// =========================
 async function registrar() {
   if (preview) return;
 
@@ -416,6 +250,7 @@ async function registrar() {
   }
 }
 
+//PING
 async function ping() {
   if (preview) return;
 
@@ -430,7 +265,7 @@ async function ping() {
     console.error("Erro ping:", e);
   }
 }
-
+// HEARTBEAT
 function iniciarHeartbeat() {
   if (preview) return;
 
@@ -438,10 +273,7 @@ function iniciarHeartbeat() {
   heartbeatInterval = setInterval(ping, 30000);
 }
 
-
-// =========================
 // UNREGISTER
-// =========================
 function desligar() {
   if (preview) return;
 
@@ -454,7 +286,7 @@ function desligar() {
 
 window.addEventListener("beforeunload", desligar);
 
-
+//RODAR PLAYLIST
 async function tocarPlaylist() {
 
   if (playlistAtual.length === 0) {
@@ -464,16 +296,12 @@ async function tocarPlaylist() {
         Nenhum conteúdo na playlist
       </div>
     `;
-
     return;
   }
 
   const item = playlistAtual[playlistIndex];
-
   await render(item);
-
-  const duracao =
-    (item.duracao || item.intervalo || 10) * 1000;
+  const duracao = (item.duracao || item.intervalo || 10) * 1000;
 
   playlistTimer = setTimeout(() => {
 
@@ -482,15 +310,12 @@ async function tocarPlaylist() {
     if (playlistIndex >= playlistAtual.length) {
       playlistIndex = 0;
     }
-
     tocarPlaylist();
 
   }, duracao);
 }
 
-// =========================
 // LOOP PRINCIPAL
-// =========================
 async function carregar() {
 
   try {
@@ -531,10 +356,7 @@ async function carregar() {
   }
 }
 
-
-// =========================
 // INIT
-// =========================
 async function iniciar() {
 
   if (!preview) {
