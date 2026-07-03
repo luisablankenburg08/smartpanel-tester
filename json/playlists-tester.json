@@ -3,14 +3,37 @@
     "tv1": {
       "items": [
         {
-          "tipo": "video",
-          "id": "OXIAp2zgips",
-          "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
-          "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
-          "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
-          "duracao": 230,
-          "live": false
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
         },
+        {
+          "id": "1783082676361",
+          "titulo": "Clube do Livro",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+          "duracao": 30
+        },
+        {
+          "id": "1783082708138",
+          "titulo": "Joaquim - Salgados",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
+          "duracao": 30
+        },
+        {
+          "id": "1783082743473",
+          "titulo": "Joaquim - Combo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+          "duracao": 30
+        }
+      ]
+    },
+    "tv2": {
+      "items": [
         {
           "tipo": "video",
           "id": "TjxfN_tIv6o",
@@ -18,15 +41,6 @@
           "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
           "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
           "duracao": 67,
-          "live": false
-        },
-        {
-          "tipo": "video",
-          "id": "4m7xcDovykU",
-          "titulo": "Curso Técnico em Informática Garopaba",
-          "iframe": "https://www.youtube.com/embed/4m7xcDovykU?autoplay=1&mute=1&playsinline=1",
-          "thumb": "https://img.youtube.com/vi/4m7xcDovykU/hqdefault.jpg",
-          "duracao": 202,
           "live": false
         }
       ]
@@ -127,49 +141,39 @@
   ],
   "avisosCustomizados": [
     {
-      "id": "1783019096803",
+      "id": "1783077286617",
       "titulo": "Projeto",
-      "texto": "Smart Digital Panel Project",
-      "link": "",
-      "embed": "",
-      "duracao": 15,
-      "tipo": "avisos"
+      "tipo": "texto",
+      "conteudo": "Smart Digital Panel Project",
+      "duracao": 15
     },
     {
-      "id": "1783019134219",
+      "id": "1783082579283",
+      "titulo": "Solicitação de Conteúdo",
+      "tipo": "canva",
+      "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+      "duracao": 30
+    },
+    {
+      "id": "1783082676361",
       "titulo": "Clube do Livro",
-      "texto": "",
-      "link": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view",
-      "embed": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
-      "duracao": 30,
-      "tipo": "avisos"
+      "tipo": "canva",
+      "conteudo": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
+      "duracao": 30
     },
     {
-      "id": "1783019212484",
-      "titulo": "Solicitação de Mídia",
-      "texto": "",
-      "link": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view",
-      "embed": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-      "duracao": 30,
-      "tipo": "avisos"
-    },
-    {
-      "id": "1783019292229",
+      "id": "1783082708138",
       "titulo": "Joaquim - Salgados",
-      "texto": "",
-      "link": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view",
-      "embed": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
-      "duracao": 30,
-      "tipo": "avisos"
+      "tipo": "canva",
+      "conteudo": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
+      "duracao": 30
     },
     {
-      "id": "1783019337445",
+      "id": "1783082743473",
       "titulo": "Joaquim - Combo",
-      "texto": "",
-      "link": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view",
-      "embed": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-      "duracao": 30,
-      "tipo": "avisos"
+      "tipo": "canva",
+      "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+      "duracao": 30
     }
   ]
 }

@@ -24,16 +24,14 @@ app.use(session({
 }));
 
 //USAR UPLOADS
-app.use("/uploads",express.static("public/uploads"));
+app.use("/uploads",express.static("uploads"));
 
 if (!fs.existsSync(STATE_FILE)) { fs.writeFileSync(STATE_FILE, "{}") }
-
-
 
 const storage = multer.diskStorage({
 
 destination(req,file,cb){
-  cb(null,"public/uploads");
+  cb(null,"uploads");
 },
 
 filename(req,file,cb){
@@ -430,26 +428,39 @@ app.post("/unregister", (req, res) => {
   }
 })
 
-// LISTAR VÍDEOS
-app.get("/videos", verificarAuth, (req, res) => {
+//API DO YOPUTUBE PARA DURAÇÃO DO VÍDEO
+const { Innertube } = require("youtubei.js");
+let yt = null;
+async function getYoutube() {
+  if (!yt) {
+    yt = await Innertube.create();
+  }
+  return yt;
+}
 
-  let playlists = readPlaylists();
-  let videos = getAllVideoItems(playlists);
-  res.json(videos);
-});
+async function obterInformacoesVideo(videoId) {
+  const youtube = await getYoutube();
+  const info = await youtube.getInfo(videoId);
+
+  return {
+    titulo: info.basic_info.title,
+    duracao: Number(info.basic_info.duration),
+    thumb: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    live: info.basic_info.is_live
+  };
+}
 
 // ADICIONAR VÍDEO
-app.post("/videos", verificarAuth, (req, res) => {
-
-  const { titulo, iframe, thumb, duracao, live } = req.body;
+app.post("/videos", verificarAuth, async (req, res) => {
+  console.log("adição chegando")
+  const { titulo, iframe } = req.body;
+  const videoId = extrairIdDoIframe(iframe);
+  const dados = await obterInformacoesVideo(videoId);
+  let playlists = readPlaylists();
 
   if (!iframe) {
     return res.status(400).json({ erro: "Iframe obrigatório" });
   }
-
-  const videoId = extrairIdDoIframe(iframe);
-
-  let playlists = readPlaylists();
 
   if (!playlists.videosCustomizados) {
     playlists.videosCustomizados = [];
@@ -462,19 +473,28 @@ app.post("/videos", verificarAuth, (req, res) => {
   }
 
   const novoVideo = {
-  id: videoId,
-  titulo,
-  iframe,
-  thumb,
-  duracao: live ? 9999999 : (duracao || 60),
-  live: !!live
-};
+    id: videoId,
+    titulo: titulo || dados.titulo,
+    iframe,
+    thumb: dados.thumb,
+    duracao: dados.live ? 9999999 : dados.duracao,
+    live: dados.live
+  };
 
   playlists.videosCustomizados.push(novoVideo);
 
   savePlaylists(playlists);
 
   res.json({ ok: true });
+  console.log("adição concluída")
+});
+
+// LISTAR VÍDEOS
+app.get("/videos", verificarAuth, (req, res) => {
+
+  let playlists = readPlaylists();
+  let videos = getAllVideoItems(playlists);
+  res.json(videos);
 });
 
 // DELETAR VÍDEO
@@ -537,36 +557,42 @@ app.get("/avisos", verificarAuth, (req,res)=>{
   res.json(getAllAvisoItems(playlists));
 });
 
-//SALVAR AVISOS
-app.post(
-  "/avisos",
-  verificarAuth,
-  upload.single("arquivo"),
-  (req,res)=>{
+// ADICIONAR AVISO 
+app.post("/avisos", verificarAuth, upload.single("arquivo"), (req, res) => {
 
-    let playlists=readPlaylists();
-    if(!playlists.avisosCustomizados){
-      playlists.avisosCustomizados=[];
-    }
+  let playlists = readPlaylists();
 
-    const aviso={
-      id:Date.now().toString(),
-      titulo:req.body.titulo,
-      texto:req.body.texto,
-      link:req.body.link,
-      embed:req.body.embed,
-      duracao:Number(req.body.duracao)||15
-    };
+  if (!playlists.avisosCustomizados) {
+    playlists.avisosCustomizados = [];
+  }
 
-      if(req.file){
-        aviso.arquivo="/uploads/"+req.file.filename;
-      }
+  const aviso = {
+    id: Date.now().toString(),
+    titulo: req.body.titulo,
+    tipo: req.body.tipo,
+    conteudo: req.body.conteudo,
+    duracao: Number(req.body.duracao) || 15
+  };
 
-      playlists.avisosCustomizados.push(aviso);
-      savePlaylists(playlists);
-      res.json({ok:true});
+  if (req.file) {
+    aviso.conteudo = "/uploads/" + req.file.filename;
+
+    const ext = path.extname(req.file.originalname).toLowerCase();
+
+    aviso.tipo = ext === ".pdf"
+      ? "pdf"
+      : "imagem";
+  }
+
+  playlists.avisosCustomizados.push(aviso);
+
+  savePlaylists(playlists);
+
+  res.json({
+    ok: true,
+    aviso
+  });
 });
-
 // EDITAR AVISOS
 app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
   const playlists = readPlaylists();
@@ -580,16 +606,19 @@ app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
     });
   }
 
-  aviso.titulo = req.body.titulo;
-  aviso.texto = req.body.texto;
-  aviso.link = req.body.link;
-  aviso.embed = req.body.embed;
-  aviso.duracao = Number(req.body.duracao) || 15;
+  aviso.titulo=req.body.titulo;
+  aviso.tipo=req.body.tipo;
+  aviso.conteudo=req.body.conteudo;
+  aviso.duracao=Number(req.body.duracao)||15;
 
   if(req.file){
-    aviso.arquivo = "/uploads/" + req.file.filename;
-  }
+      aviso.conteudo="/uploads/"+req.file.filename;
+      const ext=path.extname(req.file.originalname).toLowerCase();
 
+      aviso.tipo=(ext==".pdf")
+        ?"pdf"
+        :"imagem";
+  }
   savePlaylists(playlists);
   res.json({ok:true});
 });

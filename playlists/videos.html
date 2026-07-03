@@ -197,7 +197,7 @@ function renderVideos(){
   videosDisponiveis.forEach(video => {
 
     let videoId = video.id || extrairIdDoIframe(video.iframe);
-
+    
     let card = document.createElement("div");
     card.className = "video-card";
 
@@ -214,6 +214,7 @@ function renderVideos(){
       <img src="${video.thumb}" class="video-thumb">
       <div class="video-info">
         <h3>${video.titulo}</h3>
+        <p>Duração: ${video.duracao ? video.duracao + "s" : "Desconhecida"}</p>
         <button class="selecionar-btn">
           ${jaSelecionado ? "Selecionado" : "Selecionar"}
         </button>
@@ -289,15 +290,12 @@ async function adicionarVideo(){
     id: videoId,
     titulo,
     iframe,
-    thumb,
-    duracao: 60
-};
+    thumb
+  };
 
   const res = await fetch("/videos", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify(novoVideo)
   });
 
@@ -305,10 +303,8 @@ async function adicionarVideo(){
     alert("Erro ao salvar vídeo");
     return;
   }
-
   document.getElementById("youtube-url").value = "";
   document.getElementById("youtube-titulo").value = "";
-
   carregarVideos();
 }
 

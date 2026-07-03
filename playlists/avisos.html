@@ -52,6 +52,7 @@
 
 //VARIÁVEIS
 let avisos = [];
+let playlist = [];
 let avisoEditando = null;
 
 // TV ATUAL
@@ -96,6 +97,14 @@ async function escolherTV(){
   });
 }
 
+// VERIFICAR SE AVISO JÁ EXISTE
+function avisoJaExiste(novoAviso){
+    return avisos.some(aviso =>
+    aviso.titulo === novoAviso.titulo &&
+    aviso.texto === novoAviso.texto
+  );
+}
+
 //CARREGAR AVISOS
 async function carregarAvisos(){
   const res = await fetch("/avisos");
@@ -106,104 +115,132 @@ async function carregarAvisos(){
 
 //RENDERIZAR AVISOS
 function renderizarAvisos(){
-
   const lista = document.getElementById("lista-avisos");
-  lista.innerHTML="";
+  lista.innerHTML = "";
 
   avisos.forEach(aviso=>{
     let descricao="";
-      if(aviso.texto){
-        descricao=aviso.texto;
-      }
-      else if(aviso.embed){
-        descricao="<b>Canva</b>";
-      }
-      else if(aviso.arquivo){
-        if(aviso.arquivo.endsWith(".pdf")){
-          descricao="<b>PDF</b>";
-        }else{
-          descricao="<b>Imagem</b>";
-        }
-      }
-    
+
+    switch(aviso.tipo){
+      case "texto":
+        descricao = aviso.conteudo.length > 120
+          ? aviso.conteudo.substring(0,120)+"..."
+          : aviso.conteudo;
+        break;
+
+      case "canva":
+        descricao = "<b>Canva</b>";
+        break;
+
+      case "link":
+        descricao = "<b>Link</b>";
+        break;
+
+      case "pdf":
+        descricao = "<b>PDF</b>";
+        break;
+
+      case "imagem":
+        descricao = "<b>Imagem</b>";
+        break;
+    }
+
     const card=document.createElement("div");
     card.className="card-aviso";
-    card.innerHTML=`
+    const selecionado=playlist.find(a=>a.id===aviso.id);
 
+    if(selecionado){
+      card.classList.add("video-selecionado");
+    }
+
+    card.innerHTML=`
       <h3>${aviso.titulo}</h3>
-      ${descricao}
+      <p>${descricao}</p>
       <p>Duração: ${aviso.duracao}s</p>
 
-      <div class="acoes-card">
+      <button class="selecionar-btn">${selecionado ? "Selecionado" : "Selecionar"}</button>`;
 
-        <button onclick="aplicarAviso('${aviso.id}')">Aplicar</button>
-        <button onclick="editarAviso('${aviso.id}')">Editar</button>
-        <button onclick="excluirAviso('${aviso.id}')"> Excluir </button> 
-        
-      </div>
-    `;
+    const btn=card.querySelector(".selecionar-btn");
+
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      const existe=playlist.find(a=>a.id===aviso.id);
+
+      if(existe){
+        playlist=playlist.filter(a=>a.id!==aviso.id);
+        card.classList.remove("video-selecionado");
+        btn.innerText="Selecionar";
+      }else{
+        playlist.push(aviso);
+        card.classList.add("video-selecionado");
+        btn.innerText="Selecionado";
+      }
+      mostrarAcoesPlaylist();
+    };
     lista.appendChild(card);
   });
+  mostrarAcoesPlaylist();
 }
 
-// VERIFICAR SE AVISO JÁ EXISTE
-function avisoJaExiste(novoAviso){
-  return avisos.some(aviso =>
-    aviso.titulo === novoAviso.titulo &&
-    aviso.texto === novoAviso.texto
-  );
-}
-
-//ADICIONAR AVISO
+// ADICIONAR AVISO
 async function adicionarAviso(){
+
   const titulo = document.getElementById("aviso-titulo").value.trim();
-  const link = document.getElementById("aviso-link").value.trim();
   const texto = document.getElementById("aviso-texto").value.trim();
-  const duracao =parseInt(document.getElementById("aviso-duracao").value) || 15;
+  const link = document.getElementById("aviso-link").value.trim();
   const arquivo = document.getElementById("aviso-arquivo").files[0];
+  const duracao = parseInt(document.getElementById("aviso-duracao").value) || 15;
 
   if(!titulo){
     alert("Digite um título.");
     return;
   }
+
   if(!texto && !link && !arquivo){
-    alert("Digite um texto, informe um link ou escolha um arquivo.");
+    alert("Digite um texto, um link ou escolha um arquivo.");
     return;
   }
-  let embed = "";
 
-  if(link) {
-    if(link.startsWith("<iframe")){
-      embed = link;
-    }
-    else if(link.includes("canva.com")){
+  let tipo = "";
+  let conteudo = "";
 
-    embed = link;
+  if(arquivo){
+    const ext = arquivo.name.split(".").pop().toLowerCase();
 
-    if(!embed.includes("embed")){
-      embed += embed.includes("?")
-        ? "&embed"
-        : "?embed";
-      }
+    if(ext=="pdf"){
+      tipo="pdf";
     }else{
-      embed = link;
+      tipo="imagem";
     }
+  }else if(texto){
+    tipo="texto";
+    conteudo=texto;
+  }
+
+  else if(link.includes("canva.com")){
+    tipo="canva";
+    conteudo = link.includes("embed")
+      ? link
+      : link + (link.includes("?") ? "&embed" : "?embed");
+  }
+  else{
+    tipo="link";
+    conteudo=link;
   }
 
   const form = new FormData();
 
-  form.append("titulo", titulo);
-  form.append("texto", texto);
-  form.append("link", link);
-  form.append("duracao", duracao);
-  form.append("embed", embed);
+  form.append("titulo",titulo);
+  form.append("tipo",tipo);
+  form.append("conteudo",conteudo);
+  form.append("duracao",duracao);
 
   if(arquivo){
     form.append("arquivo",arquivo);
   }
 
   const url = avisoEditando
-    ? "/avisos/" + avisoEditando
+    ? "/avisos/"+avisoEditando
     : "/avisos";
 
   const metodo = avisoEditando
@@ -211,73 +248,96 @@ async function adicionarAviso(){
     : "POST";
 
   await fetch(url,{
-    method: metodo,
-    body: form
+    method:metodo,
+    body:form
   });
 
-  avisoEditando = null;
+  avisoEditando=null;
 
   document.getElementById("aviso-titulo").value="";
   document.getElementById("aviso-texto").value="";
   document.getElementById("aviso-link").value="";
   document.getElementById("aviso-duracao").value="";
-  document.getElementById("aviso-arquivo").value = "";
+  document.getElementById("aviso-arquivo").value="";
   carregarAvisos();
 }
 
-//EDITAR AVISO
-async function editarAviso(id){
-  avisoEditando = id
-  const aviso =avisos.find(a=>a.id===id);
+// EDITAR AVISO
+function editarAviso(){
 
-  if (!aviso) {
-    return
+  if(playlist.length===0){
+    alert("Selecione um aviso.");
+    return;
   }
 
-  document.getElementById("aviso-titulo").value = aviso.titulo || "";
-  document.getElementById("aviso-texto").value = aviso.texto || "";
-  document.getElementById("aviso-link").value = aviso.link || "";
-  document.getElementById("aviso-duracao").value = aviso.duracao || 15;
+  if(playlist.length>1){
+    alert("Selecione apenas um aviso.");
+    return;
+  }
+
+  const aviso=playlist[0];
+  avisoEditando=aviso.id;
+
+  document.getElementById("aviso-titulo").value=aviso.titulo;
+  document.getElementById("aviso-duracao").value=aviso.duracao;
+  document.getElementById("aviso-texto").value="";
+  document.getElementById("aviso-link").value="";
+  document.getElementById("aviso-arquivo").value="";
+
+  if(aviso.tipo==="texto"){
+    document.getElementById("aviso-texto").value=aviso.conteudo;
+  }
+
+  if(aviso.tipo==="link" || aviso.tipo==="canva"){
+    document.getElementById("aviso-link").value=aviso.conteudo;
+  }
   document.getElementById("novo-aviso-form").style.display="flex";
-
-  mostrarInputs();
-
 }
 
 //EXCLUIR AVISO
-async function excluirAviso(id){
-  if(!confirm("Excluir aviso?"))
-    return;
+async function excluirAviso(){
 
-  await fetch("/avisos/"+id,{
+  if(playlist.length===0){
+    alert("Selecione um aviso.");
+    return;
+  }
+
+  if(playlist.length>1){
+    alert("Selecione apenas um aviso.");
+    return;
+  }
+
+  const aviso=playlist[0];
+
+  if(!confirm(`Excluir "${aviso.titulo}"?`)){
+    return;
+  }
+
+  await fetch("/avisos/"+aviso.id,{
     method:"DELETE"
   });
+  
+  playlist=[];
   carregarAvisos();
 }
 
 //APLICAR AVISO
-async function aplicarAviso(id){
+async function aplicarAviso(){
 
-  const aviso = avisos.find(a=>a.id===id);
-  const tv = await escolherTV();
-
-  if(!tv)
+  if(playlist.length==0){
+    alert("Selecione ao menos um aviso.");
     return;
+  }
+
+  const tv=await escolherTV();
+  if(!tv) return;
 
   await fetch("/playlist/add",{
     method:"POST",
-    headers:{ "Content-Type":"application/json"},
+    headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       tv,
-      items:[{
-        tipo:"avisos",
-        titulo:aviso.titulo,
-        texto:aviso.texto,
-        link:aviso.link,
-        embed:aviso.embed,
-        arquivo:aviso.arquivo,
-        duracao:aviso.duracao
-      }]
+      items:playlist
     })
   });
 
@@ -289,7 +349,11 @@ async function aplicarAviso(id){
       refresh:Date.now()
     })
   });
-  alert("Aviso adicionado à playlist.");
+
+  playlist=[];
+  renderizarAvisos();
+  alert("Avisos adicionados.");
+  window.location.href="/controller-tester.html";
 }
 
 // MOSTRAR INPUTS
@@ -301,6 +365,16 @@ function mostrarInputs(){
     form.style.display = "none";
   }else{
     form.style.display = "flex";
+  }
+}
+
+// MOSTRAR BOTÕES 
+function mostrarAcoesPlaylist(){
+  const acoes=document.getElementById("acoes-playlist");
+  if(playlist.length>0){
+    acoes.style.display="flex";
+  }else{
+    acoes.style.display="none";
   }
 }
 

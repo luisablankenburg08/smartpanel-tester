@@ -50,7 +50,6 @@ function adicionarPlaylist(event) {
   }
 }
 
-
 function criarMenuTVs(lista){
   const menu = document.getElementById("menu-tvs");
   menu.innerHTML = "";

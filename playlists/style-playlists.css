@@ -84,6 +84,9 @@ body {
   box-shadow:0 2px 10px rgba(0,0,0,0.15);
   margin-left: 1vw;
 }
+.video-card:hover{
+  transform:scale(1.02);
+}
 
 .video-thumb{
   width:100%;
@@ -313,7 +316,7 @@ body {
 }
 
 .card-aviso{
-  background:#5eb86c;
+  background:#fff;
   border-radius:16px;
   padding:20px;
   cursor:pointer;
@@ -324,7 +327,6 @@ body {
 
 .card-aviso:hover{
   transform:scale(1.02);
-  background:#5eb86c;
 }
 
 .card-aviso h3{

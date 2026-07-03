@@ -68,123 +68,78 @@ function getTempoItem(item){
 }
 
 // RENDER
-async function render(item) {
+async function render(item){
 
-  let tipo = item.tipo;
-
-  if(!tipo){
-
-    if(item.iframe){
-      tipo = "videos";
-    }
-
-    else if(
-      item.embed ||
-      item.texto ||
-      item.url
-    ){
-      tipo = "avisos";
-    }
-  }
-
-  if(tipo === "canva"){
-    tipo = "avisos";
-  }
-
-  // ================= VIDEO =================
-  if (tipo === "videos" || tipo === "video") {
-
+  // Vídeo 
+  if(item.iframe){
     frame.style.display = "block";
     content.style.display = "none";
+    const src = normalizarYoutube(item.iframe);
 
-    let src = normalizarYoutube(item.iframe);
-
-    if (frame.src !== src) {
+    if(frame.src !== src){
       frame.src = src;
     }
     return;
   }
 
-  // ================= OUTROS =================
   frame.style.display = "none";
   content.style.display = "block";
 
-  // ================= AVISOS =================
-  if (tipo === "avisos" || tipo === "aviso") {
+  switch(item.tipo){
 
-    // Canva
-    if (item.embed || item.tipoConteudo === "avisos") {
-
-      const src =
-        item.embed ||
-        item.url ||
-        item.texto;
-
+    case "texto":
       content.innerHTML = `
-        <div style="width:100vw; height:100vh; display:flex; justify-content:center; align-items:center;background:#000;">
-          <iframe src="${src}" style="width:100vw; height:100vh; border:none;" allowfullscreen allow="autoplay; fullscreen; clipboard-read; clipboard-write">
-          </iframe>
-        </div>`;
-      return;
-    }
+        <div class="aviso">
+          <fieldset class="field-texto">
+            <legend>
+              <img src="/layouts/logo-ifsc.png" class="warning-image">
+            </legend>
+            ${item.conteudo}
+          </fieldset>
+        </div> `;
+      break;
 
-    // PDF
-    if (item.arquivo && item.arquivo.endsWith(".pdf")) {
-      content.innerHTML = `<iframe src="${item.arquivo}" style="width:100vw; height:100vh; border:none;"></iframe>`;
-      return;
-    }
+    case "canva":
+      content.innerHTML = `
+        <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;" allowfullscreen allow="autoplay; fullscreen"> </iframe>`;
+      break;
 
-    // Imagem PNG/JPG
-    if (
-      item.arquivo &&
-      (
-        item.arquivo.endsWith(".png") ||
-        item.arquivo.endsWith(".jpg") ||
-        item.arquivo.endsWith(".jpeg") ||
-        item.arquivo.endsWith(".webp")
-      )
-    ) {
-      content.innerHTML = `<img src="${item.arquivo}" style="width:100vw; height:100vh; object-fit:contain;">`;
-      return;
-    }
+    case "link":
+      content.innerHTML = `
+        <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;"></iframe>`;
+      break;
 
-    // Texto
+    case "pdf":
     content.innerHTML = `
-      <div class="aviso">
-        <fieldset class="field-texto">
-          <legend>
-            <img src="/layouts/logo-ifsc.png" class="warning-image">
-          </legend>
-          ${item.texto || ""}
-        </fieldset>
-      </div>
-    `;
+      <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;"></iframe>`;
+    break;
 
-    return;
+    case "imagem":
+    content.innerHTML = `
+      <img src="${item.conteudo}" style="width:100vw;height:100vh;object-fit:contain;">`;
+    break;
+    
+    case "mapa":
+      content.innerHTML = `<img src="${item.src}" class="imagemViewer">`;
+      break;
+
+    case "calendario":
+      content.innerHTML = `
+        <iframe src="${item.src}" style="width:100vw;height:100vh;border:none;"></iframe>`;
+      break;
+
+    default:
+      content.innerHTML = `
+        <div style="
+          width:100vw;
+          height:100vh;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          font-size:40px; ">
+          Conteúdo não suportado
+        </div>`;
   }
-
-  // ================= MAPA =================
-  if (tipo === "mapa") {
-    content.innerHTML = ` <img src="${item.src}" class="imagemViewer">`;
-    return;
-  }
-
-  // ================= CALENDÁRIO =================
-  if (tipo === "calendario") {
-    content.innerHTML = `<iframe src="${item.src}" style="width:100vw; height:100vh; border:none;"> </iframe>`;
-    return;
-  }
-
-  // ================= FALLBACK =================
-  content.innerHTML = `
-    <div style="
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      width:100vw;
-      height:100vh;
-      font-size:2rem;
-    ">Conteúdo não suportado</div>`;
 }
 
 // =========================
