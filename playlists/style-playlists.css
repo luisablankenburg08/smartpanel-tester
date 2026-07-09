@@ -139,8 +139,8 @@ body {
 }
 #youtube-url:focus,
 #youtube-titulo:focus{
-    outline:none;
-    border:.15vw solid #2f9e40;
+  outline:none;
+  border:.15vw solid #2f9e40;
 }
 
 #btn-playlist {
@@ -242,12 +242,6 @@ body {
   position: relative;
 }
 
-#mapa-campus {
-  width: 68vw;
-  height: 90vh;
-  margin-left: 16vw;
-}
-
 .salvar-btn {
   display:block;
   width: 15vw;
@@ -255,18 +249,6 @@ body {
   font-size: 18px;
   margin-left: 42.5vw;
   background-color: #2f9e40;
-}
-
-.item-playlist{
-  padding: 10px;
-  margin: 5px;
-  background: #eee;
-  cursor: grab;
-  border-radius: 8px;
-}
-
-.item-playlist.drag-over{
-  border: 2px dashed #333;
 }
 
 #add-aviso-box{
@@ -338,4 +320,37 @@ body {
   gap:15px;
   flex-wrap:wrap;
   margin-top:20px;
+}
+
+.card-mapa{
+  width: 700px;
+  max-width: 95%;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-mapa img{
+  width: 100%;
+  border-radius: 1vw;
+  border: 1px solid #ddd;
+}
+
+.acoes-card-mapa{
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+#nova-playlist-form{
+  display:none;
+  margin-top:1.5vw;
+  flex-direction:row;
+  justify-content:center;
+  align-items:center;
+  gap:1.5vw;
 }

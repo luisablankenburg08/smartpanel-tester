@@ -1,21 +1,9 @@
 {
   "tvPlaylists": {
     "tv1": {
+      "playlistId": "1783608839184",
+      "titulo": "teste",
       "items": [
-        {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
-        },
-        {
-          "id": "1783082676361",
-          "titulo": "Clube do Livro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
-          "duracao": 30
-        },
         {
           "id": "1783082708138",
           "titulo": "Joaquim - Salgados",
@@ -174,6 +162,28 @@
       "tipo": "canva",
       "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
       "duracao": 30
+    },
+    {
+      "id": "1783537829258",
+      "titulo": "teste pdf",
+      "tipo": "pdf",
+      "conteudo": "/uploads/1783537829245.pdf",
+      "duracao": 15
+    },
+    {
+      "id": "1783537883740",
+      "titulo": "teste png",
+      "tipo": "imagem",
+      "conteudo": "/uploads/1783537883715.png",
+      "duracao": 15
+    },
+    {
+      "id": "1783539112629",
+      "titulo": "Informativo Banheiro",
+      "tipo": "canva",
+      "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
+      "duracao": 30
     }
-  ]
+  ],
+  "playlistsSalvas": []
 }

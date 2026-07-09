@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modo Padrão</title>
+<link rel="stylesheet" href="style-playlists.css">
+<link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+
+<body>
+
+<button class="btn-voltar" onclick="voltar()">Voltar</button>
+
+<div class="container">
+
+  <div>
+    <button class="tituloAdicionar" onclick="mostrarInputs()">Adicionar Nova Playlist</button>
+  </div>
+
+  <div id="nova-playlist-form">
+
+    <input id="playlist-titulo" placeholder="Título da playlist">
+    <div id="lista-conteudos"></div>
+    <button onclick="salvarPlaylist()">Salvar</button>
+
+  </div>
+  <!-- PLAYLIST -->
+  <div>
+    <h2 class="titulosh2">Playlists Adicionadas</h2>
+    <div id="lista-playlists"></div>
+  </div>
+
+  <div class="acoes-playlist" id="acoes-playlist">
+    <button class="btn-playlist" onclick="aplicarPlaylist()">Aplicar Playlist</button>
+    <button class="btn-delete" onclick="excluirPlaylist()">Deletar</button>
+    <button class="btn-editar" onclick="editarPlaylist()">Editar</button>
+  </div>
+
+  <div id="tv-modal" class="modal-tv">
+    <div class="modal-tv-content">
+      <h2>Escolha uma TV</h2>
+      <div id="lista-tvs-modal"></div>
+      <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+//VARIÁVEIS
+let playlists = [];            
+let playlistSelecionada = null;
+let playlistEditando = null;
+let conteudosDisponiveis = [];
+
+// TV ATUAL
+const params = new URLSearchParams(window.location.search);
+const tv = params.get("tv");
+
+//ESCOLHER TVS PARA APLICAR
+async function obterTVs(){
+
+  const res = await fetch("/state");
+  const state = await res.json();
+
+  return Object.keys(state);
+}
+
+function fecharModalTV(){
+  document.getElementById("tv-modal").style.display = "none";
+}
+
+async function escolherTV(){
+  return new Promise(async resolve => {
+
+    const tvs = await obterTVs();
+    const lista = document.getElementById("lista-tvs-modal");
+
+    lista.innerHTML = "";
+    tvs.forEach(tv => {
+
+      const btn = document.createElement("button");
+      btn.className = "btn-tv-modal";
+      btn.textContent = tv;
+
+      btn.onclick = () => {
+        fecharModalTV();
+        resolve(tv);
+      };
+      lista.appendChild(btn);
+    });
+
+    document.getElementById("tv-modal").style.display = "flex";
+  });
+}
+
+//CARREGAR E RENDERIZAR CONTEÚDO PARA ADICIONAR NAS PLAYLISTS
+async function carregarConteudos(){
+  const res = await fetch("/conteudos");
+  conteudosDisponiveis = await res.json();
+  renderizarConteudos();
+}
+
+function renderizarConteudos(){
+  const lista =document.getElementById("lista-conteudos");
+  lista.innerHTML = "";
+
+  conteudosDisponiveis.forEach(item=>{
+    const div=document.createElement("div");
+    div.className="conteudo-item";
+    div.innerHTML=`
+      <label>
+        <input type="checkbox" value="${item.id}">
+          ${item.titulo}
+          (${item.duracao || 30}s)
+      </label>`;
+
+    lista.appendChild(div);
+  });
+}
+
+// SALVAR PLAYLIST PARA ADICIONAR
+async function salvarPlaylist(){
+
+  const titulo = document.getElementById("playlist-titulo").value;
+  const itens=[];
+
+  document.querySelectorAll("#lista-conteudos input:checked").forEach(check=>{
+    const item=conteudosDisponiveis.find(i=>i.id===check.value);
+
+      if(item){
+        itens.push(item);
+      }
+  });
+
+  const dados={
+    titulo,
+    items:itens
+  };
+
+  if(playlistEditando){
+
+    await fetch("/playlists-salvas/"+playlistEditando.id,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(dados)
+    });
+
+  }else{
+
+    await fetch("/playlists-salvas",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(dados)
+    });
+  }
+
+  playlistEditando=null;
+  document.getElementById("playlist-titulo").value="";
+  document.getElementById("nova-playlist-form").style.display="none";
+  playlistSelecionada = null;
+  carregarPlaylists();
+}
+
+//CARREGAR PLAYLISTS
+async function carregarPlaylists(){
+  const res = await fetch("/playlists-salvas");
+  playlists = await res.json();
+  renderizarPlaylists();
+}
+
+//RENDERIZAR PLAYLISTS
+function renderizarPlaylists(){
+
+  const lista =document.getElementById("lista-playlists");
+  lista.innerHTML="";
+
+  playlists.forEach(pl=>{
+    const card=document.createElement("div");
+    card.className="card-playlist";
+
+    if(
+      playlistSelecionada &&
+      playlistSelecionada.id===pl.id
+    ){
+      card.classList.add("selecionado");
+    }
+
+    const total=  pl.items.reduce((s,i)=>s+(i.duracao||30),0);
+    let itensHTML="";
+
+      pl.items.forEach((item,index)=>{
+        itensHTML+=`
+          <div class="playlist-item">
+            <span>
+              ${String(index+1).padStart(2,"0")}.
+              ${item.titulo}
+            </span>
+
+            <span>
+              ${item.duracao||30}s
+            </span>
+          </div> `;
+      });
+
+      card.innerHTML=`
+        <h3>${pl.titulo}</h3>
+
+        <p>
+        ${pl.items.length} itens •
+        ${Math.floor(total/60)} min
+        ${String(total%60).padStart(2,"0")} s
+        </p>
+
+        <div class="itens-playlist">
+        ${itensHTML}
+        </div>
+
+        <button class="btn-selecionar">
+        ${playlistSelecionada?.id===pl.id ? "Selecionada" : "Selecionar"}
+        </button>`;
+
+        card.onclick=()=>{
+          playlistSelecionada=pl;
+          renderizarPlaylists();
+        };
+        lista.appendChild(card);
+    });
+    mostrarAcoesPlaylist();
+}
+
+//APLICAR PLAYLIST
+async function aplicarPlaylist(){
+
+  if(!playlistSelecionada){
+    alert("Selecione uma playlist.");
+    return;
+  }
+
+  const tv = await escolherTV();
+  if(!tv) return;
+
+  await fetch("/playlist/aplicar",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      tv,
+      playlistId: playlistSelecionada.id
+    })
+  });
+
+  await fetch("/update",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      tv,
+      refresh: Date.now()
+    })
+  });
+
+  playlistSelecionada = null;
+  carregarPlaylists();
+  alert("Playlist aplicada.");
+}
+
+//ADICIONAR PLAYLIST
+async function adicionarPlaylist(){
+  playlistEditando = null;
+  document.getElementById("playlist-titulo").value = "";
+  await carregarConteudos();
+
+  document.querySelectorAll("#lista-conteudos input").forEach(check=>check.checked=false);
+
+  document.getElementById("nova-playlist-form").style.display="block";
+}
+
+// EDITAR PLAYLIST (NOME, DURAÇÃO E ITENS)
+async function editarPlaylist(){
+
+  if(!playlistSelecionada){
+    alert("Selecione uma playlist.");
+    return;
+  }
+
+  playlistEditando = playlistSelecionada;
+  document.getElementById("playlist-titulo").value = playlistSelecionada.titulo;
+  await carregarConteudos();
+
+  document.querySelectorAll("#lista-conteudos input").forEach(check=>{
+    check.checked = playlistSelecionada.items.some(
+      item=>item.id===check.value
+    );
+  });
+  document.getElementById("nova-playlist-form").style.display="block";
+}
+
+//EXCLUIR AVISO
+async function excluirPlaylist(){
+
+  if(!playlistSelecionada){
+    alert("Selecione uma playlist.");
+    return;
+  }
+
+  if(!confirm(`Excluir "${playlistSelecionada.titulo}"?`)){
+    return;
+  }
+
+  await fetch("/playlists-salvas/" + playlistSelecionada.id,{
+    method:"DELETE"
+  });
+
+  playlistSelecionada = null;
+  carregarPlaylists();
+}
+
+// MOSTRAR INPUTS
+function mostrarInputs(){
+  const form=document.getElementById("nova-playlist-form");
+
+  if(form.style.display==="block"){
+    form.style.display="none";
+    return;
+  }
+  adicionarPlaylist();
+}
+
+// MOSTRAR BOTÕES 
+function mostrarAcoesPlaylist(){
+  document.getElementById("acoes-playlist").style.display = playlistSelecionada ?"flex" :"none";
+}
+
+// VOLTAR
+function voltar(){
+  window.location.href = "/controller-tester.html";
+}
+
+// INIT
+(async ()=>{
+  await carregarPlaylists();
+  document.getElementById("nova-playlist-form").style.display="none";
+})();
+
+</script>
+</body>
+</html>

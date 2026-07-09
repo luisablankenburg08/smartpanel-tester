@@ -8,54 +8,35 @@
     <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 <body>
-  <button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
-  <h2 class="titulosplaylists"> Mapa do Campus (Floripa) </h2>
 
-  <img
-    src="/playlists/mapa-floripa.jpg"
-    id="mapa-campus"
-    alt="Mapa do Campus"
-  >
+  <button class="btn-voltar" onclick="voltar()">Voltar</button>
+  <h2 class="titulosplaylists"> (Floripa) </h2>
 
-  <div class="acoes-playlist">
 
-    <button
-      class="btn-playlist"
-      onclick="salvarMapa()"
-    >
-      Aplicar Mapa
-    </button>
+  <div class="card-mapa">
+    <img id="mapa-campus" src="/playlists/mapa-floripa.jpg" alt="Mapa do Campus">
 
-    <button
-      class="btn-playlist destaque"
-      onclick="aplicarTodas()"
-    >
-      Aplicar em todas as telas
-    </button>
-
+    <div class="acoes-card-mapa">
+      <button class="btn-playlist" onclick="aplicarMapa()">Aplicar</button>
+      <button class="btn-editar" onclick="alterarMapa()">Alterar</button>
+    </div>
   </div>
+
+<input type="file" id="arquivo-mapa" accept=".png,.jpg,.jpeg,.webp" style="display:none">
 
   <div id="tv-modal" class="modal-tv">
   <div class="modal-tv-content">
-
     <h2>Escolha uma TV</h2>
-
     <div id="lista-tvs-modal"></div>
-
-    <button
-      class="btn-playlist"
-      onclick="fecharModalTV()">
-      Cancelar
-    </button>
-
+    <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
   </div>
 </div>
 
 <script>
 
 let params = new URLSearchParams(window.location.search);
-
 let tv = params.get("tv");
+let mapaAtual = "/playlists/mapa-floripa.jpg";
 
 async function obterTVs(){
   const res = await fetch("/state");
@@ -99,79 +80,76 @@ async function escolherTV(){
   });
 }
 
-function voltarMenu() {
-  window.location.href = "/controller-tester.html"; }
-
-async function aplicarTodas(){
-
-  let playlist = [
-    {
-      tipo: "mapa",
-      titulo: "Mapa do Campus",
-      src: "/playlists/mapa-floripa.jpg",
-      duracao: 30
-    }
-  ];
-
-  await fetch("/update-all", {
-
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-    pagina: "playlist",
-    intervalo: 30,
-    items: playlist
-  })
-  });
-  alert("Mapa aplicado em todas as TVs");
-  window.location.href = "/controller-tester.html";
+async function carregarMapa(){
+  const res = await fetch("/mapa");
+  const dados = await res.json();
+  mapaAtual = dados.src;
+  document.getElementById("mapa-campus").src = mapaAtual;
 }
 
+//APLICAR MAPA
+async function aplicarMapa(){
+  const tv = await escolherTV();
 
-async function salvarMapa() {
-
-  const res = await fetch("/state");
-  const state = await res.json();
-
-  const tvs = Object.keys(state);
-
-  if(tvs.length === 0){
-    alert("Nenhuma TV conectada");
+  if(!tv)
     return;
-  }
 
-  const escolhida = await escolherTV();
-
-  if(!escolhida){
-    return;
-  }
-
-  let playlist = [{
+  const mapa = {
     tipo:"mapa",
     titulo:"Mapa do Campus",
-    src:"/playlists/mapa-floripa.jpg",
+    src: mapaAtual,
     duracao:30
-  }];
+  };
 
   await fetch("/playlist/add",{
     method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
+    headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
-      tv:escolhida,
-      items:playlist
+      tv,
+      items:[mapa]
     })
   });
 
-  alert("Mapa enviado para " + escolhida);
-  window.location.href = "/controller-tester.html";
+  await fetch("/update",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      tv,
+      refresh:Date.now()
+    })
+  });
+  alert("Mapa aplicado.");
+}
+
+async function alterarMapa(){
+  document.getElementById("arquivo-mapa").click();
 }
 
 
-</script>
+document.getElementById("arquivo-mapa").addEventListener("change", async function(){
+const arquivo = this.files[0];
 
+if(!arquivo)
+  return;
+
+const form = new FormData();
+form.append("mapa",arquivo);
+
+const res = await fetch("/mapa",{
+  method:"POST",
+  body:form
+});
+
+const dados = await res.json();
+mapaAtual = dados.src;
+document.getElementById("mapa-campus").src = mapaAtual;
+});
+
+async function voltar(){
+  window.location.href = "/controller-tester.html"; 
+}
+
+carregarMapa();
+</script>
 </body>
 </html>

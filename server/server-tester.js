@@ -428,7 +428,7 @@ app.post("/unregister", (req, res) => {
   }
 })
 
-//API DO YOPUTUBE PARA DURAÇÃO DO VÍDEO
+//API DO YOUTUBE PARA DURAÇÃO DO VÍDEO
 const { Innertube } = require("youtubei.js");
 let yt = null;
 async function getYoutube() {
@@ -593,6 +593,7 @@ app.post("/avisos", verificarAuth, upload.single("arquivo"), (req, res) => {
     aviso
   });
 });
+
 // EDITAR AVISOS
 app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
   const playlists = readPlaylists();
@@ -659,6 +660,181 @@ app.get("/playlist", (req,res)=>{
     }
   }
   res.json(items);
+});
+
+//ADICIONAR MAPA
+app.post("/mapa",verificarAuth,upload.single("mapa"),(req,res)=>{
+    if(!req.file){
+      return res.status(400).json({
+      erro:"Arquivo não enviado"
+      });
+    }
+
+    const src="/uploads/"+req.file.filename;
+    let playlists=readPlaylists();
+    playlists.mapaCampus=src;
+    savePlaylists(playlists);
+    res.json({ok:true,src});
+
+});
+
+// CARREGAR MAPA
+app.get("/mapa",(req,res)=>{
+  const playlists=readPlaylists();
+  res.json({src: playlists.mapaCampus || "/playlists/mapa-floripa.jpg"});
+});
+
+//LISTAR PLAYLISTS SALVAS
+app.get("/playlists-salvas", (req, res) => {
+  const playlists = readPlaylists();
+  res.json(playlists.playlistsSalvas || []);
+});
+
+//CRIAR NOVAS PLAYLISTS
+app.post("/playlists-salvas", verificarAuth, (req, res) => {
+
+  const { titulo, items } = req.body;
+
+  if (!titulo) {
+    return res.status(400).json({
+      erro: "Título obrigatório"
+    });
+  }
+
+  const playlists = readPlaylists();
+
+  if (!playlists.playlistsSalvas) {
+    playlists.playlistsSalvas = [];
+  }
+
+  const novaPlaylist = {
+    id: Date.now().toString(),
+    titulo,
+    items: Array.isArray(items) ? items : []
+  };
+
+  playlists.playlistsSalvas.push(
+    novaPlaylist
+  );
+
+  savePlaylists(playlists);
+  res.json({ok: true,playlist: novaPlaylist});
+});
+
+//EDITAR PLAYLISTS PRONTAS
+app.put("/playlists-salvas/:id", verificarAuth, (req, res) => {
+
+  const playlists = readPlaylists();
+
+  const playlist =
+    playlists.playlistsSalvas.find(
+      p => p.id === req.params.id
+    );
+
+  if (!playlist) {
+    return res.status(404).json({
+      erro: "Playlist não encontrada"
+    });
+  }
+
+  playlist.titulo = req.body.titulo;
+  playlist.items = Array.isArray(req.body.items) ? req.body.items : [];
+  savePlaylists(playlists);
+  res.json({ok: true});
+});
+
+//EXCLUIR PLAYLISTS PRONTAS
+app.delete("/playlists-salvas/:id", verificarAuth, (req, res) => {
+  const playlists = readPlaylists();
+  playlists.playlistsSalvas =
+    playlists.playlistsSalvas.filter(
+      p => p.id !== req.params.id
+    );
+
+  savePlaylists(playlists);
+  res.json({ok: true});
+});
+
+//APLICAR PLAYLISTS PRONTAS
+app.post("/playlist/aplicar", verificarAuth, (req, res) => {
+  const { tv, playlistId } = req.body;
+  const playlists = readPlaylists();
+  const state = readState();
+  const playlist =
+    playlists.playlistsSalvas.find(
+      p => p.id === playlistId
+    );
+
+  if (!playlist) {
+    return res.status(404).json({
+      erro: "Playlist não encontrada"
+    });
+  }
+
+  if (!playlists.tvPlaylists) {
+    playlists.tvPlaylists = {};
+  }
+
+  playlists.tvPlaylists[tv] = {
+    playlistId,
+    titulo: playlist.titulo,
+    items: structuredClone(playlist.items)
+  };
+
+  state[tv].refresh = Date.now();
+  savePlaylists(playlists);
+
+  fs.writeFileSync(
+    STATE_FILE,
+    JSON.stringify(state, null, 2)
+  );
+
+  res.json({ok: true});
+});
+
+// LISTAR CONTEÚDOS DISPONÍVEIS
+app.get("/conteudos", (req, res) => {
+  const playlists = readPlaylists();
+  const conteudos = [];
+
+  conteudos.push(
+    ...getAllVideoItems(playlists)
+  );
+
+  conteudos.push(
+    ...getAllAvisoItems(playlists)
+  );
+
+  if (playlists.mapaCampus) {
+    conteudos.push({
+      id: "mapa",
+      tipo: "mapa",
+      titulo: "Mapa do Campus",
+      conteudo: playlists.mapaCampus,
+      duracao: 30
+    });
+  }
+
+    if (playlists.calendario) {
+      conteudos.push({
+        id: "calendario",
+        tipo: "calendario",
+        titulo: "Calendário",
+        conteudo: playlists.calendario,
+        duracao: 30
+      });
+    }
+
+    if (playlists.ensalamento) {
+      conteudos.push({
+        id: "ensalamento",
+        tipo: "ensalamento",
+        titulo: "Ensalamento",
+        conteudo: playlists.ensalamento,
+        duracao: 30
+      });
+    }
+    res.json(conteudos);
 });
 
 // SAVE PLAYLIST 
