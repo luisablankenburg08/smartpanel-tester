@@ -1,0 +1,79 @@
+body { 
+    font-family: Arial, sans-serif; 
+    background: #f7f7f7; 
+}
+
+h1 { 
+    margin-bottom: 8px; 
+}
+
+.wrapper { 
+    display: grid; 
+    gap: 24px; 
+}
+
+.day-section { 
+    background: white; 
+    padding: 16px; 
+    border-radius: 8px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    margin-bottom: 20px; 
+}
+
+.day-section h2 { 
+    margin: 0 0 10px 0; 
+    padding-bottom: 6px; 
+    border-bottom: 2px solid #2f4f4f; 
+    color: #2f4f4f; 
+}
+
+.grid-table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    background: white; 
+    margin-top: 8px; 
+    table-layout: fixed; 
+}
+
+.grid-table th, .grid-table td { 
+    border: 1px solid #ccc; 
+    width: 3.5vw;
+    padding: 8px; 
+    text-align: left; 
+    vertical-align: top; 
+}
+
+.grid-table th { 
+    background: #2f4f4f; 
+    color: white; 
+}
+
+.turno-header { 
+    background: #dfefff; 
+    color: #123; 
+    font-weight: bold; 
+    width: 120px; 
+}
+
+.cell { 
+    height: 2vw; 
+    width: 4vw;
+    background: #fff; 
+    white-space: normal; 
+    line-height: 1.2; 
+    font-size: 12px; 
+}
+
+.cell .badge { 
+    display: block; 
+    background: #e8f0fe; 
+    color: #0b5fff; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    word-break: break-word; 
+}
+
+.empty-cell { 
+    color: #999; 
+    font-style: italic; 
+}

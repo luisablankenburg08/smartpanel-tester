@@ -23,13 +23,11 @@
     "tv2": {
       "items": [
         {
-          "tipo": "video",
-          "id": "TjxfN_tIv6o",
-          "titulo": "MCC INFO25: Apresentações",
-          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
-          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
-          "duracao": 67,
-          "live": false
+          "id": "1783539112629",
+          "titulo": "Informativo Banheiro",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
+          "duracao": 30
         }
       ]
     }
@@ -168,13 +166,6 @@
       "titulo": "teste pdf",
       "tipo": "pdf",
       "conteudo": "/uploads/1783537829245.pdf",
-      "duracao": 15
-    },
-    {
-      "id": "1783537883740",
-      "titulo": "teste png",
-      "tipo": "imagem",
-      "conteudo": "/uploads/1783537883715.png",
       "duracao": 15
     },
     {

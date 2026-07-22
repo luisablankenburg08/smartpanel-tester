@@ -3,16 +3,17 @@ const path = require("path");
 const express = require("express")
 const fs = require("fs")
 const app = express()
-const PLAYLIST_FILE = path.join("/home/pi/tester/json/playlists-tester.json"); //salvar conteúdos em playlists-tester.json
-const STATE_FILE = "/home/pi/tester/json/state.json" // salvar tvs em state.json
-const LOGIN_DIR = path.join(__dirname, "login") 
+const ROOT_DIR = path.resolve(__dirname, "..");
+const PLAYLIST_FILE = path.join(ROOT_DIR, "json", "playlists-tester.json"); //salvar conteúdos em playlists-tester.json
+const STATE_FILE = path.join(ROOT_DIR, "json", "state.json"); // salvar tvs em state.json
+const LOGIN_DIR = path.join(__dirname, "login");
+const UPLOAD_DIR = path.join(__dirname, "uploads");
 const tvHeartbeats = new Map()
 
 
 const session = require("express-session");
 
 app.use("/login", express.static(LOGIN_DIR))
-
 
 //AUTENTICAÇÃO
 app.use(express.json());
@@ -24,7 +25,7 @@ app.use(session({
 }));
 
 //USAR UPLOADS
-app.use("/uploads",express.static("uploads"));
+app.use("/uploads", express.static(UPLOAD_DIR));
 
 if (!fs.existsSync(STATE_FILE)) { fs.writeFileSync(STATE_FILE, "{}") }
 
@@ -215,9 +216,21 @@ app.post("/login", (req, res) => {
 
 });
 
-// proteger controller (ANTES do static)
+// servir páginas e assets do painel
 app.get("/controller-tester.html", verificarAuth, (req, res) => {
-  res.sendFile("/home/pi/tester/controller-tester.html");
+  res.sendFile(path.join(ROOT_DIR, "controller-tester.html"));
+});
+
+app.get("/viewer-tester.html", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "viewer-tester.html"));
+});
+
+app.get(["/controller-tester.css", "/viewer-tester.css"], (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, req.path.replace(/^\//, "")));
+});
+
+app.get(["/controller-tester.js", "/viewer-tester.js"], (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, req.path.replace(/^\//, "")));
 });
 
 app.get("/login", (req, res) => {
@@ -234,7 +247,7 @@ function verificarAuth(req, res, next) {
   }
 }
 
-app.use(express.static("/home/pi/tester"))
+app.use(express.static(ROOT_DIR))
 
 //==================
 // ROTAS

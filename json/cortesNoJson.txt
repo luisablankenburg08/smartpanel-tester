@@ -1,0 +1,49 @@
+============================================================
+TURMAS CORTADAS DO JSON PARA MELHOR APROVEITAMENTO DA TABELA
+============================================================
+
+
+==== A-203 (ENTULHO) ====
+ {
+                    "id": "-28",
+                    "name": "A-203",
+                    "short": "A-203  (Peq) - Entulho",
+                    "buildingid": "",
+                    "bell": "",
+                    "color": "#0000FF",
+                    "customfields": [
+                        {
+                            "field": "Lotação",
+                            "value": "32"
+                        },
+                        {
+                            "field": "Ativa",
+                            "value": "Não"
+                        },
+                        {
+                            "field": "Tamanho (metragem)",
+                            "value": "48"
+                        }
+                    ]
+                },
+
+==== B-106 (ARTES) ====
+
+{
+                    "id": "-32",
+                    "name": "B-106 (Artes)",
+                    "short": "B-106 - Sala de Artes",
+                    "buildingid": "",
+                    "bell": "",
+                    "color": "#333399",
+                    "customfields": [
+                        {
+                            "field": "Tamanho (metragem)",
+                            "value": "56,40"
+                        },
+                        {
+                            "field": "Ativa",
+                            "value": "Sim"
+                        }
+                    ]
+                },
