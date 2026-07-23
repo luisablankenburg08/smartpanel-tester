@@ -23,11 +23,12 @@
     "tv2": {
       "items": [
         {
-          "id": "1783539112629",
-          "titulo": "Informativo Banheiro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
-          "duracao": 30
+          "tipo": "ensalamento",
+          "id": "ensalamento-segunda",
+          "dia": 0,
+          "titulo": "Ensalamento - Segunda-feira",
+          "duracao": 30,
+          "src": "/playlists/verEnsalamento.html"
         }
       ]
     }

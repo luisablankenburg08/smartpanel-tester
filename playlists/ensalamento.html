@@ -4,538 +4,291 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ensalamento</title>
-  <link rel="stylesheet" href="ensalamento.css">
+  <link rel="stylesheet" href="style-playlists.css">
+  <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 <body>
 
-  <h1>Ensalamento</h1>
-  <div id="app"></div>
+  <button class="btn-voltar" onclick="voltar()">Voltar</button>
+  <h2 class="titulosplaylists">Ensalamento</h2>
+  <div class="ensalamento-container">
 
-  <script>
+    <div class="area-ver-ensalamento">
+      <button class="btn-ver-ensalamento" onclick="verEnsalamento()">Ver ensalamento completo</button>
+    </div>
 
-    const CAMINHO_JSON = "./json/requisicao.json";
+    <div id="lista-ensalamentos" class="ensalamento-grid"></div>
+  </div>
 
-    /* A ordem dos bits encontrada no JSON é:
-      10000 = Segunda-feira
-      01000 = Terça-feira
-      00100 = Quarta-feira
-      00010 = Quinta-feira
-      00001 = Sexta-feira*/
+  <div id="tv-modal" class="modal-tv">
+    <div class="modal-tv-content">
+      <h2>Escolha uma TV</h2>
+      <div id="lista-tvs-modal"></div>
+      <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+    </div>
+  </div>
 
-    const DIAS_SEMANA = [
-      {
-        indice: 0,
-        codigo: "10000",
-        nome: "Segunda-feira",
-        abreviacao: "Seg"
-      },
-      {
-        indice: 1,
-        codigo: "01000",
-        nome: "Terça-feira",
-        abreviacao: "Ter"
-      },
-      {
-        indice: 2,
-        codigo: "00100",
-        nome: "Quarta-feira",
-        abreviacao: "Qua"
-      },
-      {
-        indice: 3,
-        codigo: "00010",
-        nome: "Quinta-feira",
-        abreviacao: "Qui"
-      },
-      {
-        indice: 4,
-        codigo: "00001",
-        nome: "Sexta-feira",
-        abreviacao: "Sex"
-      }
-    ];
+  <div id="modal-edicao" class="modal-edicao">
+    <div class="modal-edicao-content">
+      <h2>Editar ensalamento</h2>
+      <label for="editar-titulo">Nome</label>
+      <input type="text" id="editar-titulo">
+      <label for="editar-duracao"> Duração (segundos)</label>
+      <input type="number" id="editar-duracao" min="1">
 
-    /* Ordem visual dos períodos.
-      O valor "short" vindo de periods será usado para
-      identificar o turno.
-      Caso o JSON possua outros períodos, eles também
-      poderão aparecer automaticamente. */
+      <div class="acoes-edicao">
+        <button class="btn-salvar-edicao" onclick="salvarEdicao()">Salvar</button>
+        <button class="btn-cancelar-edicao" onclick="fecharModalEdicao()">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
-    const ORDEM_TURNOS = [
-      "M12",
-      "M34",
-      "T12",
-      "T34",
-      "N12",
-      "N34",
-      "N123"
-    ];
+<script>
 
-    const NOMES_TURNOS = {
-      M12: "Manhã 12",
-      M34: "Manhã 34",
-      T12: "Tarde 12",
-      T34: "Tarde 34",
-      N12: "Noite 12",
-      N34: "Noite 34",
-      N123: "Noite 123"
-    };
-
-    // CARREGAR JSON
-    async function carregarJson() {
-      const response = await fetch('../json/requisicao.json', { cache: 'no-store' });
-
-      if (!response.ok) {
-        throw new Error(`Não foi possível carregar o ensalamento. Status: ${response.status}`);
-      }
-      return response.json();
+  //CONFIGURAÇÃO
+  const DIAS_ENSALAMENTO = [
+    {
+      id: "ensalamento-segunda",
+      dia: 0,
+      titulo: "Ensalamento - Segunda-feira",
+      duracao: 30
+    },
+    {
+      id: "ensalamento-terca",
+      dia: 1,
+      titulo: "Ensalamento - Terça-feira",
+      duracao: 30
+    },
+    {
+      id: "ensalamento-quarta",
+      dia: 2,
+      titulo: "Ensalamento - Quarta-feira",
+      duracao: 30
+    },
+    {
+      id: "ensalamento-quinta",
+      dia: 3,
+      titulo: "Ensalamento - Quinta-feira",
+      duracao: 30
+    },
+    {
+      id: "ensalamento-sexta",
+      dia: 4,
+      titulo: "Ensalamento - Sexta-feira",
+      duracao: 30
     }
+  ];
 
-    // LOCALIZAR UMA TABELA DO EDUPAGE
-    function localizarTabela(dados, idTabela) {
-      const raiz = dados?.r ?? dados;
-      const tabelas = raiz?.dbiAccessorRes?.tables ?? raiz?.tables ?? []; 
+  let ensalamentos = [...DIAS_ENSALAMENTO];
+  let indiceEdicao = null;
 
-      return tabelas.find(
-        tabela => tabela.id === idTabela
-      );
-    }
 
-    // OBTER LINHAS DE UMA TABELA
-    function obterLinhasTabela(dados, idTabela) {
-      const tabela = localizarTabela(dados, idTabela);
-      return tabela?.data_rows || [];
-    }
+ //OBTER TVS ATIVAS
+  async function obterTVs() {
+    const resposta = await fetch("/state");
+    const estado = await resposta.json();
+    return Object.keys(estado);
+  }
 
-    // PREPARAR DADOS DO EDUPAGE
-    function prepararDados(dados) {
-      const periodos = ordenarPeriodos(obterLinhasTabela(dados, "periods"));
-      const salas = obterLinhasTabela(dados, "classrooms");
-      const turmas = obterLinhasTabela(dados, "classes");
-      const aulas = obterLinhasTabela(dados, "lessons");
-      const cartoes = obterLinhasTabela(dados,"cards");
+  //MODAL TV
+  function fecharModalTV() {
+    document.getElementById("tv-modal").style.display = "none";
+  }
 
-      // ÍNDICE DE PERÍODOS
-      const periodosPorId = Object.fromEntries(
-        periodos.map(periodo => [String(periodo.id), periodo]));
+  async function escolherTV() {
+    return new Promise(
+      async resolve => {
+        try {
+          const tvs = await obterTVs();
+          const lista = document.getElementById("lista-tvs-modal");
+          lista.innerHTML = "";
 
-      // ÍNDICE DE SALAS
-      const salasPorId = Object.fromEntries(
-        salas.map(sala => [String(sala.id), sala]));
-
-      // ÍNDICE DE TURMAS
-      const turmasPorId = Object.fromEntries(
-        turmas.map(turma => [String(turma.id),turma]));
-
-      // ÍNDICE DE AULAS      
-      const aulasPorId = Object.fromEntries(
-        aulas.map(aula => [String(aula.id),aula]));
-
-      return {
-        periodos,
-        salas,
-        turmas,
-        aulas,
-        cartoes,
-        periodosPorId,
-        salasPorId,
-        turmasPorId,
-        aulasPorId
-      };
-    }
-
-    // DESCOBRIR OS DIAS DE UM CARD
-    function descobrirDiasDoCartao(cartao) {
-      const mascara = String(cartao.days || "");
-
-      /* O EduPage usa uma máscara de cinco posições:
-        posição 0 = segunda
-        posição 1 = terça
-        posição 2 = quarta
-        posição 3 = quinta
-        posição 4 = sexta */
-
-      return DIAS_SEMANA.filter(
-        dia => mascara[dia.indice] === "1");
-    }
-
-    // DESCOBRIR PERÍODO DO CARD
-    function descobrirPeriodo(cartao, dadosPreparados) {
-      const periodoId = String(cartao.period ?? "");
-
-      return dadosPreparados.periodosPorId[periodoId] || null;
-    }
-
-    // OBTER NOME DO TURNO
-    function obterNomeTurno(periodo) {
-      if (!periodo) {
-        return "Sem turno";
-      }
-
-      const codigo = String(periodo.short || "").trim();
-
-      if (NOMES_TURNOS[codigo]) {
-        return NOMES_TURNOS[codigo];
-      }
-
-      if (periodo.name) {
-        return periodo.name;
-      }
-
-      return codigo || "Sem turno";
-    }
-
-    // DESCOBRIR TURMAS DE UMA AULA
-    function descobrirTurmasDaAula(aula, dadosPreparados) {
-      if (!aula || !Array.isArray(aula.classids)) {
-        return [];
-      }
-
-      return aula.classids.map(
-        idTurma => dadosPreparados.turmasPorId[String(idTurma)]
-      ).filter(Boolean);
-    }
-
-    // DESCOBRIR SALAS DE UM CARD
-    function descobrirSalasDoCartao(cartao, dadosPreparados) { 
-
-      if (!Array.isArray(cartao.classroomids)) {
-        return [];
-      }
-
-      return cartao.classroomids.map(
-        idSala => dadosPreparados.salasPorId[String(idSala)]
-      ).filter(Boolean);
-    }
-
-    // CRIAR REGISTROS DO ENSALAMENTO
-    function criarRegistrosEnsalamento(dadosPreparados) {
-      const registros = [];
-      /*A lógica principal começa em CARDS.
-        Cada card informa:
-        - lessonid
-        - period
-        - days
-        - classroomids
-        A partir do lessonid buscamos a aula.
-        A aula fornece classids.
-        Os classids fornecem a turma.*/
-
-      dadosPreparados.cartoes.forEach(cartao => {
-
-          // LOCALIZAR A AULA
-          const aula = dadosPreparados.aulasPorId[String(cartao.lessonid)];
-
-          if (!aula) {
-            console.warn("Aula não encontrada para o card:", cartao);
+          if (tvs.length === 0) {
+            lista.innerHTML = "<p>Nenhuma TV encontrada.</p>";
             return;
           }
 
-          // DESCOBRIR PERÍODO
-          const periodoInicial = descobrirPeriodo(cartao, dadosPreparados);
-            if (!periodoInicial) {
-              console.warn("Período inicial não encontrado para o card:", cartao);
-              return;
+          tvs.forEach(
+            nomeTV => {
+              const botao = document.createElement("button");
+              botao.className = "btn-tv-modal";
+              botao.textContent = nomeTV;
+              botao.onclick = () => {
+                fecharModalTV();
+                resolve(nomeTV);
+              };
+
+              lista.appendChild(botao);
             }
-
-        
-          // DESCOBRIR DURAÇÃO DAS AULAS (1 OU 2 PERÍODOS)
-          const duracao = Math.max(1, Number(aula.durationperiods) || 1);
-
-          // DESCOBRIR DIAS
-          const dias = descobrirDiasDoCartao(cartao);
-
-          // DESCOBRIR TURMAS
-          const turmas = descobrirTurmasDaAula(aula, dadosPreparados);
-
-          // DESCOBRIR SALAS
-          const salas = descobrirSalasDoCartao(cartao, dadosPreparados);
-
-          // DESCOBRIR PERÍODOS OCUPADOS
-          const indicePeriodoInicial = dadosPreparados.periodos.findIndex( periodo =>
-          String(periodo.id) === String(periodoInicial.id) );
-
-          const periodosOcupados = dadosPreparados.periodos.slice(indicePeriodoInicial, indicePeriodoInicial + duracao);
-
-          // CRIAR REGISTROS
-          dias.forEach(dia => {
-            turmas.forEach(turma => {
-              salas.forEach(sala => {
-                periodosOcupados.forEach(periodo => {
-                  const codigoTurno = String(periodo.short || "");
-                  const nomeTurno = obterNomeTurno(periodo);
-
-                  registros.push({
-                    diaId: dia.indice,
-                    diaCodigo: dia.codigo,
-                    diaNome: dia.nome,
-                    periodoId: periodo.id,
-                    periodoCodigo: codigoTurno,
-                    turno: nomeTurno,
-                    salaId: sala.id,
-                    sala: sala.name || sala.short || "Sala sem nome",
-                    turmaId: turma.id,
-                    turma: turma.name || turma.short || "Turma sem nome",
-                    aulaId: aula.id,
-                    cartaoId: cartao.id,
-                    duracao: duracao,
-                    periodoInicialId: periodoInicial.id
-                  });
-                });
-              });
-            });
-          });
-        });
-        return registros;
-      }
-
-    // REMOVER REGISTROS DUPLICADOS
-    function removerDuplicados(registros) {
-      const registrosUnicos = new Map();
-
-      registros.forEach(
-        registro => {
-          const chave = [
-            registro.diaId,
-            registro.periodoId,
-            registro.salaId,
-            registro.turmaId
-          ].join("|");
-
-          if (!registrosUnicos.has(chave)) {
-            registrosUnicos.set(
-              chave,
-              registro
-            );
-          }
-        });
-
-      return Array.from(registrosUnicos.values());
-    }
-
-    // CRIAR MATRIZ DO ENSALAMENTO
-    function criarMatrizEnsalamento(registros) {
-      const matriz = {};
-
-      DIAS_SEMANA.forEach(
-        dia => {matriz[dia.indice] = {};}
-      );
-
-      registros.forEach(
-        registro => {
-          const dia = registro.diaId;
-          const periodo = registro.periodoId;
-          const sala = registro.salaId;
-
-          if (!matriz[dia]) {
-            matriz[dia] = {};
-          }
-
-          if (!matriz[dia][periodo]) {
-            matriz[dia][periodo] = {};
-          }
-
-          if (!matriz[dia][periodo][sala]) {
-            matriz[dia][periodo][sala] = [];
-          }
-
-          const lista = matriz[dia][periodo][sala];
-
-          /* Uma célula pode ter mais de uma turma.
-            Por isso usamos uma lista.
-            Também verificamos se a turma já foi
-            adicionada para evitar duplicação. */
-
-          const turmaJaExiste = lista.some(item =>
-            String(item.turmaId) === String(registro.turmaId)
           );
-
-          if (!turmaJaExiste) {
-            lista.push(registro);
-          }
-        });
-      return matriz;
-    }
-
-    // ORDENAR SALAS
-    function ordenarSalas(salas) {
-      return [...salas].sort(
-        (a, b) => {
-          const nomeA = String(a.name || a.short || "" );
-          const nomeB = String(b.name || b.short || "" );
-
-          return nomeA.localeCompare(nomeB,"pt-BR", {numeric: true, sensitivity: "base"});
+          document.getElementById("tv-modal").style.display = "flex";
+        } catch (erro) {
+          console.error(erro);
+          alert("Não foi possível carregar as TVs.");
+          resolve(null);
         }
-      );
-    }
-
-    // ORDENAR PERÍODOS
-    function ordenarPeriodos(periodos) {
-
-      return [...periodos].sort(
-        (a, b) => {
-          const codigoA = String(a.short || "" );
-          const codigoB = String(b.short || "" );
-          const indiceA = ORDEM_TURNOS.indexOf(codigoA);
-          const indiceB = ORDEM_TURNOS.indexOf(codigoB);
-
-          /*Se os dois períodos estão
-            no nosso mapa conhecido,
-            usamos a ordem definida. */
-
-          if (indiceA !== -1 && indiceB !== -1) {
-            return indiceA - indiceB;
-          }
-
-          /* Caso contrário, usamos
-            o horário de início. */
-          const horarioA = String(a.starttime || "");
-          const horarioB = String(b.starttime || "");
-          return horarioA.localeCompare(horarioB);
-        });
-    }
-
-    // CRIAR UMA TABELA DE UM DIA
-
-    function criarTabelaDoDia(dia, salas, periodos, matriz) {
-      const secao = document.createElement("section");
-      secao.className = "day-section";
-
-      // TÍTULO
-      const titulo = document.createElement("h2");
-      titulo.textContent = dia.nome;
-      secao.appendChild(titulo);
-
-      // TABELA
-      const tabela = document.createElement("table");
-      tabela.className = "grid-table";
-
-      // CABEÇALHO
-      const cabecalho = document.createElement("thead");
-      const linhaCabecalho = document.createElement("tr");
-      const colunaTurno = document.createElement("th");
-      colunaTurno.textContent = "Turno";
-      linhaCabecalho.appendChild(colunaTurno);
-
-      salas.forEach(
-        sala => {
-          const coluna = document.createElement("th");
-          coluna.textContent = sala.name || sala.short || "Sala";
-          linhaCabecalho.appendChild(coluna);
-        });
-
-      cabecalho.appendChild(linhaCabecalho);
-      tabela.appendChild(cabecalho);
-
-      // CORPO
-      const corpo = document.createElement("tbody");
-
-      periodos.forEach(
-        periodo => {
-          const linha = document.createElement("tr");
-
-          // NOME DO TURNO
-          const colunaTurno = document.createElement("th");
-          colunaTurno.className = "turno-header";
-          colunaTurno.textContent = obterNomeTurno(periodo);
-          linha.appendChild(colunaTurno);
-
-          // CÉLULAS DAS SALAS
-          salas.forEach(
-            sala => {
-              const coluna = document.createElement("td");
-              coluna.className ="cell";
-              const registros = matriz[dia.indice] ?.[periodo.id] ?.[sala.id] || [];
-
-              if (registros.length === 0) {
-                const vazio = document.createElement("span");
-                vazio.className = "empty-cell";
-                vazio.textContent = "—";
-                coluna.appendChild(vazio);
-
-              } else {
-                /*Cada registro representa
-                  uma turma naquela sala,
-                  naquele dia e naquele período.*/
-
-                registros.forEach(
-                  registro => {
-                    const badge =document.createElement("div");
-                    badge.className = "badge";
-                    badge.textContent = registro.turma;
-                    coluna.appendChild(badge);
-                  }
-                );}
-              linha.appendChild(coluna);
-            });
-          corpo.appendChild(linha);
-        });
-      tabela.appendChild(corpo);
-      secao.appendChild(tabela);
-      return secao;
-    }
-
-    // RENDERIZAR TODAS AS TABELAS
-    function renderizarEnsalamento(dadosPreparados, matriz) {
-      const aplicativo = document.getElementById("app");
-      aplicativo.innerHTML = "";
-      const wrapper = document.createElement("div");
-      wrapper.className = "wrapper";
-    
-      const salas = ordenarSalas(dadosPreparados.salas).filter(sala => sala.name || sala.short);
-      const periodos = ordenarPeriodos(dadosPreparados.periodos);
-
-      // CRIAR UMA TABELA PARA CADA DIA
-
-      DIAS_SEMANA.forEach(dia => {
-          const tabela =criarTabelaDoDia(dia, salas, periodos, matriz);
-          wrapper.appendChild(tabela);
-        });
-
-      aplicativo.appendChild(wrapper);
-    }
-
-    // PROCESSO PRINCIPAL
-    async function construirEnsalamento() {
-      try {
-        // 1. CARREGAR JSON
-        const dados = await carregarJson();
-        console.log("JSON do EduPage carregado.");
-
-        // 2. PREPARAR DADOS
-        const dadosPreparados = prepararDados(dados);
-        console.log("Dados preparados:",dadosPreparados);
-
-        // 3. CRIAR REGISTROS
-        let registros = criarRegistrosEnsalamento(dadosPreparados);
-        console.log("Registros encontrados:", registros);
-
-        // 4. REMOVER DUPLICAÇÕES
-        registros = removerDuplicados(registros);
-        console.log("Registros únicos:", registros);
-
-        // 5. CRIAR MATRIZ
-        const matriz = criarMatrizEnsalamento(registros);
-        console.log("Matriz final:", matriz);
-        
-        // 6. RENDERIZAR
-        renderizarEnsalamento(dadosPreparados,matriz);
-
-      } catch (erro) {
-        console.error("Erro ao construir ensalamento:", erro);
-
-        document.getElementById("app").innerHTML = `
-
-          <div style="color: red;padding: 20px;">
-            <h2> Erro ao carregar o ensalamento</h2
-            <p>${erro.message}</p>
-          </div>`;
       }
+    );
+  }
+
+
+  //RENDERIZAR CARDS
+  function renderizarCards() {
+    const container = document.getElementById("lista-ensalamentos");
+    container.innerHTML = "";
+    ensalamentos.forEach(
+      (ensalamento, indice) => {
+
+        const card = document.createElement("div");
+        card.className = "card-ensalamento";
+
+        const titulo = document.createElement("div");
+        titulo.className = "titulo-card-ensalamento";
+        titulo.textContent = ensalamento.titulo;
+
+        const duracao = document.createElement("div");
+        duracao.className = "duracao-card-ensalamento";
+        duracao.textContent = `Duração: ${ensalamento.duracao} segundos`;
+
+        const acoes = document.createElement("div");
+        acoes.className = "acoes-card-ensalamento";
+
+        const botaoAplicar = document.createElement("button");
+        botaoAplicar.className = "btn-aplicar";
+        botaoAplicar.textContent = "Aplicar";
+        botaoAplicar.onclick = () => aplicarEnsalamento(ensalamento);
+
+        const botaoEditar = document.createElement("button");
+        botaoEditar.className = "btn-editar";
+        botaoEditar.textContent = "Editar";
+        botaoEditar.onclick = () => abrirModalEdicao(indice);
+
+        const botaoExcluir = document.createElement("button");
+        botaoExcluir.className = "btn-delete";
+        botaoExcluir.textContent = "Excluir";
+        botaoExcluir.onclick = () => excluirEnsalamento(indice);
+
+        acoes.appendChild(botaoAplicar);
+        acoes.appendChild(botaoEditar);
+        acoes.appendChild(botaoExcluir);
+        card.appendChild(titulo);
+        card.appendChild(duracao);
+        card.appendChild(acoes);
+        container.appendChild(card);
+      }
+    );
+  }
+
+  // APLICAR ENSALAMENTO
+  async function aplicarEnsalamento(ensalamento) {
+    const tv = await escolherTV();
+
+    if (!tv) {
+      return;
     }
 
-    // INIT
-    construirEnsalamento();
+    const item = {
+      tipo: "ensalamento",
+      id: ensalamento.id,
+      dia: ensalamento.dia,
+      titulo: ensalamento.titulo,
+      duracao: Number(ensalamento.duracao),
+      src: "/playlists/verEnsalamento.html"
+    };
 
-  </script>
+    try {
+      const resposta = await fetch("/playlist/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          tv,
+          items: [item]
+        })
+      });
+
+      await fetch("/update", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          tv,
+          refresh: Date.now()
+        })
+      });
+
+      alert(`${ensalamento.titulo} aplicado à TV ${tv}.`);
+
+    } catch (erro) {
+      console.error("Erro ao aplicar ensalamento:", erro);
+      alert("Erro ao aplicar o ensalamento.");
+    }
+  }
+
+  //EDITAR
+  function abrirModalEdicao(indice) {
+    indiceEdicao = indice;
+    const ensalamento = ensalamentos[indice];
+    document.getElementById("editar-titulo").value = ensalamento.titulo;
+    document.getElementById("editar-duracao").value = ensalamento.duracao;
+    document.getElementById("modal-edicao").style.display = "flex";
+  }
+
+  function fecharModalEdicao() {
+    indiceEdicao = null;
+    document.getElementById("modal-edicao").style.display = "none";
+  }
+
+  function salvarEdicao() {
+    if (indiceEdicao === null) {
+      return;
+    }
+
+    const novoTitulo = document.getElementById("editar-titulo").value.trim();
+    const novaDuracao = Number(document.getElementById("editar-duracao").value);
+
+    if (!novoTitulo) {
+      alert("Digite um nome para o ensalamento.");
+      return;
+    }
+
+    if (!novaDuracao || novaDuracao <= 0) {
+      alert("Digite uma duração válida.");
+      return;
+    }
+
+    ensalamentos[indiceEdicao].titulo = novoTitulo;
+    ensalamentos[indiceEdicao].duracao = novaDuracao;
+
+    fecharModalEdicao();
+    renderizarCards();
+  }
+
+  //EXCLUIR
+  function excluirEnsalamento(indice) {
+    const ensalamento = ensalamentos[indice];
+    const confirmar = confirm(`Deseja excluir "${ensalamento.titulo}"?`);
+
+    if (!confirmar) {
+      return;
+    }
+
+    ensalamentos.splice(indice, 1);
+    renderizarCards();
+  }
+
+
+  // VER ENSALAMENTO COMPLETO
+  function verEnsalamento() {
+    window.location.href = "/playlists/verEnsalamento.html";
+  }
+
+  // VOLTAR
+  function voltar() {
+    window.location.href = "/controller-tester.html";
+  }
+
+  //INIT
+  renderizarCards();
+
+</script>
 </body>
 </html>

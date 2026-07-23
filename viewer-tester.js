@@ -127,6 +127,14 @@ async function render(item){
       content.innerHTML = `
         <iframe src="${item.src}" style="width:100vw;height:100vh;border:none;"></iframe>`;
       break;
+    
+    case "ensalamento": {
+      const dia = Number(item.dia);
+      const src = `/playlists/verEnsalamento.html?dia=${dia}`;
+
+      content.innerHTML = `
+        <iframe src="${src}" style="width:100vw; height:100vh; border:none;"></iframe>`;}
+      break;
 
     default:
       content.innerHTML = `

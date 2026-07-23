@@ -354,3 +354,189 @@ body {
   align-items:center;
   gap:1.5vw;
 }
+
+.ensalamento-container {
+  width: 95%;
+  max-width: 1400px;
+  margin: 30px auto;
+}
+
+.area-ver-ensalamento {
+  display: flex;
+  justify-content: center;
+  margin: 25px 0 35px 0;
+}
+
+.btn-ver-ensalamento {
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #2f4f4f;
+  color: white;
+  transition: 0.2s;
+}
+
+.btn-ver-ensalamento:hover {
+  transform: scale(1.03);
+  opacity: 0.9;
+}
+
+.ensalamento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card-ensalamento {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  transition: 0.2s;
+}
+
+.card-ensalamento:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12pxrgba(0, 0, 0, 0.2);
+}
+
+.titulo-card-ensalamento {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #2f4f4f;
+}
+
+.duracao-card-ensalamento {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.acoes-card-ensalamento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acoes-card-ensalamento button {
+  flex: 1;
+  min-width: 90px;
+  padding: 9px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-aplicar {
+  background: #2f4f4f;
+  color: white;
+}
+
+.modal-tv {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background:rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-tv-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+
+#lista-tvs-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+
+.btn-tv-modal {
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2f4f4f;
+  color: white;
+  font-size: 16px;
+}
+
+.modal-edicao {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background:rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-edicao-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 450px;
+}
+
+
+.modal-edicao-content h2 {
+  margin-top: 0;
+}
+
+.modal-edicao-content label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.modal-edicao-content input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.acoes-edicao {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.acoes-edicao button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-salvar-edicao {
+  background: #2f4f4f;
+  color: white;
+}
+
+.btn-cancelar-edicao {
+  background: #ddd;
+}
