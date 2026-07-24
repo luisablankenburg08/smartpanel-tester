@@ -4,29 +4,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modo Padrão</title>
+<title>Playlists</title>
 <link rel="stylesheet" href="style-playlists.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 
 <body>
 
-<button class="btn-voltar" onclick="voltar()">Voltar</button>
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
+
+    <div class="d-flex align-items-center">
+      <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
+    </div>
+  </div>
+</nav>
 
 <div class="container">
-
   <div>
-    <button class="tituloAdicionar" onclick="mostrarInputs()">Adicionar Nova Playlist</button>
+    <button class="btn-adicionar-playlist" onclick="mostrarInputs()">
+      <span>➕</span>
+      <span>Adicionar Nova Playlist</span>
+    </button>
   </div>
 
-  <div id="nova-playlist-form">
+<div id="nova-playlist-form">
+  <div class="playlist-form-header">
+    <h3 id="titulo-form-playlist">Nova Playlist</h3>
+    <button type="button" class="btn-fechar-form" onclick="fecharFormularioPlaylist()">✕</button>
+  </div>
 
-    <input id="playlist-titulo" placeholder="Título da playlist">
+  <div class="campo-playlist">
+    <label for="playlist-titulo">Nome da playlist</label>
+    <input id="playlist-titulo" type="text" placeholder="Digite o nome da playlist">
+  </div>
+
+  <div class="campo-playlist">
+    <label>Selecione os conteúdos</label>
     <div id="lista-conteudos"></div>
-    <button onclick="salvarPlaylist()">Salvar</button>
-
   </div>
-  <!-- PLAYLIST -->
+
+  <div class="acoes-form-playlist">
+    <button class="btn-playlist" onclick="salvarPlaylist()">Salvar Playlist</button>
+    <button class="btn-cancelar-aviso" onclick="fecharFormularioPlaylist()">Cancelar</button>
+  </div>
+
+</div>
+  
   <div>
     <h2 class="titulosh2">Playlists Adicionadas</h2>
     <div id="lista-playlists"></div>
@@ -45,7 +71,6 @@
       <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -104,22 +129,26 @@ async function carregarConteudos(){
   renderizarConteudos();
 }
 
-function renderizarConteudos(){
-  const lista =document.getElementById("lista-conteudos");
+function renderizarConteudos() {
+  const lista = document.getElementById("lista-conteudos");
   lista.innerHTML = "";
 
-  conteudosDisponiveis.forEach(item=>{
-    const div=document.createElement("div");
-    div.className="conteudo-item";
-    div.innerHTML=`
-      <label>
-        <input type="checkbox" value="${item.id}">
-          ${item.titulo}
-          (${item.duracao || 30}s)
-      </label>`;
+  conteudosDisponiveis.forEach(
+    item => {
+      const div = document.createElement("div");
+      div.className = "conteudo-item";
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" value="${item.id}">
+          <span class="conteudo-info">
+            <strong>${item.titulo}</strong>
+            <small>${item.tipo || "Conteúdo"} • ${item.duracao || 30}s</small>
+          </span>
+        </label>`;
 
-    lista.appendChild(div);
-  });
+      lista.appendChild(div);
+    }
+  );
 }
 
 // SALVAR PLAYLIST PARA ADICIONAR
@@ -206,26 +235,72 @@ function renderizarPlaylists(){
           </div> `;
       });
 
-      card.innerHTML=`
-        <h3>${pl.titulo}</h3>
+      const selecionada =
+        playlistSelecionada &&
+        playlistSelecionada.id === pl.id;
 
-        <p>
-        ${pl.items.length} itens •
-        ${Math.floor(total/60)} min
-        ${String(total%60).padStart(2,"0")} s
-        </p>
 
-        <div class="itens-playlist">
-        ${itensHTML}
+      card.innerHTML = `
+
+        <div class="playlist-card-header">
+
+          <h3>
+            ${pl.titulo}
+          </h3>
+
+          <span class="playlist-status">
+            ${pl.items.length} itens
+          </span>
+
         </div>
 
-        <button class="btn-selecionar">
-        ${playlistSelecionada?.id===pl.id ? "Selecionada" : "Selecionar"}
-        </button>`;
 
-        card.onclick=()=>{
-          playlistSelecionada=pl;
+        <div class="playlist-resumo">
+
+          <span>
+            ⏱
+            ${Math.floor(total / 60)} min
+            ${String(total % 60).padStart(2, "0")} s
+          </span>
+
+        </div>
+
+
+        <div class="itens-playlist">
+
+          ${itensHTML}
+
+        </div>
+
+
+        <button
+          class="selecionar-btn"
+        >
+          ${selecionada
+            ? "Selecionada"
+            : "Selecionar"
+          }
+        </button>
+
+      `;
+
+        card.onclick = () => {
+
+          if (
+            playlistSelecionada &&
+            playlistSelecionada.id === pl.id
+          ) {
+
+            playlistSelecionada = null;
+
+          } else {
+
+            playlistSelecionada = pl;
+
+          }
+
           renderizarPlaylists();
+
         };
         lista.appendChild(card);
     });
@@ -331,6 +406,20 @@ function mostrarInputs(){
 // MOSTRAR BOTÕES 
 function mostrarAcoesPlaylist(){
   document.getElementById("acoes-playlist").style.display = playlistSelecionada ?"flex" :"none";
+}
+
+function fecharFormularioPlaylist() {
+
+  playlistEditando =
+    null;
+
+  document
+    .getElementById(
+      "nova-playlist-form"
+    )
+    .style.display =
+      "none";
+
 }
 
 // VOLTAR

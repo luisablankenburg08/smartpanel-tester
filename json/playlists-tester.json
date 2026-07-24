@@ -22,14 +22,9 @@
       ]
     },
     "tv2": {
+      "playlistId": "1784925827181",
+      "titulo": "teste",
       "items": [
-        {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
-        },
         {
           "id": "1783077286617",
           "titulo": "Projeto",
@@ -38,12 +33,11 @@
           "duracao": 15
         },
         {
-          "tipo": "ensalamento",
-          "id": "ensalamento-segunda",
-          "dia": 0,
-          "titulo": "Ensalamento - Segunda-feira",
-          "duracao": 30,
-          "src": "/playlists/verEnsalamento.html"
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
         }
       ]
     }
@@ -187,26 +181,22 @@
   ],
   "playlistsSalvas": [
     {
-      "id": "1784907820380",
+      "id": "1784925827181",
       "titulo": "teste",
       "items": [
         {
-          "id": "TjxfN_tIv6o",
-          "titulo": "MCC INFO25: Apresentações",
-          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
-          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
-          "duracao": 67,
-          "tipo": "video",
-          "live": false
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
         },
         {
-          "id": "qCFeUspzav8",
-          "titulo": "TURISMO BASE COMUNITÁRIA GAROPABA",
-          "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
-          "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
-          "duracao": 490,
-          "tipo": "video",
-          "live": false
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
         }
       ]
     }

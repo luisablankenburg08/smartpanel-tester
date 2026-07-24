@@ -1,48 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head> 
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vídeos</title>
   <link rel="stylesheet" href="/playlists/style-playlists.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
-
 <body>
-<button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
 
- <div id="add-video-box">
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
 
-  <button class="tituloAdicionar" onclick="mostrarInputs()">Adicionar Novo Vídeo</button>
-
-  <div id="novo-video-form">
-
-    <input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui...">
-    <input type="text" id="youtube-titulo" placeholder="Digite o título do vídeo...">
-    <button id="btn-playlist" class="btn-playlist" onclick="adicionarVideo()">Adicionar Vídeo</button>
-
+    <div class="d-flex align-items-center">
+      <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
+    </div>
   </div>
+</nav>
 
+<main class="container py-4">
+
+  <div id="add-video-box"> 
+    <button class="btn-adicionar-aviso-video" onclick="mostrarInputs()"> 
+      <span>➕ Adicionar Novo Vídeo</span> 
+    </button> 
 </div>
 
-<h2 class="titulosh2">Vídeos Adicionados</h2>
+  <div id="novo-video-form" class="card shadow-sm formulario-conteudo">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label for="youtube-titulo" class="form-label">Título do vídeo</label>
+          <input type="text" id="youtube-titulo"class="form-control" placeholder="Ex.: Vídeo institucional do IFSC">
+        </div>
 
-<div id="lista-videos"></div>
+        <div class="col-md-7">
+          <label for="youtube-url" class="form-label">Link Incorporado do YouTube</label>
+          <input type="url" id="youtube-url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+      </div>
 
-<div class="acoes-playlist" id="acoes-playlist">
-  <button class="btn-playlist" onclick="aplicarPlaylist()">Aplicar Playlist</button>
-  <button class="btn-playlist" onclick="aplicarTodas()">Aplicar em todas as telas</button>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" onclick="mostrarInputs()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="adicionarVideo()">Adicionar Vídeo</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2 class="titulosh2">Vídeos Adicionados</h2>
+      </div>
+    </div>
+
+    <div id="lista-videos"></div>
+  </section>
+
+  <div class="acoes-playlist" id="acoes-playlist">
+  <button class="btn-playlist" onclick="aplicarVideo()">Aplicar Vídeo</button>
   <button class="btn-delete" onclick="deletar()">Deletar</button>
   <button class="btn-editar" onclick="editar()">Editar</button>
 </div>
+</main>
 
 <div id="tv-modal" class="modal-tv">
   <div class="modal-tv-content">
     <h2>Escolha uma TV</h2>
-
+    <p class="text-muted">Selecione em qual TV deseja aplicar os vídeos.</p>
     <div id="lista-tvs-modal"></div>
-
-    <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+    <button class="btn btn-outline-secondary mt-3" onclick="fecharModalTV()">Cancelar</button>
   </div>
 </div>
 
@@ -333,7 +362,7 @@ function mostrarInputs(){
 }
 
 // APLICAR/SALVAR PLAYLIST
-async function aplicarPlaylist(){
+async function aplicarVideo(){
 
   if(playlist.length === 0){
     alert("Selecione ao menos um vídeo");
