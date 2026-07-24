@@ -228,6 +228,7 @@ async function ping() {
     console.error("Erro ping:", e);
   }
 }
+
 // HEARTBEAT
 function iniciarHeartbeat() {
   if (preview) return;

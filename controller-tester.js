@@ -143,100 +143,49 @@ async function selecionarTV(tv) {
 
 // OBTER TVs CONECTADAS
 async function obterEstadoTVs() {
-  const resposta =
-    await fetch(
-      "/state",
-      {
-        cache: "no-store"
-      }
-    );
-
+  const resposta = await fetch("/state", {cache: "no-store"});
 
   if (!resposta.ok) {
-
-    throw new Error(
-      "Não foi possível obter o estado das TVs."
-    );
-
+    throw new Error("Não foi possível obter o estado das TVs.");
   }
-
   return resposta.json();
 }
 
 // CONFIGURAR BOTÃO DO SELETOR
 function configurarSeletorTV() {
-
-  const botao =
-    document.getElementById(
-      "botao-tv-selecionada"
-    );
-
-
+  const botao = document.getElementById("botao-tv-selecionada");
+  
   if (!botao) {
-
-    console.error(
-      "Botão #botao-tv-selecionada não encontrado."
-    );
-
+    console.error("Botão #botao-tv-selecionada não encontrado.");
     return;
-
   }
-
-
-  console.log(
-    "Seletor de TV configurado."
-  );
-
-
-  // IMPORTANTE:
-  // O botão abre e fecha o menu personalizado
+  console.log("Seletor de TV configurado.");
 
   botao.addEventListener(
     "click",
     function(event) {
-
       event.stopPropagation();
-
       alternarMenuTVs();
-
     }
   );
 
-
-  // Impedir que clique dentro do menu
-  // feche o menu antes da seleção
-
-  const menu =
-    document.getElementById(
-      "menu-tvs-navbar"
-    );
-
-
+  const menu = document.getElementById("menu-tvs-navbar");
+  
   if (menu) {
-
     menu.addEventListener(
       "click",
       function(event) {
-
         event.stopPropagation();
-
       }
     );
-
   }
-
-
-  // Clique fora fecha o menu
 
   document.addEventListener(
     "click",
     function() {
-
       fecharMenuTVs();
-
     }
   );
-
 }
 
 function renderizarPlaylist(tv) {
@@ -418,117 +367,36 @@ async function salvarPlaylistEditada() {
 }
 
 async function carregar() {
-
   try {
+    const estado = await obterEstadoTVs();
+    const tvs = Object.keys(estado).sort();
+    console.log("TVs encontradas:", tvs);
 
-    const estado =
-      await obterEstadoTVs();
-
-    const tvs =
-      Object.keys(
-        estado
-      ).sort();
-
-
-    console.log(
-      "TVs encontradas:",
-      tvs
-    );
-
-
-    // =================================================
-    // NENHUMA TV
-    // =================================================
-
-    if (
-      tvs.length === 0
-    ) {
-
+    if (tvs.length === 0) {
       tvSelecionada = null;
+      localStorage.removeItem(CHAVE_TV_SELECIONADA);
+      
+      criarMenuTVs([]);
 
-      localStorage.removeItem(
-        CHAVE_TV_SELECIONADA
-      );
-
-      criarMenuTVs(
-        []
-      );
-
-      document.getElementById(
-        "tv-atual"
-      ).innerHTML = `
-        <p class="mensagemtv">
-          Nenhuma TV conectada
-        </p>
-      `;
-
+      document.getElementById("tv-atual").innerHTML = `
+        <p class="mensagemtv">Nenhuma TV conectada</p>`;
       return;
-
     }
-
-
-    // =================================================
-    // RECUPERAR TV SALVA
-    // =================================================
-
-    const tvSalva =
-      obterTVSelecionadaSalva();
-
-
-    if (
-      tvSalva &&
-      tvs.includes(tvSalva)
-    ) {
-
-      tvSelecionada =
-        tvSalva;
-
+    const tvSalva = obterTVSelecionadaSalva();
+    
+    if (tvSalva && tvs.includes(tvSalva)) {
+      tvSelecionada = tvSalva;
     } else {
-
-      tvSelecionada =
-        tvs[0];
-
-      salvarTVSelecionada(
-        tvSelecionada
-      );
-
+      tvSelecionada = tvs[0];
+      salvarTVSelecionada(tvSelecionada);
     }
 
-
-    // =================================================
-    // CRIAR MENU
-    // =================================================
-
-    criarMenuTVs(
-      tvs
-    );
-
-
-    // =================================================
-    // CONFIGURAR BOTÃO
-    // =================================================
-
+    criarMenuTVs(tvs);
     configurarSeletorTV();
-
-
-    // =================================================
-    // MOSTRAR TV
-    // =================================================
-
-    await mostrarTV(
-      tvSelecionada
-    );
-
-
+    await mostrarTV(tvSelecionada);
   } catch (erro) {
-
-    console.error(
-      "Erro ao carregar TVs:",
-      erro
-    );
-
+    console.error("Erro ao carregar TVs:", erro);
   }
-
 }
 
 async function mudar(tv, pagina, intervalo) {

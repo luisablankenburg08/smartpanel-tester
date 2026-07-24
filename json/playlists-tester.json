@@ -24,6 +24,13 @@
     "tv2": {
       "items": [
         {
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
+        },
+        {
           "id": "1783077286617",
           "titulo": "Projeto",
           "tipo": "texto",
@@ -169,13 +176,6 @@
       "tipo": "canva",
       "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
       "duracao": 30
-    },
-    {
-      "id": "1783537829258",
-      "titulo": "teste pdf",
-      "tipo": "pdf",
-      "conteudo": "/uploads/1783537829245.pdf",
-      "duracao": 15
     },
     {
       "id": "1783539112629",

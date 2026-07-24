@@ -5,29 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Avisos</title>
   <link rel="stylesheet" href="/playlists/style-playlists.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 
 <body>
-<button class="btn-voltar" onclick="voltarMenu()">Voltar</button>
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+  <div class="container-fluid">
 
- <div id="add-aviso-box">
-
-  <button class="tituloAdicionar" onclick="mostrarInputs()">Adicionar Novo Aviso</button>
-
-  <div id="novo-aviso-form">
-
-    <textarea type="text" id="aviso-texto" placeholder="Digite o aviso..."></textarea>
-    <input type="text" id="aviso-link" placeholder="Digite o link do aviso...">
-    <input type="text" id="aviso-titulo" placeholder="Digite o título do aviso...">
-    <input type="text" id="aviso-duracao" placeholder="Digite a duração do aviso...">
-    <input type="file" id="aviso-arquivo" accept=".pdf,.png,.jpg,.jpeg,.webp">
-
-    <button id="btn-playlist" class="btn-playlist" onclick="adicionarAviso()">Adicionar Aviso</button>
+    <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
+    </div>
 
   </div>
+</nav>
+<div id="add-aviso-box">
+    <button id="btn-adicionar-aviso" class="btn-adicionar-aviso" onclick="mostrarInputs()">
+      <span>➕ Adicionar Novo Aviso</span>
+    </button>
 
-</div>
+    <div id="novo-aviso-form">
+      <div class="campo-aviso">
+        <label for="aviso-titulo">Título do aviso</label>
+        <input type="text" id="aviso-titulo" placeholder="Digite o título do aviso...">
+      </div>
+
+      <div class="campo-aviso">
+        <label>Tipo de conteúdo</label>
+        
+        <div id="tipo-conteudo" class="tipos-conteudo">
+          <button type="button" class="tipo-conteudo-btn ativo" data-tipo="texto" onclick="selecionarTipoConteudo('texto')">
+            📝
+            <span>Texto</span>
+          </button>
+
+          <button type="button" class="tipo-conteudo-btn" data-tipo="link" onclick="selecionarTipoConteudo('link')">
+            🔗
+            <span>Link</span>
+          </button>
+
+          <button type="button" class="tipo-conteudo-btn" data-tipo="canva" onclick="selecionarTipoConteudo('canva')">
+            🎨
+            <span>Canva</span>
+          </button>
+
+          <button type="button" class="tipo-conteudo-btn" data-tipo="arquivo" onclick="selecionarTipoConteudo('arquivo')">
+            📎
+            <span>Arquivo</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="campo-tipo-texto" class="campo-conteudo">
+        <label for="aviso-texto">Texto do aviso</label>
+        <textarea id="aviso-texto" rows="5" placeholder="Digite o texto que será exibido na TV..."></textarea>
+      </div>
+
+      <div id="campo-tipo-link" class="campo-conteudo" style="display:none;">
+        <label for="aviso-link"> Endereço do conteúdo</label>
+        <input type="text" id="aviso-link" placeholder="Cole aqui o link...">
+        <small id="ajuda-link">Insira o endereço da página que deseja exibir.</small>
+      </div>
+
+      <div id="campo-tipo-arquivo" class="campo-conteudo" style="display:none;">
+        <label for="aviso-arquivo">Arquivo do aviso</label>
+        <input type="file" id="aviso-arquivo" accept=".pdf,.png,.jpg,.jpeg,.webp">
+        <small> Formatos aceitos: PDF, PNG, JPG e WEBP.</small>
+      </div>
+
+      <div class="campo-aviso">
+        <label for="aviso-duracao">Duração na tela</label>
+        <div class="duracao-input">
+          <input type="number" id="aviso-duracao" min="1" value="15">
+          <span>segundos</span>
+        </div>
+      </div>
+
+      <div class="acoes-form-aviso">
+        <button id="btn-cancelar-aviso" type="button" class="btn-cancelar-aviso" onclick="cancelarEdicaoAviso()">Cancelar</button>
+        <button id="btn-playlist" class="btn-playlist" type="button" onclick="adicionarAviso()">Adicionar Aviso</button>
+      </div>
+    </div>
+  </div>
 
 <h2 class="titulosh2">Avisos Adicionados</h2>
 
@@ -54,12 +114,50 @@
 let avisos = [];
 let playlist = [];
 let avisoEditando = null;
+let tipoConteudoSelecionado = "texto";
 
 // TV ATUAL
 const params = new URLSearchParams(window.location.search);
 const tv = params.get("tv");
 
-//ESCOLHER TVS PARA APLICAR
+function selecionarTipoConteudo(tipo) {
+  tipoConteudoSelecionado = tipo;
+
+  document.querySelectorAll(".tipo-conteudo-btn").forEach(botao => {
+    botao.classList.remove("ativo");
+  });
+
+  const botaoSelecionado = document.querySelector(`.tipo-conteudo-btn[data-tipo="${tipo}"]`);
+
+  if (botaoSelecionado) {
+    botaoSelecionado.classList.add("ativo");
+  }
+
+  document.querySelectorAll(".campo-conteudo").forEach(campo => {
+    campo.style.display = "none";
+  });
+
+  if (tipo === "texto") {
+    document.getElementById("campo-tipo-texto").style.display = "flex";
+  }
+
+  if (tipo === "link" || tipo === "canva") {
+    document.getElementById("campo-tipo-link").style.display = "flex";
+
+    const ajuda = document.getElementById("ajuda-link");
+
+    if (tipo === "canva") {
+      ajuda.textContent = "Cole aqui o link de incorporação do Canva.";
+    } else {
+      ajuda.textContent = "Insira o endereço da página que deseja exibir.";
+    }
+  }
+
+  if (tipo === "arquivo") {
+    document.getElementById("campo-tipo-arquivo").style.display = "flex";
+  }
+}
+
 async function obterTVs(){
 
   const res = await fetch("/state");
@@ -150,7 +248,7 @@ function renderizarAvisos(){
     const selecionado=playlist.find(a=>a.id===aviso.id);
 
     if(selecionado){
-      card.classList.add("video-selecionado");
+      card.classList.add("aviso-selecionado");
     }
 
     card.innerHTML=`
@@ -158,7 +256,7 @@ function renderizarAvisos(){
       <p>${descricao}</p>
       <p>Duração: ${aviso.duracao}s</p>
 
-      <button class="selecionar-btn">${selecionado ? "Selecionado" : "Selecionar"}</button>`;
+      <button class="selecionar-btn">${selecionado ? "✓ Selecionado" : "Selecionar"}</button>`;
 
     const btn=card.querySelector(".selecionar-btn");
 
@@ -173,7 +271,7 @@ function renderizarAvisos(){
       }else{
         playlist.push(aviso);
         card.classList.add("video-selecionado");
-        btn.innerText="Selecionado";
+        btn.innerText="✓ Selecionado";
       }
       mostrarAcoesPlaylist();
     };
@@ -183,115 +281,168 @@ function renderizarAvisos(){
 }
 
 // ADICIONAR AVISO
-async function adicionarAviso(){
-
+async function adicionarAviso() {
   const titulo = document.getElementById("aviso-titulo").value.trim();
-  const texto = document.getElementById("aviso-texto").value.trim();
-  const link = document.getElementById("aviso-link").value.trim();
-  const arquivo = document.getElementById("aviso-arquivo").files[0];
   const duracao = parseInt(document.getElementById("aviso-duracao").value) || 15;
 
-  if(!titulo){
-    alert("Digite um título.");
-    return;
-  }
-
-  if(!texto && !link && !arquivo){
-    alert("Digite um texto, um link ou escolha um arquivo.");
+  if (!titulo) {
+    alert("Digite um título para o aviso.");
     return;
   }
 
   let tipo = "";
   let conteudo = "";
+  let arquivo = null;
 
-  if(arquivo){
+  // TEXTO
+  if (tipoConteudoSelecionado === "texto") {
+    const texto = document.getElementById("aviso-texto").value.trim();
+
+    if (!texto) {
+      alert("Digite o texto do aviso.");
+      return;
+    }
+    tipo = "texto";
+    conteudo = texto;
+  }
+
+  // LINK
+  else if (tipoConteudoSelecionado === "link") {
+    const link = document.getElementById("aviso-link").value.trim();
+
+    if (!link) {
+      alert("Digite o link do aviso.");
+      return;
+    }
+    tipo = "link";
+    conteudo = link;
+  }
+
+  // CANVA
+  else if (tipoConteudoSelecionado === "canva") {
+    const link = document.getElementById("aviso-link").value.trim();
+    if (!link) {
+      alert("Digite o link do Canva.");
+      return;
+    }
+    tipo = "canva";
+    conteudo = link.includes("embed") ? link : link + (link.includes("?") ? "&embed" : "?embed");
+  }
+
+  // ARQUIVO
+  else if (tipoConteudoSelecionado === "arquivo") {
+    arquivo = document.getElementById("aviso-arquivo").files[0];
+    if (!arquivo) {
+      alert("Escolha um arquivo.");
+      return;
+    }
+
     const ext = arquivo.name.split(".").pop().toLowerCase();
 
-    if(ext=="pdf"){
-      tipo="pdf";
-    }else{
-      tipo="imagem";
+    if (ext === "pdf") {
+      tipo = "pdf";
     }
-  }else if(texto){
-    tipo="texto";
-    conteudo=texto;
+    else if ( ["png", "jpg", "jpeg", "webp"].includes(ext)) {
+      tipo = "imagem";
+    }
+    else {
+      alert("Formato de arquivo não suportado.");
+      return;
+    }
   }
-
-  else if(link.includes("canva.com")){
-    tipo="canva";
-    conteudo = link.includes("embed")
-      ? link
-      : link + (link.includes("?") ? "&embed" : "?embed");
-  }
-  else{
-    tipo="link";
-    conteudo=link;
-  }
-
+ 
+  // FORM DATA
   const form = new FormData();
+  form.append("titulo", titulo);
+  form.append("tipo", tipo);
+  form.append("conteudo", conteudo);
+  form.append("duracao", duracao);
 
-  form.append("titulo",titulo);
-  form.append("tipo",tipo);
-  form.append("conteudo",conteudo);
-  form.append("duracao",duracao);
+  if (arquivo) {
+    form.append("arquivo", arquivo);
+  } 
+  
+  // ADICIONAR / EDITAR
+  const url = avisoEditando ? "/avisos/" + avisoEditando : "/avisos";
+  const metodo = avisoEditando ? "PUT" : "POST";
 
-  if(arquivo){
-    form.append("arquivo",arquivo);
+  try {
+    const resposta = await fetch(url,
+      {
+        method: metodo,
+        body: form
+      }
+    );
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao salvar aviso.");
+    }
+
+    avisoEditando = null;
+    limparFormularioAviso();
+    await carregarAvisos();
   }
+  catch (erro) {
+    console.error(erro);
+    alert("Não foi possível salvar o aviso.");
+  }
+}
 
-  const url = avisoEditando
-    ? "/avisos/"+avisoEditando
-    : "/avisos";
-
-  const metodo = avisoEditando
-    ? "PUT"
-    : "POST";
-
-  await fetch(url,{
-    method:metodo,
-    body:form
-  });
-
-  avisoEditando=null;
-
-  document.getElementById("aviso-titulo").value="";
-  document.getElementById("aviso-texto").value="";
-  document.getElementById("aviso-link").value="";
-  document.getElementById("aviso-duracao").value="";
-  document.getElementById("aviso-arquivo").value="";
-  carregarAvisos();
+//LIMPAR CAMPOS
+function limparFormularioAviso() {
+  document.getElementById("aviso-titulo").value = "";
+  document.getElementById("aviso-texto").value = "";
+  document.getElementById("aviso-link").value = "";
+  document.getElementById("aviso-duracao").value = "15";
+  document.getElementById("aviso-arquivo").value = "";
+  avisoEditando = null;
+  selecionarTipoConteudo("texto");
 }
 
 // EDITAR AVISO
-function editarAviso(){
-
-  if(playlist.length===0){
+function editarAviso() {
+  if (playlist.length === 0) {
     alert("Selecione um aviso.");
     return;
   }
 
-  if(playlist.length>1){
+  if (playlist.length > 1) {
     alert("Selecione apenas um aviso.");
     return;
   }
 
-  const aviso=playlist[0];
-  avisoEditando=aviso.id;
+  const aviso = playlist[0];
+  avisoEditando = aviso.id;
 
-  document.getElementById("aviso-titulo").value=aviso.titulo;
-  document.getElementById("aviso-duracao").value=aviso.duracao;
-  document.getElementById("aviso-texto").value="";
-  document.getElementById("aviso-link").value="";
-  document.getElementById("aviso-arquivo").value="";
+  document.getElementById("aviso-titulo").value =aviso.titulo || "";
+  document.getElementById("aviso-duracao").value = aviso.duracao || 15;
+  document.getElementById("novo-aviso-form").style.display = "flex";
 
-  if(aviso.tipo==="texto"){
-    document.getElementById("aviso-texto").value=aviso.conteudo;
+  if (aviso.tipo === "texto") {
+    selecionarTipoConteudo("texto");
+    document.getElementById("aviso-texto").value = aviso.conteudo || "";
+  }
+  else if (aviso.tipo === "link") {
+    selecionarTipoConteudo("link");
+    document.getElementById("aviso-link").value =aviso.conteudo || "";
+  }
+  else if (aviso.tipo === "canva") {
+    selecionarTipoConteudo("canva");
+    document.getElementById("aviso-link").value =aviso.conteudo || "";
+  }
+  else if (aviso.tipo === "pdf" || aviso.tipo === "imagem") {
+    selecionarTipoConteudo("arquivo");
   }
 
-  if(aviso.tipo==="link" || aviso.tipo==="canva"){
-    document.getElementById("aviso-link").value=aviso.conteudo;
-  }
-  document.getElementById("novo-aviso-form").style.display="flex";
+  document.getElementById("btn-playlist").textContent = "Salvar Alterações";
+}
+
+//CANCELAR EDIÇÃO
+function cancelarEdicaoAviso() {
+  limparFormularioAviso();
+  const form = document.getElementById("novo-aviso-form");
+  form.style.display ="none";
+  document.getElementById("btn-playlist").textContent ="Adicionar Aviso";
 }
 
 //EXCLUIR AVISO
@@ -357,13 +508,14 @@ async function aplicarAviso(){
 }
 
 // MOSTRAR INPUTS
-function mostrarInputs(){
-
+function mostrarInputs() {
   const form = document.getElementById("novo-aviso-form");
+  const icone = document.getElementById("icone-adicionar");
 
-  if(form.style.display === "flex"){
-    form.style.display = "none";
-  }else{
+  if (form.style.display === "flex") {
+    form.style.display ="none";
+  }
+  else {
     form.style.display = "flex";
   }
 }

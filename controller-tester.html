@@ -1,182 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Controle-TESTER</title>
-
   <link rel="stylesheet" href="controller-tester.css">
-
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-    crossorigin="anonymous"
-  >
-
-  <link
-    rel="icon"
-    type="image/png"
-    href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico"
-  >
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
-
 <body>
-
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
-
   <div class="container-fluid">
-
-    <!-- LOGO / TÍTULO -->
-
-    <a
-      class="navbar-brand"
-      href="/controller-tester.html"
-    >
-      Painel de Controle
-    </a>
-
-
-    <!-- BOTÃO MOBILE -->
-
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Alternar navegação"
-    >
-
+    <a class="navbar-brand" href="/controller-tester.html">Painel de Controle</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Alternar navegação">
       <span class="navbar-toggler-icon"></span>
-
     </button>
 
-
-    <!-- CONTEÚDO NAVBAR -->
-
-    <div
-      class="collapse navbar-collapse"
-      id="navbarSupportedContent"
-    >
-
-      <!-- MENU DE PÁGINAS -->
-
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/avisos.html"
-          >
-            Avisos
-          </a>
+          <a class="nav-link" href="/playlists/avisos.html">Avisos</a>
         </li>
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/calendario.html"
-          >
-            Calendário
-          </a>
+          <a class="nav-link" href="/playlists/calendario.html">Calendário</a>
         </li>
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/ensalamento.html"
-          >
-            Ensalamento
-          </a>
+          <a class="nav-link" href="/playlists/ensalamento.html">Ensalamento</a>
         </li>
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/mapa.html"
-          >
-            Mapa do Câmpus
-          </a>
+          <a class="nav-link" href="/playlists/mapa.html">Mapa do Câmpus</a>
         </li>
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/videos.html"
-          >
-            Vídeos
-          </a>
+          <a class="nav-link" href="/playlists/videos.html">Vídeos</a>
         </li>
-
         <li class="nav-item">
-          <a
-            class="nav-link"
-            href="/playlists/playlists.html"
-          >
-            Playlists
-          </a>
+          <a class="nav-link" href="/playlists/playlists.html">Playlists</a>
         </li>
-
       </ul>
 
-
       <!-- SELETOR DE TV -->
+    <div class="seletor-tv-container" id="seletor-tv-container">
+        <button type="button" id="botao-tv-selecionada" class="btn btn-outline-primary">
+            <span id="tv-selecionada-navbar">Nenhuma TV selecionada</span>
+            <span class="seta-tv">▼</span>
+        </button>
 
-<div
-  class="seletor-tv-container"
-  id="seletor-tv-container"
->
-
-  <button
-    type="button"
-    id="botao-tv-selecionada"
-    class="btn btn-outline-primary"
-  >
-    <span id="tv-selecionada-navbar">
-      Nenhuma TV selecionada
-    </span>
-
-    <span class="seta-tv">
-      ▼
-    </span>
-  </button>
-
-
-  <!-- MENU PERSONALIZADO -->
-
-  <div
-    id="menu-tvs-navbar"
-    class="menu-tvs-navbar"
-  >
-
-    <div class="menu-tv-vazio">
-      Carregando TVs...
-    </div>
-
-  </div>
-
-</div>
+        <div id="menu-tvs-navbar" class="menu-tvs-navbar">
+            <div class="menu-tv-vazio">Carregando TVs...</div>
+        </div>
+        </div>
       </div>
-
     </div>
-
   </div>
-
 </nav>
 
-
-<!-- TV ATUAL -->
-
 <div id="tv-atual"></div>
-
-
-<!-- BOOTSTRAP JS -->
 
 <script
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
@@ -184,11 +62,7 @@
   crossorigin="anonymous"
 ></script>
 
-
-<!-- CONTROLLER -->
-
 <script src="controller-tester.js"></script>
 
 </body>
-
 </html>

@@ -210,7 +210,7 @@ fieldset legend {
 .listaPlaylistAtual li{
   display: flex;
   align-items: center;
-  height: 0.4vw;
+  height: 0.5vh;
   width: 25vw;
   margin: 1vh;
   padding: 1vw;
@@ -233,10 +233,10 @@ fieldset legend {
 .btn-remover{
   margin-left:auto;
   border:none;
-  background:#d32f2f;
+  background:#abb1d4 ;
   color:white;
-  width:32px;
-  height:32px;
+  width:2vw;
+  height:o.3vh;
   border-radius:50%;
   cursor:pointer;
 }
@@ -330,7 +330,7 @@ fieldset legend {
 }
 
 .item-tv-navbar.selecionada {
-  background-color: #0d6efd;
+  background-color: #6358ff;
   color: white;
   font-weight: bold;
 }
