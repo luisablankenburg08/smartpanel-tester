@@ -1,102 +1,275 @@
+
+// VARIÁVEIS GLOBAIS
 let pendingSelections = {};
 let tvSelecionada = null;
 let playlistAtual = [];
 let modoEdicao = false;
 let dragIndex = null;
 
-function adicionarConteudo(event) {
+// CONFIGURAÇÃO DA TV SELECIONADA
+const CHAVE_TV_SELECIONADA = "tvSelecionada";
 
-  event.preventDefault(); 
-  
-  var input = document.getElementById("inputconteudo");
+// SALVAR TV SELECIONADA
+function salvarTVSelecionada(tv) {
 
-  if (input.style.display === "none") {
-      input.style.display = "block";
-      input.focus(); 
-  } else {
-      input.style.display = "none";
+  if (!tv) {
+    return;
+  }
+  tvSelecionada = tv;
+  localStorage.setItem(CHAVE_TV_SELECIONADA, tv);
+}
+
+// OBTER TV SALVA
+function obterTVSelecionadaSalva() {
+  return localStorage.getItem(CHAVE_TV_SELECIONADA);
+}
+
+// ATUALIZAR TEXTO DO BOTÃO
+function atualizarTituloTV() {
+  const titulo = document.getElementById("tv-selecionada-navbar");
+  if (!titulo) {
+    return;
   }
 
-  var criarconteudo =  document.getElementById("criarconteudo");
-
-  if (criarconteudo.style.display === "none") {
-      criarconteudo.style.display = "block";
-      criarconteudo.focus(); 
+  if (tvSelecionada) {
+    titulo.textContent = `TV selecionada: ${tvSelecionada}`;
   } else {
-      criarconteudo.style.display = "none";
+    titulo.textContent = "Nenhuma TV selecionada";
   }
 }
 
-function adicionarPlaylist(event) {
+// ABRIR MENU
+function abrirMenuTVs() {
+  const menu = document.getElementById("menu-tvs-navbar");
+  const container = document.getElementById("seletor-tv-container");
+  if (!menu || !container) {
+    return;
+  }
+  menu.classList.add("aberto");
+  container.classList.add("aberto");
+}
 
-  event.preventDefault(); 
-  
-  var input = document.getElementById("inputplaylist");
+// FECHAR MENU
+function fecharMenuTVs() {
+  const menu = document.getElementById("menu-tvs-navbar");
+  const container = document.getElementById("seletor-tv-container");
 
-  if (input.style.display === "none") {
-      input.style.display = "block";
-      input.focus(); 
-  } else {
-      input.style.display = "none";
+  if (!menu || !container) {
+    return;
   }
 
-  var criarplaylist =  document.getElementById("criarplaylist");
+  menu.classList.remove("aberto");
+  container.classList.remove("aberto");
+}
 
-  if (criarplaylist.style.display === "none") {
-      criarplaylist.style.display = "block";
-      criarplaylist.focus(); 
+// ALTERNAR MENU
+function alternarMenuTVs() {
+  const menu = document.getElementById("menu-tvs-navbar");
+
+  if (!menu) {
+    return;
+  }
+
+  if (menu.classList.contains("aberto")) {
+    fecharMenuTVs();
   } else {
-      criarplaylist.style.display = "none";
+    abrirMenuTVs();
   }
 }
 
-function criarMenuTVs(lista){
-  const menu = document.getElementById("menu-tvs");
+// CRIAR MENU DAS TVs
+function criarMenuTVs(listaTVs) {
+  const menu = document.getElementById("menu-tvs-navbar");
+  if (!menu) {
+    console.error("Elemento #menu-tvs-navbar não encontrado.");
+    return;
+  }
+
   menu.innerHTML = "";
 
-  lista.forEach(tv=>{
-    const botao = document.createElement("button");
-    botao.innerText = tv;
-    botao.className = "botao-tv";
+  if (!listaTVs || listaTVs.length === 0) {
+    const mensagem = document.createElement("div");
+    mensagem.className = "menu-tv-vazio";
+    mensagem.textContent = "Nenhuma TV conectada";
+    menu.appendChild(mensagem);
+    atualizarTituloTV();
+    return;
+  }
 
-    botao.onclick = async ()=>{
-      tvSelecionada = tv;
-      await mostrarTV(tv);
+
+  listaTVs.forEach(
+    tv => {
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "item-tv-navbar";
+      botao.textContent = tv;
+
+      if (tv === tvSelecionada) {
+        botao.classList.add("selecionada");
+      }
+
+      botao.addEventListener(
+        "click", 
+        async function(event) {
+          event.stopPropagation();
+          console.log("TV selecionada:", tv);
+          await selecionarTV(tv);
+        });
+
+      menu.appendChild(botao);
     }
-    menu.appendChild(botao);
-  });
+  );
+  atualizarTituloTV();
 }
 
-function renderizarPlaylist(tv){
+// SELECIONAR TV
+async function selecionarTV(tv) {
 
+  if (!tv) {
+    return;
+  }
+
+  console.log("Alterando TV para:", tv);
+  salvarTVSelecionada(tv);
+  atualizarTituloTV();
+  fecharMenuTVs();
+
+  const estado = await obterEstadoTVs();
+  const tvs = Object.keys(estado).sort();
+
+  criarMenuTVs(tvs);
+  await mostrarTV(tv);
+}
+
+// OBTER TVs CONECTADAS
+async function obterEstadoTVs() {
+  const resposta =
+    await fetch(
+      "/state",
+      {
+        cache: "no-store"
+      }
+    );
+
+
+  if (!resposta.ok) {
+
+    throw new Error(
+      "Não foi possível obter o estado das TVs."
+    );
+
+  }
+
+  return resposta.json();
+}
+
+// CONFIGURAR BOTÃO DO SELETOR
+function configurarSeletorTV() {
+
+  const botao =
+    document.getElementById(
+      "botao-tv-selecionada"
+    );
+
+
+  if (!botao) {
+
+    console.error(
+      "Botão #botao-tv-selecionada não encontrado."
+    );
+
+    return;
+
+  }
+
+
+  console.log(
+    "Seletor de TV configurado."
+  );
+
+
+  // IMPORTANTE:
+  // O botão abre e fecha o menu personalizado
+
+  botao.addEventListener(
+    "click",
+    function(event) {
+
+      event.stopPropagation();
+
+      alternarMenuTVs();
+
+    }
+  );
+
+
+  // Impedir que clique dentro do menu
+  // feche o menu antes da seleção
+
+  const menu =
+    document.getElementById(
+      "menu-tvs-navbar"
+    );
+
+
+  if (menu) {
+
+    menu.addEventListener(
+      "click",
+      function(event) {
+
+        event.stopPropagation();
+
+      }
+    );
+
+  }
+
+
+  // Clique fora fecha o menu
+
+  document.addEventListener(
+    "click",
+    function() {
+
+      fecharMenuTVs();
+
+    }
+  );
+
+}
+
+function renderizarPlaylist(tv) {
   const lista = document.getElementById(`playlist-${tv}`);
+
+  if (!lista) {
+    return;
+  }
   lista.innerHTML = "";
 
-  const totalSegundos = playlistAtual.reduce((total, item) => total + (item.duracao ?? 30),0);
+  const totalSegundos = playlistAtual.reduce((total, item) => {
+    return (total + (item.duracao ?? 30));
+  }, 0);
 
   const minutos = Math.floor(totalSegundos / 60);
   const segundos = totalSegundos % 60;
+  const titulo = document.getElementById("titulo-playlist");
 
-  document.getElementById("titulo-playlist").textContent = `Playlist Atual (${playlistAtual.length} itens • ${minutos} min ${segundos}s)`;
+  if (titulo) {
+    titulo.textContent = `Playlist Atual (${playlistAtual.length} itens • ${minutos} min ${segundos}s)`;
+  }
 
   playlistAtual.forEach((item, index) => {
-
     const li = document.createElement("li");
-
     li.dataset.index = index;
-
-    const numero = String(index + 1).padStart(2, "0");
+    const numero = String(index + 1).padStart(2,"0");
     const duracao = item.duracao ?? 30;
-
+    
     li.innerHTML = `
 
       <div class="playlist-item">
         <div class="playlist-esquerda">
-
-          <span class="playlist-numero">
-            ${numero}.
-          </span>
-
+          <span class="playlist-numero">${numero}.</span>
           <span class="playlist-titulo">
             ${
               item.titulo ||
@@ -105,231 +278,269 @@ function renderizarPlaylist(tv){
               "Item"
             }
           </span>
-
         </div>
 
-      <span class="playlist-duracao">
-        ${duracao}s
-      </span>
-
+        <span class="playlist-duracao">${duracao}s</span>
       </div>
 
-    ${
-      modoEdicao
-      ? `
-        <button
-          class="btn-remover"
-          onclick="removerItem(${index})">
-          ✖
-        </button>
-      `
-      : ""
+      ${modoEdicao ? `
+          <button class="btn-remover" onclick="removerItem(${index})">✖</button>` : ""
+      }`;
+
+    if (modoEdicao) {
+      li.draggable =true;
+
+      li.addEventListener("dragstart", dragStart);
+      li.addEventListener("dragover", dragOver);
+      li.addEventListener("drop", dropItem);
     }
-  `;
-
-  if(modoEdicao){
-
-    li.draggable = true;
-
-    li.addEventListener(
-      "dragstart",
-      dragStart
-    );
-
-    li.addEventListener(
-      "dragover",
-      dragOver
-    );
-
-    li.addEventListener(
-      "drop",
-      dropItem
-    );
+    lista.appendChild(li);
   }
+);
 
-  lista.appendChild(li);
-  });
 }
 
-async function mostrarTV(tv){
+async function mostrarTV(tv) {
+
+  if (!tv) {
+    return;
+  }
 
   const container = document.getElementById("tv-atual");
   container.innerHTML = "";
   const field = document.createElement("fieldset");
   field.className = "tv";
-
-  field.innerHTML = `
+  field.innerHTML = ` 
     <h2>${tv}</h2>
 
-    <iframe class="tv-preview-frame" src="/viewer-tester.html?tv=${tv}&preview=true"></iframe>
+    <iframe class="tv-preview-frame" src="/viewer-tester.html?tv=${encodeURIComponent(tv)}&preview=true"></iframe>
 
     <div id="playlist">
-
       <div class="playlist-header">
-
-        <h3 class="titulo-playlist-atual" id="titulo-playlist"> Playlist Atual </h3>
-
+        <h3 class="titulo-playlist-atual" id="titulo-playlist"> Playlist Atual</h3>
         <button class="btn-editar" onclick="editarPlaylist()">Editar</button>
-
       </div>
 
       <ol id="playlist-${tv}" class="listaPlaylistAtual"></ol>
-
-    </div>
-  `;
+    </div>`;
 
   container.appendChild(field);
 
-  try{
+  try {
+    const resposta = await fetch(`/playlist-tv/${encodeURIComponent(tv)}`, {cache: "no-store"});
 
-    const res = await fetch(`/playlist-tv/${tv}`);
+    if (!resposta.ok) {
+      throw new Error("Não foi possível carregar a playlist.");
+    }
 
-    playlistAtual = await res.json();
-
+    playlistAtual = await resposta.json();
     renderizarPlaylist(tv);
-
-  }catch(err){
-
-    console.error(
-      "Erro ao carregar playlist da TV:",
-      err
-    );
-
+  } catch (erro) {
+    console.error("Erro ao carregar playlist da TV:",erro);
   }
 }
 
-function editarPlaylist(){
-
+function editarPlaylist() {
   modoEdicao = !modoEdicao;
+
   renderizarPlaylist(tvSelecionada);
-  const btn =document.querySelector(".btn-editar");
 
-  btn.textContent =
-    modoEdicao
-      ? "Salvar"
-      : "Editar";
+  const botao = document.querySelector(".btn-editar");
 
-  if(!modoEdicao){
+  if (!botao) {
+    return;
+  }
+
+  botao.textContent = modoEdicao ? "Salvar" : "Editar";
+
+  if (!modoEdicao) {
     salvarPlaylistEditada();
   }
 }
 
-function removerItem(index){
-  if(
-    !confirm("Remover este item da playlist?")
-  ){
+function removerItem(index) {
+  if (!confirm("Remover este item da playlist?")) {
     return;
   }
 
-  playlistAtual.splice(index,1);
+  playlistAtual.splice(index, 1);
+
   renderizarPlaylist(tvSelecionada);
   salvarPlaylistEditada();
 }
 
-function dragStart(e){
-
-  dragIndex =
-    Number(
-      e.target.dataset.index
-    );
+function dragStart(event) {
+  dragIndex = Number(event.target.dataset.index);
 }
 
-function dragOver(e){
-
-  e.preventDefault();
+function dragOver(event) {
+  event.preventDefault();
 }
 
-function dropItem(e){
+function dropItem(event) {
+  event.preventDefault();
 
-  e.preventDefault();
+  const dropIndex = Number(event.currentTarget.dataset.index);
+  const item = playlistAtual.splice(dragIndex, 1)[0];
 
-  const dropIndex =
-    Number(
-      e.currentTarget.dataset.index
-    );
-
-  const item =
-    playlistAtual.splice(
-      dragIndex,
-      1
-    )[0];
-
-  playlistAtual.splice(
-    dropIndex,
-    0,
-    item
-  );
-
+  playlistAtual.splice(dropIndex, 0, item);
   renderizarPlaylist(tvSelecionada);
-
   salvarPlaylistEditada();
 }
 
-async function salvarPlaylistEditada(){
+async function salvarPlaylistEditada() {
+  if (!tvSelecionada) {
+    return;
+  }
 
-  try{
-
-    await fetch("/playlist/reorder",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
+  try {
+    await fetch("/playlist/reorder", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
         tv: tvSelecionada,
         items: playlistAtual
       })
     });
 
-    await fetch("/update",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
+    await fetch("/update", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
         tv: tvSelecionada,
-        refresh: Date.now()
+        refresh:Date.now()
       })
     });
 
-  }catch(err){
-
-    console.error(err);
-
+  } catch (erro) {
+    console.error("Erro ao salvar playlist:", erro);
   }
 }
 
-async function carregar(){
-  const res = await fetch("/state");
-  const state = await res.json();
+async function carregar() {
 
-  const tvs = Object.keys(state).sort();
+  try {
 
-  if(tvs.length === 0){
-    document.getElementById("tv-atual").innerHTML =
-      "<p class='mensagemtv'>Nenhuma TV conectada</p>";
-    return;
+    const estado =
+      await obterEstadoTVs();
+
+    const tvs =
+      Object.keys(
+        estado
+      ).sort();
+
+
+    console.log(
+      "TVs encontradas:",
+      tvs
+    );
+
+
+    // =================================================
+    // NENHUMA TV
+    // =================================================
+
+    if (
+      tvs.length === 0
+    ) {
+
+      tvSelecionada = null;
+
+      localStorage.removeItem(
+        CHAVE_TV_SELECIONADA
+      );
+
+      criarMenuTVs(
+        []
+      );
+
+      document.getElementById(
+        "tv-atual"
+      ).innerHTML = `
+        <p class="mensagemtv">
+          Nenhuma TV conectada
+        </p>
+      `;
+
+      return;
+
+    }
+
+
+    // =================================================
+    // RECUPERAR TV SALVA
+    // =================================================
+
+    const tvSalva =
+      obterTVSelecionadaSalva();
+
+
+    if (
+      tvSalva &&
+      tvs.includes(tvSalva)
+    ) {
+
+      tvSelecionada =
+        tvSalva;
+
+    } else {
+
+      tvSelecionada =
+        tvs[0];
+
+      salvarTVSelecionada(
+        tvSelecionada
+      );
+
+    }
+
+
+    // =================================================
+    // CRIAR MENU
+    // =================================================
+
+    criarMenuTVs(
+      tvs
+    );
+
+
+    // =================================================
+    // CONFIGURAR BOTÃO
+    // =================================================
+
+    configurarSeletorTV();
+
+
+    // =================================================
+    // MOSTRAR TV
+    // =================================================
+
+    await mostrarTV(
+      tvSelecionada
+    );
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao carregar TVs:",
+      erro
+    );
+
   }
 
-  if(!tvSelecionada){
-    tvSelecionada = tvs[0];
-  }
-
-  criarMenuTVs(tvs);
-  await mostrarTV(tvSelecionada);
 }
 
-async function mudar(tv, pagina, intervalo){
-
-  await fetch("/update",{
-  method:"POST",
-  headers:{
-    "Content-Type":"application/json"
-  },
-  body:JSON.stringify({
-    tv,
-    refresh: Date.now()
-  })
-});
-
+async function mudar(tv, pagina, intervalo) {
+  await fetch("/update", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        tv: tvSelecionada,
+        refresh:Date.now()
+      })
+    });
 }
+
+// INIT
 carregar();

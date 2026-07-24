@@ -5,23 +5,31 @@
       "titulo": "teste",
       "items": [
         {
-          "id": "1783082708138",
-          "titulo": "Joaquim - Salgados",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNUCP97Jc/GZuT1yrGRpFDaUpqxlMPMQ/view?embed",
-          "duracao": 30
+          "tipo": "ensalamento",
+          "id": "ensalamento-sexta",
+          "dia": 4,
+          "titulo": "Ensalamento - Sexta-feira",
+          "duracao": 30,
+          "src": "/playlists/verEnsalamento.html"
         },
         {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
+          "id": "1783082676361",
+          "titulo": "Clube do Livro",
           "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+          "conteudo": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
           "duracao": 30
         }
       ]
     },
     "tv2": {
       "items": [
+        {
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
+        },
         {
           "tipo": "ensalamento",
           "id": "ensalamento-segunda",
@@ -177,5 +185,30 @@
       "duracao": 30
     }
   ],
-  "playlistsSalvas": []
+  "playlistsSalvas": [
+    {
+      "id": "1784907820380",
+      "titulo": "teste",
+      "items": [
+        {
+          "id": "TjxfN_tIv6o",
+          "titulo": "MCC INFO25: Apresentações",
+          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+          "duracao": 67,
+          "tipo": "video",
+          "live": false
+        },
+        {
+          "id": "qCFeUspzav8",
+          "titulo": "TURISMO BASE COMUNITÁRIA GAROPABA",
+          "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+          "duracao": 490,
+          "tipo": "video",
+          "live": false
+        }
+      ]
+    }
+  ]
 }

@@ -127,12 +127,12 @@ fieldset legend {
 
 /* field TV central */
 .tv{ 
-  width: 25vw;
+  width: 70vw;
   height: auto;
-  min-height: 50vh;
+  min-height: 90vh;
   overflow: visible;
   justify-content: center;
-  border:1px solid #ccc;
+  border:1px solid white;
   border-radius:1vw;
   padding:15px;
   
@@ -140,29 +140,31 @@ fieldset legend {
 
 .mensagemtv{
   font-size: 24px;
-  color: #1c7f13;
+  color: #13307f;
   font-weight: bold;
   margin-top: 5vw;
 }
 
 .tv-preview-frame {
   display: flex;
-  width: 22vw;
-  height: 16vw;
+  width: 66vw;
+  height: 30vw;
   border: 0.1vw solid #000;
   margin-top: 3vh;
   margin-left: 1.5vw;
+  overflow: hidden;
 }
 
 #tv-atual{
   display:flex;
   justify-content:center;
+  
 }
 
 /* título TV */
 .tv h2 {
-  color: #6abf59; 
-  font-size:1.5vw;
+  color: #5b81e7; 
+  font-size:2vw;
   text-decoration: underline;
   font-weight: bold;
   text-transform: uppercase;  
@@ -183,7 +185,7 @@ fieldset legend {
   width: 5vw;
   border: none;
   background-color: rgb(243, 233, 233);
-  color: #6abf59;
+  color: #6358ff;
   cursor: pointer;
 }
 
@@ -194,8 +196,9 @@ fieldset legend {
 
 .titulo-playlist-atual {
   margin: 0;
+  font-size: 1.5vw;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1c7f13;
+  color: #6358ff;
 }
 
 .listaPlaylistAtual{
@@ -208,9 +211,10 @@ fieldset legend {
   display: flex;
   align-items: center;
   height: 0.4vw;
+  width: 25vw;
   margin: 1vh;
   padding: 1vw;
-  background: #c4d4ab ;
+  background: #abb1d4 ;
   border-radius: 1vw;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: 600;
@@ -273,8 +277,73 @@ fieldset legend {
   transform:scale(1.05);
 }
 
+.seletor-tv-container {
+  position: relative;
+  margin-left: 20px;
+}
 
+#botao-tv-selecionada {
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
 
+.seta-tv {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.menu-tvs-navbar {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  min-width: 220px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  padding: 5px;
+  display: none;
+  z-index: 9999;
+}
+
+.menu-tvs-navbar.aberto {
+  display: block;
+}
+
+.item-tv-navbar {
+  width: 100%;
+  display: block;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.item-tv-navbar:hover {
+  background-color: #f1f3f5;
+}
+
+.item-tv-navbar.selecionada {
+  background-color: #0d6efd;
+  color: white;
+  font-weight: bold;
+}
+
+.menu-tv-vazio {
+  padding: 10px 14px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.seletor-tv-container.aberto .seta-tv {
+  transform: rotate(180deg);
+}
 
 /* CSS UTILIZADO NA VERSÃO 1
 
