@@ -5,6 +5,13 @@
       "titulo": "teste",
       "items": [
         {
+          "id": "1783082743473",
+          "titulo": "Joaquim - Combo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+          "duracao": 30
+        },
+        {
           "tipo": "ensalamento",
           "id": "ensalamento-sexta",
           "dia": 4,
