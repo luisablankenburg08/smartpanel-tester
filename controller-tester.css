@@ -185,7 +185,7 @@ fieldset legend {
   width: 5vw;
   border: none;
   background-color: rgb(243, 233, 233);
-  color: #6358ff;
+  color: #003049;
   cursor: pointer;
 }
 
@@ -198,7 +198,7 @@ fieldset legend {
   margin: 0;
   font-size: 1.5vw;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #6358ff;
+  color: #003049;
 }
 
 .listaPlaylistAtual{
@@ -330,7 +330,7 @@ fieldset legend {
 }
 
 .item-tv-navbar.selecionada {
-  background-color: #6358ff;
+  background-color: #003049;
   color: white;
   font-weight: bold;
 }

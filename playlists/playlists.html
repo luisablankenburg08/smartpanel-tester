@@ -30,28 +30,35 @@
     </button>
   </div>
 
-<div id="nova-playlist-form">
-  <div class="playlist-form-header">
-    <h3 id="titulo-form-playlist">Nova Playlist</h3>
-    <button type="button" class="btn-fechar-form" onclick="fecharFormularioPlaylist()">✕</button>
-  </div>
+  <div id="nova-playlist-form">
+    <div class="playlist-form-header">
+      <h3 id="titulo-form-playlist">Nova Playlist</h3>
+      <button type="button" class="btn-fechar-form" onclick="fecharFormularioPlaylist()">✕</button>
+    </div>
 
-  <div class="campo-playlist">
-    <label for="playlist-titulo">Nome da playlist</label>
-    <input id="playlist-titulo" type="text" placeholder="Digite o nome da playlist">
-  </div>
+    <div class="campo-playlist">
+      <label for="playlist-titulo">Nome da playlist</label>
+      <input id="playlist-titulo" type="text" placeholder="Digite o nome da playlist">
+    </div>
 
-  <div class="campo-playlist">
-    <label>Selecione os conteúdos</label>
-    <div id="lista-conteudos"></div>
-  </div>
+    <div id="area-ordem-playlist" class="campo-playlist" style="display:none;">
+      <label>Ordem dos conteúdos</label>
+      <p class="ajuda-ordem-playlist">Arraste os conteúdos para definir a ordem em que serão exibidos.</p>
+      <div id="lista-ordem-playlist"></div>
+    </div>
 
-  <div class="acoes-form-playlist">
-    <button class="btn-playlist" onclick="salvarPlaylist()">Salvar Playlist</button>
-    <button class="btn-cancelar-aviso" onclick="fecharFormularioPlaylist()">Cancelar</button>
-  </div>
+    <div class="campo-playlist">
+      <label>
+        <span id="titulo-conteudos-disponiveis">Selecione os conteúdos</span>
+      </label>
+      <div id="lista-conteudos"></div>
+    </div>
 
-</div>
+    <div class="acoes-form-playlist">
+      <button class="btn-playlist" onclick="salvarPlaylist()">Salvar Playlist</button>
+      <button class="btn-cancelar-aviso" onclick="fecharFormularioPlaylist()">Cancelar</button>
+    </div>
+  </div>
   
   <div>
     <h2 class="titulosh2">Playlists Adicionadas</h2>
@@ -80,6 +87,7 @@ let playlists = [];
 let playlistSelecionada = null;
 let playlistEditando = null;
 let conteudosDisponiveis = [];
+let itensOrdenados = [];
 
 // TV ATUAL
 const params = new URLSearchParams(window.location.search);
@@ -129,69 +137,179 @@ async function carregarConteudos(){
   renderizarConteudos();
 }
 
+//RENDERIZAR CONTEÚDOS 
 function renderizarConteudos() {
   const lista = document.getElementById("lista-conteudos");
   lista.innerHTML = "";
 
-  conteudosDisponiveis.forEach(
-    item => {
-      const div = document.createElement("div");
-      div.className = "conteudo-item";
-      div.innerHTML = `
-        <label>
-          <input type="checkbox" value="${item.id}">
-          <span class="conteudo-info">
-            <strong>${item.titulo}</strong>
-            <small>${item.tipo || "Conteúdo"} • ${item.duracao || 30}s</small>
-          </span>
-        </label>`;
+  conteudosDisponiveis.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "conteudo-item";
+    const estaNaPlaylist = itensOrdenados.some(conteudo => conteudo.id === item.id);
 
-      lista.appendChild(div);
+    div.innerHTML = `
+      <label>
+        <input type="checkbox" value="${item.id}" ${estaNaPlaylist ? "checked" : ""}>
+        <span class="conteudo-info">
+          <strong>${item.titulo}</strong>
+          <small>${item.tipo || "Conteúdo"} • ${item.duracao || 30}s</small>
+        </span>
+      </label>
+    `;
+
+    const checkbox = div.querySelector("input");
+
+    checkbox.addEventListener("change",() => {
+        if (checkbox.checked) {
+          const existe = itensOrdenados.some(conteudo => conteudo.id === item.id);
+          if (!existe) {
+            itensOrdenados.push(item);
+          }
+        } else {
+          itensOrdenados = itensOrdenados.filter(conteudo => conteudo.id !== item.id);
+        }
+        renderizarOrdemPlaylist();
+    });
+    lista.appendChild(div);
+  });
+  renderizarOrdemPlaylist();
+}
+
+// RENDERIZAR ORDEM DA PLAYLIST
+function renderizarOrdemPlaylist() {
+  const area = document.getElementById("area-ordem-playlist");
+  const lista = document.getElementById("lista-ordem-playlist");
+
+  if (!playlistEditando) {
+    area.style.display = "none";
+    return;
+  }
+
+  area.style.display = "block";
+  lista.innerHTML = "";
+
+  if (itensOrdenados.length === 0) {
+    lista.innerHTML = `
+      <div class="ordem-vazia">
+        Nenhum conteúdo selecionado.
+      </div>`;
+    return;
+  }
+
+  itensOrdenados.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "item-ordem-playlist";
+    div.draggable = true;
+    div.dataset.id = item.id;
+    div.innerHTML = `
+      <span class="drag-handle">☰</span>
+      <span class="numero-item">${String(index + 1).padStart(2, "0")}</span>
+      <span class="ordem-info">
+        <strong>${item.titulo}</strong>
+        <small>${item.tipo || "Conteúdo"} • ${item.duracao || 30}s</small>
+      </span>`;
+
+    adicionarEventosDragDrop(div);
+    lista.appendChild(div);
+  });
+}
+
+//DRAG AND DROP
+function adicionarEventosDragDrop(elemento) {
+  elemento.addEventListener("dragstart",() => {
+    elemento.classList.add("arrastando");
     }
   );
+
+  elemento.addEventListener("dragend", () => {
+    elemento.classList.remove("arrastando");
+      atualizarOrdemDosItens();
+    }
+  );
+
+  elemento.addEventListener("dragover", evento => {
+    evento.preventDefault();
+    const arrastando = document.querySelector(".item-ordem-playlist.arrastando");
+
+      if (!arrastando || arrastando === elemento) {
+        return;
+      }
+
+      const lista = document.getElementById("lista-ordem-playlist");
+      const itens = [...lista.querySelectorAll(".item-ordem-playlist")];
+      const indiceArrastando = itens.indexOf(arrastando);
+      const indiceDestino = itens.indexOf(elemento);
+
+      if (indiceArrastando < indiceDestino) {
+        elemento.after(arrastando);
+      } else {
+        elemento.before(arrastando);
+      }
+    });
+}
+
+function atualizarOrdemDosItens() {
+  const lista = document.getElementById("lista-ordem-playlist");
+  const ids = [...lista.querySelectorAll(".item-ordem-playlist")].map(item => item.dataset.id);
+
+  itensOrdenados = ids.map(id =>
+    conteudosDisponiveis.find(item => item.id === id)
+  ).filter(Boolean);
+  renderizarOrdemPlaylist();
 }
 
 // SALVAR PLAYLIST PARA ADICIONAR
 async function salvarPlaylist(){
+  const titulo = document.getElementById("playlist-titulo").value.trim();
 
-  const titulo = document.getElementById("playlist-titulo").value;
-  const itens=[];
-
-  document.querySelectorAll("#lista-conteudos input:checked").forEach(check=>{
-    const item=conteudosDisponiveis.find(i=>i.id===check.value);
-
-      if(item){
-        itens.push(item);
-      }
-  });
-
-  const dados={
-    titulo,
-    items:itens
-  };
-
-  if(playlistEditando){
-
-    await fetch("/playlists-salvas/"+playlistEditando.id,{
-      method:"PUT",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(dados)
-    });
-
-  }else{
-
-    await fetch("/playlists-salvas",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(dados)
-    });
+  if (!titulo) {
+    alert("Digite um nome para a playlist.");
+    return;
   }
 
-  playlistEditando=null;
-  document.getElementById("playlist-titulo").value="";
-  document.getElementById("nova-playlist-form").style.display="none";
-  playlistSelecionada = null;
-  carregarPlaylists();
+  if (playlistEditando) {
+    atualizarOrdemDosItens();
+  }
+
+  const itens = playlistEditando ? [...itensOrdenados] : [...document.querySelectorAll("#lista-conteudos input:checked")]
+    .map(check => conteudosDisponiveis.find(item => item.id === check.value)).filter(Boolean);
+
+  if (itens.length === 0) {
+    alert("Selecione pelo menos um conteúdo.");
+    return;
+  }
+
+  const dados = {titulo, items: itens};
+
+  try {
+
+    if (playlistEditando) {
+      await fetch("/playlists-salvas/" + playlistEditando.id, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body:JSON.stringify(dados)
+        });
+
+    } else {
+      await fetch("/playlists-salvas", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+      });
+    }
+
+    playlistEditando = null;
+    itensOrdenados = [];
+    document.getElementById("playlist-titulo").value = "";
+
+    fecharFormularioPlaylist();
+    playlistSelecionada = null;
+    await carregarPlaylists();
+
+  } catch (erro) {
+    console.error("Erro ao salvar playlist:",erro);
+    alert("Erro ao salvar a playlist.");
+  }
 }
 
 //CARREGAR PLAYLISTS
@@ -344,35 +462,38 @@ async function aplicarPlaylist(){
 //ADICIONAR PLAYLIST
 async function adicionarPlaylist(){
   playlistEditando = null;
-  document.getElementById("playlist-titulo").value = "";
+  itensOrdenados = [];
+
+  document.getElementById("titulo-form-playlist").textContent = "Nova Playlist";
+  document .getElementById("playlist-titulo").value = "";
+  document.getElementById("area-ordem-playlist").style.display = "none";
+
   await carregarConteudos();
 
-  document.querySelectorAll("#lista-conteudos input").forEach(check=>check.checked=false);
-
-  document.getElementById("nova-playlist-form").style.display="block";
+  document.querySelectorAll("#lista-conteudos input").forEach(check =>check.checked = false);
+  document.getElementById("nova-playlist-form").style.display ="block";
 }
 
 // EDITAR PLAYLIST (NOME, DURAÇÃO E ITENS)
 async function editarPlaylist(){
 
-  if(!playlistSelecionada){
+  if (!playlistSelecionada) {
     alert("Selecione uma playlist.");
     return;
   }
 
   playlistEditando = playlistSelecionada;
+  document.getElementById("titulo-form-playlist").textContent = "Editar Playlist";
   document.getElementById("playlist-titulo").value = playlistSelecionada.titulo;
-  await carregarConteudos();
 
-  document.querySelectorAll("#lista-conteudos input").forEach(check=>{
-    check.checked = playlistSelecionada.items.some(
-      item=>item.id===check.value
-    );
-  });
-  document.getElementById("nova-playlist-form").style.display="block";
+  itensOrdenados = [...playlistSelecionada.items];
+  await carregarConteudos();
+  document.getElementById("nova-playlist-form").style.display = "block";
+  renderizarConteudos();
+  renderizarOrdemPlaylist();
 }
 
-//EXCLUIR AVISO
+//EXCLUIR PLAYLIST
 async function excluirPlaylist(){
 
   if(!playlistSelecionada){
@@ -410,16 +531,12 @@ function mostrarAcoesPlaylist(){
 
 function fecharFormularioPlaylist() {
 
-  playlistEditando =
-    null;
+  playlistEditando = null;
+  itensOrdenados = [];
 
-  document
-    .getElementById(
-      "nova-playlist-form"
-    )
-    .style.display =
-      "none";
-
+  document.getElementById("titulo-form-playlist").textContent = "Nova Playlist";
+  document.getElementById("nova-playlist-form").style.display = "none";
+  document.getElementById("lista-ordem-playlist").innerHTML = "";
 }
 
 // VOLTAR

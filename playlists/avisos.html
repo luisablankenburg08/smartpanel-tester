@@ -93,6 +93,10 @@
 
 <div id="lista-avisos"></div>
 
+<nav id="paginacao-avisos" aria-label="Paginação dos avisos">
+  <ul class="pagination"></ul>
+</nav>
+
 <div class="acoes-playlist" id="acoes-playlist">
   <button class="btn-playlist" onclick="aplicarAviso()">Aplicar Aviso</button>
   <button class="btn-delete" onclick="excluirAviso()">Deletar</button>
@@ -115,6 +119,8 @@ let avisos = [];
 let playlist = [];
 let avisoEditando = null;
 let tipoConteudoSelecionado = "texto";
+const AVISOS_POR_PAGINA = 6;
+let paginaAtual = 1;
 
 // TV ATUAL
 const params = new URLSearchParams(window.location.search);
@@ -204,25 +210,56 @@ function avisoJaExiste(novoAviso){
 }
 
 //CARREGAR AVISOS
-async function carregarAvisos(){
+async function carregarAvisos() {
   const res = await fetch("/avisos");
   const personalizados = await res.json();
   avisos = [...personalizados];
+  const totalPaginas = Math.ceil(avisos.length / AVISOS_POR_PAGINA);
+
+  if (paginaAtual > totalPaginas && totalPaginas > 0) {
+    paginaAtual = totalPaginas;
+  }
+
+  if (avisos.length === 0) {
+    paginaAtual = 1;
+  }
   renderizarAvisos();
 }
 
-//RENDERIZAR AVISOS
-function renderizarAvisos(){
+// RENDERIZAR AVISOS COM PAGINAÇÃO
+function renderizarAvisos() {
+
   const lista = document.getElementById("lista-avisos");
   lista.innerHTML = "";
+  const totalPaginas = Math.ceil(avisos.length / AVISOS_POR_PAGINA);
 
-  avisos.forEach(aviso=>{
-    let descricao="";
 
-    switch(aviso.tipo){
+  if (totalPaginas === 0) {
+    paginaAtual = 1;
+    renderizarPaginacao();
+    mostrarAcoesPlaylist();
+    return;
+  }
+
+  if (paginaAtual > totalPaginas) {
+    paginaAtual = totalPaginas;
+  }
+
+  if (paginaAtual < 1) {
+    paginaAtual = 1;
+  }
+
+  const inicio = (paginaAtual - 1) * AVISOS_POR_PAGINA;
+  const fim = inicio + AVISOS_POR_PAGINA;
+  const avisosDaPagina = avisos.slice(inicio, fim);
+
+  avisosDaPagina.forEach(aviso => {
+    let descricao = "";
+    switch (aviso.tipo) {
+
       case "texto":
         descricao = aviso.conteudo.length > 120
-          ? aviso.conteudo.substring(0,120)+"..."
+          ? aviso.conteudo.substring(0, 120) + "..."
           : aviso.conteudo;
         break;
 
@@ -241,43 +278,121 @@ function renderizarAvisos(){
       case "imagem":
         descricao = "<b>Imagem</b>";
         break;
+
+      default:
+        descricao = "<b>Conteúdo</b>";
     }
 
-    const card=document.createElement("div");
-    card.className="card-aviso";
-    const selecionado=playlist.find(a=>a.id===aviso.id);
+    const card = document.createElement("div");
+    card.className = "card-aviso";
+    const selecionado = playlist.find(
+      a => a.id === aviso.id
+    );
 
-    if(selecionado){
+    if (selecionado) {
       card.classList.add("aviso-selecionado");
     }
 
-    card.innerHTML=`
+    card.innerHTML = `
       <h3>${aviso.titulo}</h3>
       <p>${descricao}</p>
       <p>Duração: ${aviso.duracao}s</p>
+      <button class="selecionar-btn">
+        ${selecionado ? "✓ Selecionado" : "Selecionar"}
+      </button>`;
 
-      <button class="selecionar-btn">${selecionado ? "✓ Selecionado" : "Selecionar"}</button>`;
-
-    const btn=card.querySelector(".selecionar-btn");
-
-    btn.onclick=(e)=>{
+    const btn = card.querySelector(".selecionar-btn");
+    btn.onclick = (e) => {
       e.stopPropagation();
-      const existe=playlist.find(a=>a.id===aviso.id);
+      const existe = playlist.find(
+        a => a.id === aviso.id
+      );
 
-      if(existe){
-        playlist=playlist.filter(a=>a.id!==aviso.id);
-        card.classList.remove("video-selecionado");
-        btn.innerText="Selecionar";
-      }else{
+      if (existe) {
+        playlist = playlist.filter(
+          a => a.id !== aviso.id
+        );
+        card.classList.remove("aviso-selecionado");
+        btn.innerText = "Selecionar";
+      } else {
         playlist.push(aviso);
-        card.classList.add("video-selecionado");
-        btn.innerText="✓ Selecionado";
+        card.classList.add("aviso-selecionado");
+        btn.innerText = "✓ Selecionado";
       }
       mostrarAcoesPlaylist();
     };
     lista.appendChild(card);
   });
+
+  renderizarPaginacao();
   mostrarAcoesPlaylist();
+}
+
+// RENDERIZAR PAGINAÇÃO
+function renderizarPaginacao() {
+  const container = document.querySelector("#paginacao-avisos .pagination");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+  const totalPaginas = Math.ceil(avisos.length / AVISOS_POR_PAGINA);
+
+  if (totalPaginas <= 1) {
+    document.getElementById("paginacao-avisos").style.display = "none";
+    return;
+  }
+
+  document.getElementById("paginacao-avisos").style.display = "flex";
+  const liAnterior = document.createElement("li");
+  liAnterior.className = `page-item ${paginaAtual === 1 ? "disabled" : ""}`;
+  liAnterior.innerHTML = `
+    <a class="page-link" href="#" aria-label="Anterior">
+      <span aria-hidden="true">&laquo;</span>
+    </a> `;
+
+  liAnterior.querySelector("a").onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderizarAvisos();
+    }
+  };
+  container.appendChild(liAnterior);
+  for (let i = 1; i <= totalPaginas; i++) {
+    const li = document.createElement("li");
+    li.className = `page-item ${i === paginaAtual ? "active" : ""}`;
+    const link = document.createElement("a");
+    link.className = "page-link";
+    link.href = "#";
+    link.textContent = i;
+
+    link.onclick = (e) => {
+      e.preventDefault();
+      paginaAtual = i;
+      renderizarAvisos();
+    };
+    li.appendChild(link);
+    container.appendChild(li);
+  }
+
+  const liProximo = document.createElement("li");
+  liProximo.className = `page-item ${paginaAtual === totalPaginas ? "disabled" : ""}`;
+
+  liProximo.innerHTML = `
+    <a class="page-link" href="#" aria-label="Próxima">
+      <span aria-hidden="true">&raquo;</span>
+    </a>`;
+
+  liProximo.querySelector("a").onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderizarAvisos();
+    }
+  };
+  container.appendChild(liProximo);
 }
 
 // ADICIONAR AVISO

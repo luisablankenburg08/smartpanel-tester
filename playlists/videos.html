@@ -52,11 +52,15 @@
   <section class="mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h2 class="titulosh2">Vídeos Adicionados</h2>
+        <h3>Vídeos Adicionados</h2>
       </div>
     </div>
 
     <div id="lista-videos"></div>
+
+    <nav id="paginacao-avisos" aria-label="Paginação dos avisos">
+      <ul class="pagination"></ul>
+  </nav>
   </section>
 
   <div class="acoes-playlist" id="acoes-playlist">
@@ -80,6 +84,8 @@
 // VARIÁVEIS
 let videosDisponiveis = [];
 let playlist = [];
+const VIDEOS_POR_PAGINA = 6;
+let paginaAtual = 1;
 
 //========================
 // TV ATUAL
@@ -158,9 +164,7 @@ function extrairVideoId(url) {
   return null;
 }
 
-//========================
 // DETECTAR LIVESTREAM
-//========================
 function ehLivestream(url) {
   if (!url) return false;
   
@@ -219,60 +223,136 @@ async function carregarVideos(){
 
 // RENDERIZAR
 function renderVideos(){
-
   const lista = document.getElementById("lista-videos");
   lista.innerHTML = "";
+  const totalPaginas = Math.ceil(videosDisponiveis.length / VIDEOS_POR_PAGINA);
 
-  videosDisponiveis.forEach(video => {
+  if (totalPaginas === 0) {
+    paginaAtual = 1;
+  } 
+  else if (paginaAtual > totalPaginas) {
+    paginaAtual = totalPaginas;
+  }
 
+  const inicio = (paginaAtual - 1) * VIDEOS_POR_PAGINA;
+  const fim = inicio + VIDEOS_POR_PAGINA;
+  const videosDaPagina = videosDisponiveis.slice(inicio, fim);
+
+  videosDaPagina.forEach(video => {
     let videoId = video.id || extrairIdDoIframe(video.iframe);
-    
     let card = document.createElement("div");
     card.className = "video-card";
-
     let jaSelecionado = playlist.find(v =>
       (v.id || extrairIdDoIframe(v.iframe)) === videoId
     );
 
-    if(jaSelecionado){
+    if (jaSelecionado) {
       card.classList.add("video-selecionado");
     }
 
-    card.innerHTML = `
-      ${video.live ? '<div class="live-badge">AO VIVO</div>' : ''}
+    card.innerHTML = `${video.live ? '<div class="live-badge">AO VIVO</div>' : ''}
       <img src="${video.thumb}" class="video-thumb">
       <div class="video-info">
-        <h3>${video.titulo}</h3>
-        <p>Duração: ${video.duracao ? video.duracao + "s" : "Desconhecida"}</p>
-        <button class="selecionar-btn">
-          ${jaSelecionado ? "Selecionado" : "Selecionar"}
-        </button>
-      </div>
-    `;
+        <h4>${video.titulo}</h4>
+        <p> Duração: ${video.duracao ? video.duracao + "s" : "Desconhecida"}</p>
+        <button class="selecionar-btn"> ${jaSelecionado ? "Selecionado" : "Selecionar"} </button>
+      </div>`;
 
-    let btn = card.querySelector(".selecionar-btn");
+    const btn = card.querySelector(".selecionar-btn");
 
     btn.onclick = (e) => {
       e.stopPropagation();
 
-      let existe = playlist.find(v => (v.id || extrairIdDoIframe(v.iframe)) === videoId );
+      let existe = playlist.find(v =>
+        (v.id || extrairIdDoIframe(v.iframe)) === videoId
+      );
 
-      if(existe){
-        playlist = playlist.filter(v => (v.id || extrairIdDoIframe(v.iframe)) !== videoId );
+      if (existe) {
+        playlist = playlist.filter(v =>
+          (v.id || extrairIdDoIframe(v.iframe)) !== videoId
+        );
         card.classList.remove("video-selecionado");
         btn.innerText = "Selecionar";
 
-      }else{
+      } else {
         playlist.push(video);
         card.classList.add("video-selecionado");
         btn.innerText = "Selecionado";
       }
-      mostrarAcoesPlaylist(); 
+      mostrarAcoesPlaylist();
     };
-    
     lista.appendChild(card);
   });
-  mostrarAcoesPlaylist(); 
+
+  renderizarPaginacao();
+  mostrarAcoesPlaylist();
+}
+
+// RENDERIZAR PAGINAÇÃO
+function renderizarPaginacao() {
+  const nav = document.getElementById("paginacao-avisos");
+  const container = document.querySelector("#paginacao-avisos .pagination");
+
+  if (!nav || !container) {
+    return;
+  }
+
+  container.innerHTML = "";
+  const totalPaginas = Math.ceil(videosDisponiveis.length / VIDEOS_POR_PAGINA);
+
+  if (totalPaginas <= 1) {
+    nav.style.display = "none";
+    return;
+  }
+
+  nav.style.display = "flex";
+  const liAnterior = document.createElement("li");
+  liAnterior.className = `page-item ${paginaAtual === 1 ? "disabled" : ""}`;
+  liAnterior.innerHTML = `
+    <a class="page-link" href="#" aria-label="Anterior">
+      <span aria-hidden="true">&laquo;</span>
+    </a> `;
+
+  liAnterior.querySelector("a").onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderVideos();
+    }
+  };
+  container.appendChild(liAnterior);
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const li = document.createElement("li");
+    li.className = `page-item ${i === paginaAtual ? "active" : ""}`;
+    const link = document.createElement("a");
+    link.className = "page-link";
+    link.href = "#";
+    link.textContent = i;
+    link.onclick = (e) => {
+      e.preventDefault();
+      paginaAtual = i;
+      renderVideos();
+    };
+    li.appendChild(link);
+    container.appendChild(li);
+  }
+
+  const liProximo = document.createElement("li");
+  liProximo.className = `page-item ${paginaAtual === totalPaginas ? "disabled" : ""}`;
+  liProximo.innerHTML = `
+    <a class="page-link" href="#" aria-label="Próxima">
+      <span aria-hidden="true">&raquo;</span>
+    </a> `;
+
+  liProximo.querySelector("a").onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderVideos();
+    }
+  };
+  container.appendChild(liProximo);
 }
 
 // ADICIONAR VÍDEO

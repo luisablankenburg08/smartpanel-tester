@@ -4,47 +4,88 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
-
 <link rel="stylesheet" href="login.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 
 <body>
 
-<div class="login-card">
-    <h2>Login</h2>
+  <main class="login-container">
+    <section class="login-card">
+      <div class="login-header">
+        <h1>Painel de Controle</h1>
+      </div>
 
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Usuário" required>
-        <input type="password" id="password" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-        <button type="submit">Cadastrar</button>
-    </form>
+      <form id="loginForm">
+        <div class="campo-login">
+          <label for="floatingInput">Usuário</label>
+          <input type="text" id="floatingInput" placeholder="Digite seu nome de usuário" autocomplete="username" required>
+        </div>
 
-</div>
+        <div class="campo-login">
+          <label for="floatingPassword">Senha</label>
+          <input type="password" id="floatingPassword" placeholder="Digite sua senha" autocomplete="current-password" required>
+        </div>
+
+        <div id="mensagem-erro">Usuário ou senha incorretos.</div>
+
+        <div class="login-opcoes">
+          <label class="lembrar-login">
+            <input type="checkbox" id="checkDefault">
+            <span>Lembrar</span>
+          </label>
+        </div>
+
+        <button class="btn-login" id="btn-login" type="submit">Entrar</button>
+      </form>
+    </section>
+  </main>
 
 <script>
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const username = document.getElementById("floatingInput").value.trim();
+    const password = document.getElementById("floatingPassword").value;
+    const botao = document.getElementById("btn-login");
+    const mensagem = document.getElementById("mensagem-erro");
 
-    const res = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    });
+    mensagem.style.display = "none";
+    botao.disabled = true;
+    botao.textContent = "Entrando...";
+
+    try {
+    const res = await fetch("/login",{
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            username,
+            password
+        })
+        }
+    );
 
     const data = await res.json();
 
     if (data.success) {
         window.location.href = "/controller-tester.html";
     } else {
-        alert("Usuário ou senha incorretos");
+        mensagem.textContent = "Usuário ou senha incorretos.";
+        mensagem.style.display = "block";
+        botao.disabled = false;
+        botao.textContent = "Entrar";
+    }
+    } catch (erro) {
+        console.error("Erro ao realizar login:", erro);
+        mensagem.textContent = "Não foi possível conectar ao servidor.";
+        mensagem.style.display = "block";
+        botao.disabled = false;
+        botao.textContent = "Entrar";
     }
 });
-</script>
 
+</script>
 </body>
 </html>

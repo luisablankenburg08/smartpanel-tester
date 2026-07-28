@@ -1,30 +1,16 @@
 {
   "tvPlaylists": {
     "tv1": {
-      "playlistId": "1783608839184",
+      "playlistId": "1784925827181",
       "titulo": "teste",
       "items": [
         {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
-        },
-        {
           "tipo": "ensalamento",
-          "id": "ensalamento-sexta",
-          "dia": 4,
-          "titulo": "Ensalamento - Sexta-feira",
+          "id": "ensalamento-segunda",
+          "dia": 0,
+          "titulo": "Ensalamento - Segunda-feira",
           "duracao": 30,
           "src": "/playlists/verEnsalamento.html"
-        },
-        {
-          "id": "1783082676361",
-          "titulo": "Clube do Livro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHMWi1508o/NlufFTqveAMt7RS6twSeEw/view?embed",
-          "duracao": 30
         }
       ]
     },
@@ -192,18 +178,18 @@
       "titulo": "teste",
       "items": [
         {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
-        },
-        {
           "id": "1783082579283",
           "titulo": "Solicitação de Conteúdo",
           "tipo": "canva",
           "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
           "duracao": 30
+        },
+        {
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
         }
       ]
     }
