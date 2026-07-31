@@ -11,17 +11,9 @@
   <div id="app"></div>
 
   <script>
-
     const CAMINHO_JSON = "./json/requisicao.json";
     const parametros = new URLSearchParams(window.location.search);
     const diaSelecionado = parametros.has("dia") ? Number(parametros.get("dia")) : null;
-
-    /* A ordem dos bits encontrada no JSON é:
-      10000 = Segunda-feira
-      01000 = Terça-feira
-      00100 = Quarta-feira
-      00010 = Quinta-feira
-      00001 = Sexta-feira*/
 
     const DIAS_SEMANA = [
       {
@@ -55,12 +47,6 @@
         abreviacao: "Sex"
       }
     ];
-
-    /* Ordem visual dos períodos.
-      O valor "short" vindo de periods será usado para
-      identificar o turno.
-      Caso o JSON possua outros períodos, eles também
-      poderão aparecer automaticamente. */
 
     const ORDEM_TURNOS = [
       "M12",
@@ -149,13 +135,6 @@
     function descobrirDiasDoCartao(cartao) {
       const mascara = String(cartao.days || "");
 
-      /* O EduPage usa uma máscara de cinco posições:
-        posição 0 = segunda
-        posição 1 = terça
-        posição 2 = quarta
-        posição 3 = quinta
-        posição 4 = sexta */
-
       return DIAS_SEMANA.filter(
         dia => mascara[dia.indice] === "1");
     }
@@ -212,15 +191,6 @@
     // CRIAR REGISTROS DO ENSALAMENTO
     function criarRegistrosEnsalamento(dadosPreparados) {
       const registros = [];
-      /*A lógica principal começa em CARDS.
-        Cada card informa:
-        - lessonid
-        - period
-        - days
-        - classroomids
-        A partir do lessonid buscamos a aula.
-        A aula fornece classids.
-        Os classids fornecem a turma.*/
 
       dadosPreparados.cartoes.forEach(cartao => {
 
@@ -342,11 +312,6 @@
 
           const lista = matriz[dia][periodo][sala];
 
-          /* Uma célula pode ter mais de uma turma.
-            Por isso usamos uma lista.
-            Também verificamos se a turma já foi
-            adicionada para evitar duplicação. */
-
           const turmaJaExiste = lista.some(item =>
             String(item.turmaId) === String(registro.turmaId)
           );
@@ -397,13 +362,12 @@
     }
 
     // CRIAR UMA TABELA DE UM DIA
-
     function criarTabelaDoDia(dia, salas, periodos, matriz) {
       const secao = document.createElement("section");
       secao.className = "day-section";
 
       // TÍTULO
-      const titulo = document.createElement("h2");
+      const titulo = document.createElement("h1");
       titulo.textContent = dia.nome;
       secao.appendChild(titulo);
 

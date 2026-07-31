@@ -3,13 +3,17 @@ const path = require("path");
 const express = require("express")
 const fs = require("fs")
 const app = express()
+
+const UPLOADS_DIR = path.join(__dirname, "uploads");
+
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PLAYLIST_FILE = path.join(ROOT_DIR, "json", "playlists-tester.json"); //salvar conteúdos em playlists-tester.json
 const STATE_FILE = path.join(ROOT_DIR, "json", "state.json"); // salvar tvs em state.json
 const LOGIN_DIR = path.join(__dirname, "login");
-const UPLOAD_DIR = path.join(__dirname, "uploads");
 const tvHeartbeats = new Map()
-
 
 const session = require("express-session");
 
@@ -25,28 +29,19 @@ app.use(session({
 }));
 
 //USAR UPLOADS
-app.use("/uploads", express.static(UPLOAD_DIR));
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 if (!fs.existsSync(STATE_FILE)) { fs.writeFileSync(STATE_FILE, "{}") }
 
 const storage = multer.diskStorage({
-
-destination(req,file,cb){
-  cb(null,"uploads");
-},
-
-filename(req,file,cb){
-  cb(
-    null,
-    Date.now()+
-    path.extname(file.originalname)
-  );
-}
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
 });
 
-const upload = multer({
-    storage
-});
+const upload = multer({ storage });
+
 //==================
 // FUNÇÕES
 //==================
@@ -356,8 +351,7 @@ app.post("/register", (req, res) => {
   if (tv) {
     if (!state[tv]) {
       state[tv] = {
-        pagina: "layouts/tela2.html",
-        intervalo: 2000
+        status: "ativa"
       }
       saveState(state)
     }
@@ -372,8 +366,7 @@ app.post("/register", (req, res) => {
   let newTv = `tv${numero}`
 
   state[newTv] = {
-    pagina: "layouts/tela2.html",
-    intervalo: 2000
+    status: "ativa"
   }
 
   saveState(state)
@@ -675,26 +668,61 @@ app.get("/playlist", (req,res)=>{
   res.json(items);
 });
 
-//ADICIONAR MAPA
-app.post("/mapa",verificarAuth,upload.single("mapa"),(req,res)=>{
-    if(!req.file){
-      return res.status(400).json({
-      erro:"Arquivo não enviado"
-      });
+// ADICIONAR / ALTERAR MAPA
+app.post("/mapa", verificarAuth, upload.single("mapa"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      erro: "Arquivo não enviado"
+    });
+  }
+
+  const src = "/uploads/" + req.file.filename;
+  const playlists = readPlaylists();
+
+  if (!Array.isArray(playlists.mapa)) {
+    playlists.mapa = [];
+  }
+
+  const mapaExistente = playlists.mapa.find(item => item.id === "mapa");
+
+  if (mapaExistente && mapaExistente.src && mapaExistente.src.startsWith("/uploads/")) {
+    const arquivoAntigo = path.join(UPLOADS_DIR, path.basename(mapaExistente.src));
+
+    if (fs.existsSync(arquivoAntigo)) {
+      try {
+        fs.unlinkSync(arquivoAntigo);
+      } catch (erro) {
+        console.warn(
+          "Não foi possível remover o mapa antigo:",
+          erro.message
+        );
+      }
     }
+  }
 
-    const src="/uploads/"+req.file.filename;
-    let playlists=readPlaylists();
-    playlists.mapaCampus=src;
-    savePlaylists(playlists);
-    res.json({ok:true,src});
-
+  if (mapaExistente) {
+    mapaExistente.src = src;
+  } else {
+    playlists.mapa.push({
+      id: "mapa",
+      tipo: "mapa",
+      titulo: "Mapa do Campus",
+      src,
+      duracao: 30
+    });
+  }
+  savePlaylists(playlists);
+  res.json({ok: true, src});
 });
 
 // CARREGAR MAPA
-app.get("/mapa",(req,res)=>{
-  const playlists=readPlaylists();
-  res.json({src: playlists.mapaCampus || "/playlists/mapa-floripa.jpg"});
+app.get("/mapa", (req, res) => {
+  const playlists = readPlaylists();
+  const mapa = Array.isArray(playlists.mapa)
+    ? playlists.mapa.find(item => item.id === "mapa")
+    : null;
+
+  res.json({src: mapa?.src || "/playlists/mapa-floripa.jpg"});
 });
 
 //LISTAR PLAYLISTS SALVAS
@@ -818,15 +846,20 @@ app.get("/conteudos", (req, res) => {
     ...getAllAvisoItems(playlists)
   );
 
-  if (playlists.mapaCampus) {
-    conteudos.push({
-      id: "mapa",
-      tipo: "mapa",
-      titulo: "Mapa do Campus",
-      conteudo: playlists.mapaCampus,
-      duracao: 30
-    });
+
+  if (Array.isArray(playlists.mapa)) {
+    const mapa = playlists.mapa.find(item => item.id === "mapa");
+    if (mapa) {
+      conteudos.push({
+        id: mapa.id,
+        tipo: "mapa",
+        titulo: mapa.titulo,
+        src: mapa.src,
+        duracao: mapa.duracao || 30
+      });
+    }
   }
+
 
     if (playlists.calendario) {
       conteudos.push({
@@ -838,15 +871,49 @@ app.get("/conteudos", (req, res) => {
       });
     }
 
-    if (playlists.ensalamento) {
-      conteudos.push({
-        id: "ensalamento",
-        tipo: "ensalamento",
-        titulo: "Ensalamento",
-        conteudo: playlists.ensalamento,
-        duracao: 30
-      });
+     const ensalamentos = [
+    {
+      id: "ensalamento-segunda",
+      tipo: "ensalamento",
+      titulo: "Ensalamento: Segunda-feira",
+      dia: 0,
+      duracao: 30,
+      src: "/playlists/verEnsalamento.html?dia=0"
+    },
+    {
+      id: "ensalamento-terca",
+      tipo: "ensalamento",
+      titulo: "Ensalamento: Terça-feira",
+      dia: 1,
+      duracao: 30,
+      src: "/playlists/verEnsalamento.html?dia=1"
+    },
+    {
+      id: "ensalamento-quarta",
+      tipo: "ensalamento",
+      titulo: "Ensalamento: Quarta-feira",
+      dia: 2,
+      duracao: 30,
+      src: "/playlists/verEnsalamento.html?dia=2"
+    },
+    {
+      id: "ensalamento-quinta",
+      tipo: "ensalamento",
+      titulo: "Ensalamento: Quinta-feira",
+      dia: 3,
+      duracao: 30,
+      src: "/playlists/verEnsalamento.html?dia=3"
+    },
+    {
+      id: "ensalamento-sexta",
+      tipo: "ensalamento",
+      titulo: "Ensalamento: Sexta-feira",
+      dia: 4,
+      duracao: 30,
+      src: "/playlists/verEnsalamento.html?dia=4"
     }
+  ];
+    conteudos.push(...ensalamentos);
     res.json(conteudos);
 });
 

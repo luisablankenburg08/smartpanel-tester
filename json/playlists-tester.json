@@ -1,22 +1,26 @@
 {
   "tvPlaylists": {
     "tv1": {
-      "playlistId": "1784925827181",
-      "titulo": "teste",
+      "playlistId": "1785527135800",
+      "titulo": "f",
       "items": [
         {
-          "tipo": "ensalamento",
-          "id": "ensalamento-segunda",
-          "dia": 0,
-          "titulo": "Ensalamento - Segunda-feira",
-          "duracao": 30,
-          "src": "/playlists/verEnsalamento.html"
+          "id": "1783539112629",
+          "titulo": "Informativo Banheiro",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
+          "duracao": 30
+        },
+        {
+          "id": "1783082743473",
+          "titulo": "Joaquim - Combo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+          "duracao": 30
         }
       ]
     },
     "tv2": {
-      "playlistId": "1784925827181",
-      "titulo": "teste",
       "items": [
         {
           "id": "1783077286617",
@@ -24,13 +28,6 @@
           "tipo": "texto",
           "conteudo": "Smart Digital Panel Project",
           "duracao": 15
-        },
-        {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
         }
       ]
     }
@@ -122,6 +119,7 @@
   ],
   "mapa": [
     {
+      "id": "mapa",
       "tipo": "mapa",
       "titulo": "Mapa do Campus",
       "src": "/playlists/mapa-floripa.jpg",
@@ -190,6 +188,26 @@
           "tipo": "texto",
           "conteudo": "Smart Digital Panel Project",
           "duracao": 15
+        }
+      ]
+    },
+    {
+      "id": "1785527135800",
+      "titulo": "f",
+      "items": [
+        {
+          "id": "1783539112629",
+          "titulo": "Informativo Banheiro",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
+          "duracao": 30
+        },
+        {
+          "id": "1783082743473",
+          "titulo": "Joaquim - Combo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
+          "duracao": 30
         }
       ]
     }

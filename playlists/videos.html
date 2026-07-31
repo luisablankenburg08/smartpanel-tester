@@ -255,7 +255,7 @@ function renderVideos(){
       <div class="video-info">
         <h4>${video.titulo}</h4>
         <p> Duração: ${video.duracao ? video.duracao + "s" : "Desconhecida"}</p>
-        <button class="selecionar-btn"> ${jaSelecionado ? "Selecionado" : "Selecionar"} </button>
+        <button class="selecionar-btn"> ${jaSelecionado ? "✓ Selecionado" : "Selecionar"} </button>
       </div>`;
 
     const btn = card.querySelector(".selecionar-btn");
@@ -277,7 +277,7 @@ function renderVideos(){
       } else {
         playlist.push(video);
         card.classList.add("video-selecionado");
-        btn.innerText = "Selecionado";
+        btn.innerText = "✓ Selecionado";
       }
       mostrarAcoesPlaylist();
     };

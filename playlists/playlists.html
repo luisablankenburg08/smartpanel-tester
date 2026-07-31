@@ -130,7 +130,7 @@ async function escolherTV(){
   });
 }
 
-//CARREGAR E RENDERIZAR CONTEÚDO PARA ADICIONAR NAS PLAYLISTS
+//CARREGAR CONTEÚDOS
 async function carregarConteudos(){
   const res = await fetch("/conteudos");
   conteudosDisponiveis = await res.json();
@@ -359,66 +359,34 @@ function renderizarPlaylists(){
 
 
       card.innerHTML = `
-
         <div class="playlist-card-header">
-
-          <h3>
-            ${pl.titulo}
-          </h3>
-
-          <span class="playlist-status">
-            ${pl.items.length} itens
-          </span>
-
+          <h3>${pl.titulo}</h3>
+          <span class="playlist-status">${pl.items.length} itens</span>
         </div>
 
-
         <div class="playlist-resumo">
-
           <span>
-            ⏱
+            Duração: 
             ${Math.floor(total / 60)} min
             ${String(total % 60).padStart(2, "0")} s
           </span>
-
         </div>
-
 
         <div class="itens-playlist">
-
           ${itensHTML}
-
         </div>
 
-
-        <button
-          class="selecionar-btn"
-        >
-          ${selecionada
-            ? "Selecionada"
-            : "Selecionar"
-          }
-        </button>
-
+        <button class="selecionar-btn">${selecionada ? "✓ Selecionada" : "Selecionar"}</button>
       `;
 
         card.onclick = () => {
 
-          if (
-            playlistSelecionada &&
-            playlistSelecionada.id === pl.id
-          ) {
-
+          if (playlistSelecionada && playlistSelecionada.id === pl.id) {
             playlistSelecionada = null;
-
           } else {
-
             playlistSelecionada = pl;
-
           }
-
           renderizarPlaylists();
-
         };
         lista.appendChild(card);
     });
@@ -457,6 +425,7 @@ async function aplicarPlaylist(){
   playlistSelecionada = null;
   carregarPlaylists();
   alert("Playlist aplicada.");
+  window.location.href = "/controller-tester.html";
 }
 
 //ADICIONAR PLAYLIST

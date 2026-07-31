@@ -64,31 +64,31 @@ const DIAS_ENSALAMENTO = [
   {
     id: "ensalamento-segunda",
     dia: 0,
-    titulo: "Ensalamento - Segunda-feira",
+    titulo: "Ensalamento: Segunda-feira",
     duracao: 30
   },
   {
     id: "ensalamento-terca",
     dia: 1,
-    titulo: "Ensalamento - Terça-feira",
+    titulo: "Ensalamento: Terça-feira",
     duracao: 30
   },
   {
     id: "ensalamento-quarta",
     dia: 2,
-    titulo: "Ensalamento - Quarta-feira",
+    titulo: "Ensalamento: Quarta-feira",
     duracao: 30
   },
   {
     id: "ensalamento-quinta",
     dia: 3,
-    titulo: "Ensalamento - Quinta-feira",
+    titulo: "Ensalamento: Quinta-feira",
     duracao: 30
   },
   {
     id: "ensalamento-sexta",
     dia: 4,
-    titulo: "Ensalamento - Sexta-feira",
+    titulo: "Ensalamento: Sexta-feira",
     duracao: 30
   }
 ];
@@ -165,11 +165,11 @@ function renderizarCards() {
 
       const duracao = document.createElement("div");
       duracao.className = "duracao-card-ensalamento";
-      duracao.textContent = `Duração: ${ensalamento.duracao} segundos`;
+      duracao.textContent = `Duração: ${ensalamento.duracao}s`;
 
       const botaoSelecionar = document.createElement("button");
       botaoSelecionar.className = "selecionar-btn";
-      botaoSelecionar.textContent = selecionado ? "Selecionado" : "Selecionar";
+      botaoSelecionar.textContent = selecionado ? "✓ Selecionado" : "Selecionar";
 
       botaoSelecionar.onclick =
         (event) => {
@@ -263,6 +263,8 @@ async function aplicarEnsalamento(ensalamento) {
     );
 
     alert(`${ensalamento.titulo} aplicado à TV ${tv}.`);
+    ensalamentoSelecionado = null
+    window.location.href = "/controller-tester.html";
 
   } catch (erro) {
     console.error("Erro ao aplicar ensalamento:",erro);

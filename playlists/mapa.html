@@ -23,7 +23,6 @@
 
   <div class="card-mapa">
     <img id="mapa-campus" src="/playlists/mapa-floripa.jpg" alt="Mapa do Campus">
-    <h2> (Floripa) </h2>
 
     <div class="acoes-card-mapa">
       <button class="btn-playlist" onclick="aplicarMapa()">Aplicar</button>
@@ -89,11 +88,24 @@ async function escolherTV(){
   });
 }
 
-async function carregarMapa(){
-  const res = await fetch("/mapa");
-  const dados = await res.json();
-  mapaAtual = dados.src;
-  document.getElementById("mapa-campus").src = mapaAtual;
+async function carregarMapa() {
+  try {
+    const res = await fetch("/mapa", {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error("Erro ao carregar o mapa.");
+    }
+
+    const dados = await res.json();
+    mapaAtual = dados.src;
+    document.getElementById("mapa-campus").src = mapaAtual + "?t=" + Date.now();
+  } 
+  catch (erro) {
+    console.error("Erro ao carregar mapa:", erro);
+    document.getElementById("mapa-campus").src = "/playlists/mapa-floripa.jpg";
+  }
 }
 
 //APLICAR MAPA
@@ -128,31 +140,43 @@ async function aplicarMapa(){
     })
   });
   alert("Mapa aplicado.");
+  window.location.href = "/controller-tester.html";
 }
 
 async function alterarMapa(){
   document.getElementById("arquivo-mapa").click();
 }
 
+document.getElementById("arquivo-mapa").addEventListener("change", async function() {
 
-document.getElementById("arquivo-mapa").addEventListener("change", async function(){
-const arquivo = this.files[0];
+  const arquivo = this.files[0];
+  if (!arquivo) {
+    return;
+  }
 
-if(!arquivo)
-  return;
+  const form = new FormData();
+  form.append("mapa", arquivo);
+  try {
+    const res = await fetch("/mapa", {
+      method: "POST",
+      body: form
+    });
 
-const form = new FormData();
-form.append("mapa",arquivo);
-
-const res = await fetch("/mapa",{
-  method:"POST",
-  body:form
+    if (!res.ok) {
+      throw new Error("Erro ao enviar o mapa.");
+    }
+    const dados = await res.json();
+    mapaAtual = dados.src;
+    document.getElementById("mapa-campus").src = mapaAtual + "?t=" + Date.now();
+    alert("Mapa atualizado com sucesso.");
+  } 
+  catch (erro) {
+    console.error("Erro ao alterar mapa:", erro);
+    alert("Não foi possível alterar o mapa.");
+  }
+  this.value = "";
 });
 
-const dados = await res.json();
-mapaAtual = dados.src;
-document.getElementById("mapa-campus").src = mapaAtual;
-});
 
 async function voltar(){
   window.location.href = "/controller-tester.html"; 
