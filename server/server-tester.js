@@ -1,21 +1,41 @@
 const multer = require("multer");
 const path = require("path");
-const express = require("express")
-const fs = require("fs")
-const app = express()
-
-const UPLOADS_DIR = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-const ROOT_DIR = path.resolve(__dirname, "..");
-const PLAYLIST_FILE = path.join(ROOT_DIR, "json", "playlists-tester.json"); //salvar conteúdos em playlists-tester.json
-const STATE_FILE = path.join(ROOT_DIR, "json", "state.json"); // salvar tvs em state.json
-const LOGIN_DIR = path.join(__dirname, "login");
-const tvHeartbeats = new Map()
-
+const express = require("express");
+const fs = require("fs");
 const session = require("express-session");
+
+const app = express();
+
+// DIRETÓRIOS PRINCIPAIS
+const SERVER_DIR = __dirname;
+const ROOT_DIR = path.resolve(__dirname, "..");
+const UPLOADS_DIR = path.join(ROOT_DIR, "uploads");
+const JSON_DIR = path.join(ROOT_DIR, "json");
+const PLAYLISTS_DIR = path.join(ROOT_DIR, "playlists");
+const LOGIN_DIR = path.join(SERVER_DIR, "login");
+
+// ARQUIVOS JSON
+const PLAYLIST_FILE = path.join(
+  JSON_DIR,
+  "playlists-tester.json"
+);
+
+const STATE_FILE = path.join(
+  JSON_DIR,
+  "state.json"
+);
+
+// GARANTIR DIRETÓRIO DE UPLOADS
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, {
+    recursive: true
+  });
+}
+
+// ESTADO DAS TVs
+const tvHeartbeats = new Map();
+const viewerPlayback = new Map();
+const playlistVersao = new Map();
 
 app.use("/login", express.static(LOGIN_DIR))
 
@@ -34,13 +54,19 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 if (!fs.existsSync(STATE_FILE)) { fs.writeFileSync(STATE_FILE, "{}") }
 
 const storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: (req, file, cb) => {
+    cb(null, UPLOADS_DIR);
+  },
+
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+    cb(
+      null,
+      Date.now() + path.extname(file.originalname)
+    );
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({storage});
 
 //==================
 // FUNÇÕES
@@ -72,15 +98,15 @@ function saveState(state){
 function removerTV(tvId) {
   try {
     let state = readState();
-
     if (state[tvId]) {
-      delete state[tvId]
-      saveState(state)
-      tvHeartbeats.delete(tvId)
-      console.log(`❌ TV ${tvId} removida`)
+      delete state[tvId];
+      saveState(state);
+      tvHeartbeats.delete(tvId);
+      viewerPlayback.delete(tvId);
+      console.log(`❌ TV ${tvId} removida`);
     }
   } catch (e) {
-    console.error(`Erro ao remover TV ${tvId}:`, e)
+    console.error(`Erro ao remover TV ${tvId}:`, e);
   }
 }
 
@@ -97,9 +123,24 @@ function migrarPlaylists() {
 
   Object.keys(playlists.tvPlaylists).forEach(tv => {
 
-    const atual =playlists.tvPlaylists[tv];
+    const atual = playlists.tvPlaylists[tv];
+
     if (Array.isArray(atual)) {
-      playlists.tvPlaylists[tv] = {items: atual};
+      playlists.tvPlaylists[tv] = {
+        items: atual,
+        versao: Date.now()
+      };
+      alterado = true;
+      return;
+    }
+
+    if (!Array.isArray(atual.items)) {
+      atual.items = [];
+      alterado = true;
+    }
+
+    if (!atual.versao) {
+      atual.versao = Date.now();
       alterado = true;
     }
   });
@@ -249,89 +290,134 @@ app.use(express.static(ROOT_DIR))
 //==================
 
 // ADICIONAR ÀS PLAYLISTS
-app.post("/playlist/add", (req,res)=>{
+app.post("/playlist/add", verificarAuth, (req, res) => {
+  const { tv, items } = req.body;
 
-    const { tv, items } = req.body;
-    let playlists = readPlaylists();
+  if (!tv || !Array.isArray(items)) {
+    return res.status(400).json({
+      erro: "TV ou itens inválidos"
+    });
+  }
 
-    if(!playlists.tvPlaylists){
-      playlists.tvPlaylists = {};
-    }
+  let playlists = readPlaylists();
 
-    if(!playlists.tvPlaylists[tv]){
-      playlists.tvPlaylists[tv] = {
-        items:[]
-      };
-    }
+  if (!playlists.tvPlaylists) {
+    playlists.tvPlaylists = {};
+  }
 
-    if(!Array.isArray(playlists.tvPlaylists[tv].items)){
-      playlists.tvPlaylists[tv].items = [];
-    }
+  if (!playlists.tvPlaylists[tv]) {
+    playlists.tvPlaylists[tv] = {
+      items: []
+    };
+  }
 
-    playlists.tvPlaylists[tv].items.push(...items);
-    savePlaylists(playlists);
-    res.json({ok:true});
+  if (!Array.isArray(playlists.tvPlaylists[tv].items)) {
+    playlists.tvPlaylists[tv].items = [];
+  }
+
+  playlists.tvPlaylists[tv].items.push(...items);
+  const novaVersao = Date.now();
+  playlists.tvPlaylists[tv].versao = novaVersao;
+  savePlaylists(playlists);
+  playlistVersao.set(tv, novaVersao);
+  viewerPlayback.delete(tv);
+
+  let state = readState();
+
+  if (state[tv]) {
+    state[tv].refresh = Date.now();
+    saveState(state);
+  }
+
+  res.json({
+    ok: true,
+    versao: novaVersao
+  });
 
 });
 
 // IDENTIFICAR PLAYLIST ATUAL DE CADA TV 
-app.get("/playlist-tv/:tv", (req,res)=>{
+app.get("/playlist-tv/:tv", (req, res) => {
 
+  const tv = req.params.tv;
   const playlists = readPlaylists();
+  const dadosTV = playlists.tvPlaylists?.[tv];
 
-  res.json(
-    playlists.tvPlaylists?.[
-      req.params.tv
-    ]?.items || []
-  );
+  if (!dadosTV) {
+    return res.json({
+      versao: 0,
+      items: []
+    });
+  }
 
+  if (Array.isArray(dadosTV)) {
+    return res.json({
+      versao: playlistVersao.get(tv) || 0,
+      items: dadosTV
+    });
+  }
+
+  res.json({
+    versao: playlistVersao.get(tv) || dadosTV.versao || 0,
+    items: Array.isArray(dadosTV.items)
+      ? dadosTV.items
+      : []
+  });
 });
 
 // REORDENAR PLAYLIST ATUAL
-app.post("/playlist/reorder", (req,res)=>{
-
+app.post("/playlist/reorder", verificarAuth, (req, res) => {
   const { tv, items } = req.body;
 
-  if(!tv || !Array.isArray(items)){
+  if (!tv || !Array.isArray(items)) {
     return res.status(400).json({
-      erro:"Dados inválidos"
+      erro: "Dados inválidos"
     });
   }
-
-  try{
-
+  try {
     const playlists = readPlaylists();
-
-    if(!playlists.tvPlaylists){
+    if (!playlists.tvPlaylists) {
       playlists.tvPlaylists = {};
     }
 
-    if(!playlists.tvPlaylists[tv]){
-      playlists.tvPlaylists[tv] = {items:[]};
+    if (!playlists.tvPlaylists[tv]) {
+      playlists.tvPlaylists[tv] = {
+        items: []
+      };
     }
 
+    const novaVersao = Date.now();
     playlists.tvPlaylists[tv].items = items;
-
+    playlists.tvPlaylists[tv].versao = novaVersao;
     savePlaylists(playlists);
+    playlistVersao.set(tv, novaVersao);
+    viewerPlayback.delete(tv);
 
-    res.json({sucesso:true});
+    const state = readState();
 
-  }catch(err){
+    if (state[tv]) {
+      state[tv].refresh = Date.now();
+      saveState(state);
+    }
 
+    res.json({
+      ok: true,
+      versao: novaVersao
+    });
+
+  } catch (erro) {
     console.error(
       "Erro ao salvar playlist:",
-      err
+      erro
     );
 
     res.status(500).json({
-      erro:"Falha ao salvar playlist"
+      erro: "Falha ao salvar playlist"
     });
-
   }
-
 });
 
-// REGISTRO
+// REGISTRO DE TVS
 app.post("/register", (req, res) => {
 
   let { tv } = req.body
@@ -824,6 +910,7 @@ app.post("/playlist/aplicar", verificarAuth, (req, res) => {
 
   state[tv].refresh = Date.now();
   savePlaylists(playlists);
+  playlistVersao.set(tv, Date.now());
 
   fs.writeFileSync(
     STATE_FILE,
@@ -917,31 +1004,97 @@ app.get("/conteudos", (req, res) => {
     res.json(conteudos);
 });
 
+// ATUALIZAR POSIÇÃO DE REPRODUÇÃO
+app.post("/playback", (req, res) => {
+
+  const {
+    tv,
+    playlistVersao,
+    playlistIndex,
+    itemId,
+    itemInicio,
+    itemDuracao
+  } = req.body;
+
+  if (!tv) {
+    return res.status(400).json({
+      erro: "TV não informada"
+    });
+  }
+
+  viewerPlayback.set(tv, {
+    playlistVersao: Number(playlistVersao) || 0,
+    playlistIndex: Number(playlistIndex) || 0,
+    itemId: itemId || null,
+    itemInicio: Number(itemInicio) || Date.now(),
+    itemDuracao: Number(itemDuracao) || 10,
+    atualizadoEm: Date.now()
+  });
+  res.json({ok: true});
+});
+
+// CONSULTAR POSIÇÃO DE REPRODUÇÃO
+app.get("/playback/:tv", (req, res) => {
+  const tv = req.params.tv;
+  const playback = viewerPlayback.get(tv);
+
+  if (!playback) {
+    return res.json({
+      sincronizado: false
+    });
+  }
+
+  res.json({
+    sincronizado: true,
+    ...playback
+  });
+});
+
 // SAVE PLAYLIST 
 app.post("/save-playlist", verificarAuth, (req, res) => {
 
-    const { tv, items } = req.body;
-    if (!tv) {
-      return res.status(400).json({
-        erro: "TV não informada"
-      });
-    }
+  const { tv, items } = req.body;
 
-    let playlists = readPlaylists();
+  if (!tv) {
+    return res.status(400).json({
+      erro: "TV não informada"
+    });
+  }
 
-    if (!playlists.tvPlaylists) {
-      playlists.tvPlaylists = {};
-    }
+  let playlists = readPlaylists();
 
-    if (!playlists.tvPlaylists[tv]) {
-      playlists.tvPlaylists[tv] = {
-        items: []
-      };
-    }
+  if (!playlists.tvPlaylists) {
+    playlists.tvPlaylists = {};
+  }
 
-    playlists.tvPlaylists[tv].items = Array.isArray(items) ? items : [];
-    savePlaylists(playlists);
-    res.json({ok: true});
+  if (!playlists.tvPlaylists[tv]) {
+    playlists.tvPlaylists[tv] = {
+      items: []
+    };
+  }
+
+  const novaVersao = Date.now();
+
+  playlists.tvPlaylists[tv].items =
+    Array.isArray(items)
+      ? items
+      : [];
+
+  playlists.tvPlaylists[tv].versao = novaVersao;
+  savePlaylists(playlists);
+  playlistVersao.set(tv, novaVersao);
+  viewerPlayback.delete(tv);
+  const state = readState();
+
+  if (state[tv]) {
+    state[tv].refresh = Date.now();
+    saveState(state);
+  }
+
+  res.json({
+    ok: true,
+    versao: novaVersao
+  });
 });
 
 // UPDATE ALL 

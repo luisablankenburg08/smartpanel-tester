@@ -1,10 +1,11 @@
 
-// VARIÁVEIS GLOBAIS
+// VARIÁVEIS 
 let pendingSelections = {};
 let tvSelecionada = null;
 let playlistAtual = [];
 let modoEdicao = false;
 let dragIndex = null;
+let previewSyncInterval = null;
 
 // CONFIGURAÇÃO DA TV SELECIONADA
 const CHAVE_TV_SELECIONADA = "tvSelecionada";
@@ -274,6 +275,18 @@ async function mostrarTV(tv) {
     </div>`;
 
   container.appendChild(field);
+  const previewFrame = field.querySelector(".tv-preview-frame");
+
+  if (previewFrame) {
+    previewFrame.addEventListener(
+      "load",
+      () => {
+        console.log(
+          `Preview da ${tv} carregado e sincronizado`
+        );
+      }
+    );
+  }
 
   try {
     const resposta = await fetch(`/playlist-tv/${encodeURIComponent(tv)}`, {cache: "no-store"});

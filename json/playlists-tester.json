@@ -1,24 +1,27 @@
 {
   "tvPlaylists": {
     "tv1": {
-      "playlistId": "1785527135800",
-      "titulo": "f",
       "items": [
         {
-          "id": "1783539112629",
-          "titulo": "Informativo Banheiro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
-          "duracao": 30
+          "tipo": "video",
+          "id": "qCFeUspzav8",
+          "titulo": "TURISMO BASE COMUNITÁRIA GAROPABA",
+          "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+          "duracao": 490,
+          "live": false
         },
         {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
+          "tipo": "video",
+          "id": "TjxfN_tIv6o",
+          "titulo": "MCC INFO25: Apresentações",
+          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+          "duracao": 67,
+          "live": false
         }
-      ]
+      ],
+      "versao": 1785854729837
     },
     "tv2": {
       "items": [
@@ -29,7 +32,8 @@
           "conteudo": "Smart Digital Panel Project",
           "duracao": 15
         }
-      ]
+      ],
+      "versao": 1785854622059
     }
   },
   "videosCustomizados": [
@@ -188,26 +192,6 @@
           "tipo": "texto",
           "conteudo": "Smart Digital Panel Project",
           "duracao": 15
-        }
-      ]
-    },
-    {
-      "id": "1785527135800",
-      "titulo": "f",
-      "items": [
-        {
-          "id": "1783539112629",
-          "titulo": "Informativo Banheiro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
-          "duracao": 30
-        },
-        {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
         }
       ]
     }

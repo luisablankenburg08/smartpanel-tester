@@ -1,337 +1,1144 @@
 // =========================
 // CONFIG INICIAL
 // =========================
-let params = new URLSearchParams(window.location.search);
-let preview = params.get("preview") === "true";
 
-let tvId = preview ? params.get("tv") : localStorage.getItem("tvId");
+const params =
+  new URLSearchParams(window.location.search);
 
-let ultimaPagina = null;
-let modoAtual = "iframe";
+const preview =
+  params.get("preview") === "true";
 
-let ultimoConteudo = "";
-let ultimoRefresh = null;
-let carregandoConteudo = false;
+let tvId =
+  preview
+    ? params.get("tv")
+    : localStorage.getItem("tvId");
+
+
+// =========================
+// ESTADO
+// =========================
 
 let heartbeatInterval = null;
 let polling = null;
 
 let playlistIndex = 0;
 let playlistTimer = null;
-let ultimaPlaylistHash = "";
+
 let playlistAtual = [];
+let playlistVersaoAtual = 0;
+
+let playlistHash = "";
+
+let itemInicio = null;
+
+let playbackSyncInterval = null;
+
+let previewInicializado = false;
 
 
+// =========================
 // DOM
-const frame = document.getElementById("frame");
-const content = document.getElementById("content");
+// =========================
 
-// NORMALIZAR YOUTUBE
+const frame =
+  document.getElementById("frame");
+
+const content =
+  document.getElementById("content");
+
+
+// =========================
+// YOUTUBE
+// =========================
+
 function normalizarYoutube(src) {
+
   try {
+
     let url = new URL(src);
 
-    if (!url.hostname.includes("youtube")) return src;
+    if (!url.hostname.includes("youtube")) {
+      return src;
+    }
 
-    if (url.pathname === "/watch" || url.pathname === "/watch/") {
-      url.searchParams.set("autoplay", "1");
-      url.searchParams.set("mute", "1");
+    if (
+      url.pathname === "/watch" ||
+      url.pathname === "/watch/"
+    ) {
+
+      url.searchParams.set(
+        "autoplay",
+        "1"
+      );
+
+      url.searchParams.set(
+        "mute",
+        "1"
+      );
+
       return url.toString();
+
     }
 
     if (!url.pathname.includes("/embed/")) {
-      let id = url.searchParams.get("v");
+
+      const id =
+        url.searchParams.get("v");
+
       if (id) {
-        url = new URL(`https://www.youtube.com/embed/${id}`);
+
+        url =
+          new URL(
+            `https://www.youtube.com/embed/${id}`
+          );
+
       }
+
     }
 
-    url.searchParams.set("autoplay", "1");
-    url.searchParams.set("mute", "1");
-    url.searchParams.set("playsinline", "1");
-    url.searchParams.set("rel", "0");
+    url.searchParams.set(
+      "autoplay",
+      "1"
+    );
+
+    url.searchParams.set(
+      "mute",
+      "1"
+    );
+
+    url.searchParams.set(
+      "playsinline",
+      "1"
+    );
+
+    url.searchParams.set(
+      "rel",
+      "0"
+    );
 
     return url.toString();
 
   } catch {
+
     return src;
+
   }
+
 }
 
-// TEMPO
-function getTempoItem(item){
+
+// =========================
+// DURAÇÃO
+// =========================
+
+function getTempoItem(item) {
+
   return (
-    item.duracao ||
-    item.intervalo ||
-    10
+    Number(
+      item?.duracao ||
+      item?.intervalo ||
+      10
+    ) || 10
   ) * 1000;
+
 }
 
+
+// =========================
+// ID DO ITEM
+// =========================
+
+function obterIdItem(item) {
+
+  return (
+
+    item?.id ||
+
+    item?.iframe ||
+
+    item?.conteudo ||
+
+    item?.src ||
+
+    item?.titulo ||
+
+    JSON.stringify(item)
+
+  );
+
+}
+
+
+// =========================
 // RENDER
-async function render(item){
+// =========================
 
-  // Vídeo 
-  if(item.iframe){
-    frame.style.display = "block";
-    content.style.display = "none";
-    const src = normalizarYoutube(item.iframe);
+async function render(item) {
 
-    if(frame.src !== src){
-      frame.src = src;
-    }
+  if (!item) {
     return;
   }
 
-  frame.style.display = "none";
-  content.style.display = "block";
 
-  switch(item.tipo){
+  // =========================
+  // VÍDEO
+  // =========================
+
+  if (item.iframe) {
+
+    frame.style.display =
+      "block";
+
+    content.style.display =
+      "none";
+
+    const src =
+      normalizarYoutube(
+        item.iframe
+      );
+
+    if (frame.src !== src) {
+
+      frame.src = src;
+
+    }
+
+    return;
+
+  }
+
+
+  // =========================
+  // CONTEÚDO NORMAL
+  // =========================
+
+  frame.style.display =
+    "none";
+
+  content.style.display =
+    "block";
+
+
+  switch (item.tipo) {
 
     case "texto":
+
       content.innerHTML = `
+
         <div class="aviso">
-          <fieldset class="field-texto">
+
+          <fieldset
+            class="field-texto"
+          >
+
             <legend>
-              <img src="/layouts/logo-ifsc.png" class="warning-image">
+
+              <img
+                src="/layouts/logo-ifsc.png"
+                class="warning-image"
+              >
+
             </legend>
+
             ${item.conteudo}
+
           </fieldset>
-        </div> `;
+
+        </div>
+
+      `;
+
       break;
+
 
     case "canva":
+
       content.innerHTML = `
-        <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;" allowfullscreen allow="autoplay; fullscreen"> </iframe>`;
+
+        <iframe
+
+          src="${item.conteudo}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            border:none;
+          "
+
+          allowfullscreen
+
+          allow="
+            autoplay;
+            fullscreen
+          "
+
+        ></iframe>
+
+      `;
+
       break;
+
 
     case "link":
+
       content.innerHTML = `
-        <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;"></iframe>`;
+
+        <iframe
+
+          src="${item.conteudo}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            border:none;
+          "
+
+        ></iframe>
+
+      `;
+
       break;
+
 
     case "pdf":
-    content.innerHTML = `
-      <iframe src="${item.conteudo}" style="width:100vw;height:100vh;border:none;"></iframe>`;
-    break;
+
+      content.innerHTML = `
+
+        <iframe
+
+          src="${item.conteudo}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            border:none;
+          "
+
+        ></iframe>
+
+      `;
+
+      break;
+
 
     case "imagem":
-    content.innerHTML = `
-      <img src="${item.conteudo}" style="width:100vw;height:100vh;object-fit:contain;">`;
-    break;
-    
-    case "mapa":
-      content.innerHTML = `<img src="${item.src}" class="imagemViewer">`;
+
+      content.innerHTML = `
+
+        <img
+
+          src="${item.conteudo}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            object-fit:contain;
+          "
+
+        >
+
+      `;
+
       break;
+
+
+    case "mapa":
+
+      content.innerHTML = `
+
+        <img
+
+          src="${item.src}"
+
+          class="imagemViewer"
+
+        >
+
+      `;
+
+      break;
+
 
     case "calendario":
+
       content.innerHTML = `
-        <iframe src="${item.src}" style="width:100vw;height:100vh;border:none;"></iframe>`;
+
+        <iframe
+
+          src="${item.src}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            border:none;
+          "
+
+        ></iframe>
+
+      `;
+
       break;
-    
+
+
     case "ensalamento": {
-      const dia = Number(item.dia);
-      const src = `/playlists/verEnsalamento.html?dia=${dia}`;
+
+      const dia =
+        Number(item.dia);
+
+      const src =
+        `/playlists/verEnsalamento.html?dia=${dia}`;
 
       content.innerHTML = `
-        <iframe src="${src}" style="width:100vw; height:100vh; border:none;"></iframe>`;}
+
+        <iframe
+
+          src="${src}"
+
+          style="
+            width:100vw;
+            height:100vh;
+            border:none;
+          "
+
+        ></iframe>
+
+      `;
+
       break;
 
-    default:
-      content.innerHTML = `
-        <div style="
-          width:100vw;
-          height:100vh;
-          display:flex;
-          justify-content:center;
-          align-items:center;
-          font-size:40px; ">
-          Conteúdo não suportado
-        </div>`;
-  }
-}
-
-// =========================
-// PLAYLIST
-// =========================
-async function rodarPlaylistTV(items){
-
-  if(!items || items.length === 0){
-    return;
-  }
-
-  const item = items[playlistIndex];
-  await render(item);
-  const tempo = getTempoItem(item);
-
-  playlistIndex = (playlistIndex + 1) % items.length;
-
-  clearTimeout(playlistTimer);
-  playlistTimer = setTimeout(()=>{
-    rodarPlaylistTV(items);
-  }, tempo);
-}
-
-async function mostrarPlaylistTV(){
-
-  try{
-    const res = await fetch(`/playlist-tv/${tvId}`);
-    const items = await res.json();
-
-    if(!items.length){
-      return;
     }
 
-    playlistIndex = 0;
-    clearTimeout(playlistTimer);
-    await rodarPlaylistTV(items);
-  }catch(err){
-    console.error(err);
+
+    default:
+
+      content.innerHTML = `
+
+        <div
+
+          style="
+            width:100vw;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:40px;
+          "
+
+        >
+
+          Conteúdo não suportado
+
+        </div>
+
+      `;
+
   }
+
 }
 
+
+// =========================
 // REGISTRO
+// =========================
+
 async function registrar() {
-  if (preview) return;
 
-  try {
-    let res = await fetch("/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tv: tvId })
-    });
-
-    let data = await res.json();
-
-    tvId = data.tv;
-    localStorage.setItem("tvId", tvId);
-
-    iniciarHeartbeat();
-    await ping();
-
-  } catch (e) {
-    console.error("Erro register:", e);
-  }
-}
-
-//PING
-async function ping() {
-  if (preview) return;
-
-  try {
-    await fetch("/ping", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tv: tvId }),
-      keepalive: true
-    });
-  } catch (e) {
-    console.error("Erro ping:", e);
-  }
-}
-
-// HEARTBEAT
-function iniciarHeartbeat() {
-  if (preview) return;
-
-  if (heartbeatInterval) clearInterval(heartbeatInterval);
-  heartbeatInterval = setInterval(ping, 30000);
-}
-
-// UNREGISTER
-function desligar() {
-  if (preview) return;
-
-  if (tvId) {
-    const params = new URLSearchParams();
-    params.append("tv", tvId);
-    navigator.sendBeacon("/unregister", params);
-  }
-}
-
-window.addEventListener("beforeunload", desligar);
-
-//RODAR PLAYLIST
-async function tocarPlaylist() {
-
-  if (playlistAtual.length === 0) {
-
-    content.innerHTML = `
-      <div class="sem-conteudo">
-        Nenhum conteúdo na playlist
-      </div>
-    `;
+  if (preview) {
     return;
   }
 
-  const item = playlistAtual[playlistIndex];
-  await render(item);
-  const duracao = (item.duracao || item.intervalo || 10) * 1000;
+  try {
 
-  playlistTimer = setTimeout(() => {
+    const res =
+      await fetch(
+        "/register",
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              tv: tvId
+            })
+
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    tvId =
+      data.tv;
+
+
+    localStorage.setItem(
+      "tvId",
+      tvId
+    );
+
+
+    iniciarHeartbeat();
+
+    await ping();
+
+  } catch (erro) {
+
+    console.error(
+      "Erro register:",
+      erro
+    );
+
+  }
+
+}
+
+
+// =========================
+// PING
+// =========================
+
+async function ping() {
+
+  if (preview) {
+    return;
+  }
+
+  try {
+
+    await fetch(
+      "/ping",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+            tv: tvId
+          }),
+
+        keepalive: true
+
+      }
+    );
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ping:",
+      erro
+    );
+
+  }
+
+}
+
+
+// =========================
+// HEARTBEAT
+// =========================
+
+function iniciarHeartbeat() {
+
+  if (preview) {
+    return;
+  }
+
+  if (heartbeatInterval) {
+
+    clearInterval(
+      heartbeatInterval
+    );
+
+  }
+
+  heartbeatInterval =
+    setInterval(
+      ping,
+      30000
+    );
+
+}
+
+
+// =========================
+// UNREGISTER
+// =========================
+
+function desligar() {
+
+  if (preview) {
+    return;
+  }
+
+  if (!tvId) {
+    return;
+  }
+
+  const params =
+    new URLSearchParams();
+
+  params.append(
+    "tv",
+    tvId
+  );
+
+  navigator.sendBeacon(
+    "/unregister",
+    params
+  );
+
+}
+
+
+window.addEventListener(
+  "beforeunload",
+  desligar
+);
+
+
+// =========================
+// ENVIAR PLAYBACK
+// =========================
+
+async function sincronizarPlayback() {
+
+  if (preview) {
+    return;
+  }
+
+  if (!tvId) {
+    return;
+  }
+
+  if (!playlistAtual.length) {
+    return;
+  }
+
+  const item =
+    playlistAtual[
+      playlistIndex
+    ];
+
+  if (!item) {
+    return;
+  }
+
+  try {
+
+    await fetch(
+      "/playback",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+
+            tv:
+              tvId,
+
+            playlistVersao:
+              playlistVersaoAtual,
+
+            playlistIndex:
+              playlistIndex,
+
+            itemId:
+              obterIdItem(item),
+
+            itemInicio:
+              itemInicio,
+
+            itemDuracao:
+              getTempoItem(item) / 1000
+
+          })
+
+      }
+    );
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao sincronizar playback:",
+      erro
+    );
+
+  }
+
+}
+
+
+function iniciarSincronizacaoPlayback() {
+
+  if (preview) {
+    return;
+  }
+
+  if (playbackSyncInterval) {
+
+    clearInterval(
+      playbackSyncInterval
+    );
+
+  }
+
+  playbackSyncInterval =
+    setInterval(
+      sincronizarPlayback,
+      1000
+    );
+
+}
+
+
+// =========================
+// OBTER PLAYBACK
+// =========================
+
+async function obterPlaybackAtual() {
+
+  if (!preview) {
+    return null;
+  }
+
+  try {
+
+    const res =
+      await fetch(
+        `/playback/${encodeURIComponent(tvId)}`,
+        {
+          cache:
+            "no-store"
+        }
+      );
+
+
+    if (!res.ok) {
+      return null;
+    }
+
+
+    const playback =
+      await res.json();
+
+
+    if (
+      !playback.sincronizado
+    ) {
+
+      return null;
+
+    }
+
+
+    return playback;
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao obter playback:",
+      erro
+    );
+
+    return null;
+
+  }
+
+}
+
+
+// =========================
+// TOCAR PLAYLIST
+// =========================
+
+async function tocarPlaylist(
+  indiceInicial = 0,
+  inicioSincronizado = null
+) {
+
+  if (
+    !playlistAtual.length
+  ) {
+
+    content.innerHTML = `
+
+      <div class="sem-conteudo">
+
+        Nenhum conteúdo na playlist
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  playlistIndex =
+    indiceInicial;
+
+
+  if (
+    playlistIndex < 0 ||
+    playlistIndex >=
+      playlistAtual.length
+  ) {
+
+    playlistIndex = 0;
+
+  }
+
+
+  const item =
+    playlistAtual[
+      playlistIndex
+    ];
+
+
+  if (!item) {
+    return;
+  }
+
+
+  if (inicioSincronizado) {
+
+    itemInicio =
+      inicioSincronizado;
+
+  } else {
+
+    itemInicio =
+      Date.now();
+
+  }
+
+
+  await render(item);
+
+
+  const duracao =
+    getTempoItem(item);
+
+
+  let tempoRestante =
+    duracao;
+
+
+  if (inicioSincronizado) {
+
+    const decorrido =
+      Date.now() -
+      inicioSincronizado;
+
+
+    tempoRestante =
+      duracao -
+      decorrido;
+
+  }
+
+
+  if (
+    tempoRestante <= 0
+  ) {
 
     playlistIndex++;
 
-    if (playlistIndex >= playlistAtual.length) {
+    if (
+      playlistIndex >=
+      playlistAtual.length
+    ) {
+
       playlistIndex = 0;
+
     }
+
+
     tocarPlaylist();
 
-  }, duracao);
+    return;
+
+  }
+
+
+  clearTimeout(
+    playlistTimer
+  );
+
+
+  playlistTimer =
+    setTimeout(
+      () => {
+
+        playlistIndex++;
+
+        if (
+          playlistIndex >=
+          playlistAtual.length
+        ) {
+
+          playlistIndex = 0;
+
+        }
+
+        tocarPlaylist();
+
+      },
+
+      tempoRestante
+
+    );
+
 }
 
-// LOOP PRINCIPAL
+
+// =========================
+// CARREGAR PLAYLIST
+// =========================
+
 async function carregar() {
 
   try {
 
-    const res = await fetch(`/playlist-tv/${tvId}`);
-    const playlist = await res.json();
+    const res =
+      await fetch(
+        `/playlist-tv/${encodeURIComponent(tvId)}`,
+        {
+          cache:
+            "no-store"
+        }
+      );
 
-    if (!Array.isArray(playlist)) {
+
+    if (!res.ok) {
       return;
     }
 
-    // playlist mudou?
-    const hashAtual = JSON.stringify(playlist);
 
-    if (hashAtual === ultimaPlaylistHash) {
+    const dados =
+      await res.json();
+
+
+    const novaPlaylist =
+      Array.isArray(dados)
+        ? dados
+        : dados.items || [];
+
+
+    const novaVersao =
+      Array.isArray(dados)
+        ? 0
+        : Number(
+            dados.versao
+          ) || 0;
+
+
+    const novoHash =
+      JSON.stringify(
+        novaPlaylist
+      );
+
+
+    const playlistMudou =
+      novoHash !==
+      playlistHash;
+
+
+    const versaoMudou =
+      novaVersao !==
+      playlistVersaoAtual;
+
+
+    if (
+      !playlistMudou &&
+      !versaoMudou
+    ) {
+
       return;
+
     }
 
-    ultimaPlaylistHash = hashAtual;
 
-    playlistAtual = playlist;
-    playlistIndex = 0;
+    console.log(
+      "Playlist alterada:",
+      tvId
+    );
 
-    if (playlistTimer) {
-      clearTimeout(playlistTimer);
-      playlistTimer = null;
+
+    playlistHash =
+      novoHash;
+
+
+    playlistAtual =
+      novaPlaylist;
+
+
+    playlistVersaoAtual =
+      novaVersao;
+
+
+    clearTimeout(
+      playlistTimer
+    );
+
+
+    playlistTimer =
+      null;
+
+
+    // =========================
+    // PREVIEW
+    // =========================
+
+    if (preview) {
+
+      const playback =
+        await obterPlaybackAtual();
+
+
+      if (
+        playback &&
+        Number(
+          playback.playlistVersao
+        ) ===
+        playlistVersaoAtual
+      ) {
+
+        const indice =
+          Number(
+            playback.playlistIndex
+          );
+
+
+        if (
+          indice >= 0 &&
+          indice <
+            playlistAtual.length
+        ) {
+
+          const item =
+            playlistAtual[
+              indice
+            ];
+
+
+          if (
+            obterIdItem(item) ===
+            playback.itemId
+          ) {
+
+            console.log(
+              "Preview sincronizado com TV"
+            );
+
+
+            previewInicializado =
+              true;
+
+
+            await tocarPlaylist(
+              indice,
+              playback.itemInicio
+            );
+
+
+            return;
+
+          }
+
+        }
+
+      }
+
+
+      // Não foi possível sincronizar
+      // começa do início
+
+      previewInicializado =
+        true;
+
+
+      await tocarPlaylist(
+        0,
+        null
+      );
+
+
+      return;
+
     }
 
-    tocarPlaylist();
 
-  } catch(err) {
+    // =========================
+    // TV REAL
+    // =========================
+
+    await tocarPlaylist(
+      0,
+      null
+    );
+
+
+  } catch (erro) {
 
     console.error(
       "Erro ao carregar playlist:",
-      err
+      erro
     );
 
   }
+
 }
 
+
+// =========================
 // INIT
+// =========================
+
 async function iniciar() {
 
   if (!preview) {
+
     await registrar();
+
+    iniciarSincronizacaoPlayback();
+
   }
+
 
   await carregar();
 
+
   if (!polling) {
-    polling = setInterval(carregar, 5000);
+
+    polling =
+      setInterval(
+        carregar,
+        1000
+      );
+
   }
+
 }
+
 
 iniciar();
