@@ -3,7 +3,6 @@ const path = require("path");
 const express = require("express")
 const fs = require("fs")
 const app = express()
-
 // BANCO DE DADOS
 const bcrypt = require("bcrypt");
 const { pool } = require("./db");
