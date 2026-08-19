@@ -1,0 +1,134 @@
+
+
+body {
+  margin: 0;
+  background: rgb(255, 255, 255);
+  color: #1f2933;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.profile-page {
+  max-height: 50vh;
+  align-items: center;
+  justify-content: center;
+  margin-left: 75vh;
+}
+
+
+
+.profile-panel {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  max-width: 28vw ;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 2vw;
+}
+
+.profile-panel h2 {
+  margin: 0 0 12px;
+  color: #003049;
+  text-align: center;
+}
+
+
+
+
+#perfil div {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+#perfil div:last-child {
+  border-bottom: 0;
+}
+
+dt {
+  color: #003049;
+  font-weight: 700;
+}
+
+dd {
+  margin: 0;
+  float: right;
+}
+
+.admin-link {
+  display: block;
+  width: fit-content;
+  margin: 20px auto 0;
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: #003049;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .2s, opacity .2s;
+}
+
+.admin-link:hover {
+  color: #fff;
+  opacity: .9;
+  text-decoration: none;
+  transform: scale(1.03);
+}
+
+#mensagem {
+  min-height: 24px;
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+#logout-button {
+  display: block;
+  width: fit-content;
+  min-width: 140px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: #e92222;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s, opacity .2s;
+}
+
+#logout-button:hover {
+  opacity: .9;
+  transform: scale(1.03);
+}
+
+#logout-button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .profile-panel {
+    padding: 22px 18px;
+  }
+
+  #perfil div {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .admin-link,
+  #logout-button {
+    width: 100%;
+    text-align: center;
+  }
+}

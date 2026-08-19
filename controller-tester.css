@@ -125,6 +125,10 @@ fieldset legend {
   display: none;
 }
 
+#perfil {
+  font-weight: bold;
+}
+
 /* field TV central */
 .tv{ 
   width: 70vw;

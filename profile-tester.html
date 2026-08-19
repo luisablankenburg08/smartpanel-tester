@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu perfil</title>
+  <link rel="stylesheet" href="profile-tester.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+      <div class="container-fluid">
+
+        <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
+        <div class="d-flex align-items-center gap-2">
+          <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
+        </div>
+
+      </div>
+    </nav>
+
+  <main class="profile-page">
+    <section class="profile-panel">
+      <h2>Meu perfil</h2>
+      <dl id="perfil" aria-live="polite">
+        <div><dt>Usuário</dt><dd id="profile-username">Carregando...</dd></div>
+        <div><dt>Perfil</dt><dd id="profile-role">Carregando...</dd></div>
+        <div><dt>Status</dt><dd id="profile-status">Carregando...</dd></div>
+        <div><dt>Criado em</dt><dd id="profile-created">Carregando...</dd></div>
+        <div><dt>Último login</dt><dd id="profile-last-login">Carregando...</dd></div>
+      </dl>
+        <button id="logout-button" type="button">Encerrar Sessão</button>
+      <p id="mensagem" role="status"></p>
+    </section>
+
+    <section id="admin-panel" class="profile-panel" hidden>
+      <h2>Administração de usuários</h2>
+      <p>Analise solicitações, aprove contas e defina os perfis de acesso.</p>
+      <a class="admin-link" href="/users-tester.html">Gerenciar usuários e solicitações</a>
+    </section>
+
+  </main>
+  <script src="profile-tester.js"></script>
+</body>
+</html>

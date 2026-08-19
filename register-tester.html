@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitar cadastro</title>
+  <link rel="stylesheet" href="register-tester.css">
+</head>
+<body>
+  <main class="users-page">
+    <section class="users-panel">
+    <div class = "recado">
+      <h1>Solicitar cadastro</h1>
+      <p>Após o cadastro, aguarde a aprovação do administrador para acessar o sistema.</p>
+    </div>
+      <form id="registerForm">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" maxlength="80" required placeholder="Digite seu nome de usuário">
+
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" minlength="8" required placeholder="Digite sua senha">
+
+        <label for="passwordConfirmation">Confirmar senha</label>
+        <input id="passwordConfirmation" name="passwordConfirmation" type="password" minlength="8" required placeholder="Confirme sua senha">
+
+        <button type="submit">Solicitar cadastro</button>
+        <p id="mensagem" role="status"></p>
+      </form>
+      <div class="recado">
+        <a href="/login">Voltar ao login</a>
+      </div>
+    </section>
+  </main>
+  <script src="register-tester.js"></script>
+</body>
+</html>

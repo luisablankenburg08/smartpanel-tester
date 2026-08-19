@@ -4,6 +4,10 @@ const express = require("express")
 const fs = require("fs")
 const app = express()
 
+// BANCO DE DADOS
+const bcrypt = require("bcrypt");
+const { pool } = require("./db");
+
 const UPLOADS_DIR = path.join(__dirname, "uploads");
 
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -115,6 +119,26 @@ function savePlaylists(data){
   fs.writeFileSync(PLAYLIST_FILE, JSON.stringify(data, null, 2));
 }
 
+async function registrarAuditoria(req, action, entityType, entityId, details = {}, tvId = null) {
+  try {
+    await pool.query(
+      `INSERT INTO audit_logs
+        (user_id, action, entity_type, entity_id, tv_id, details)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
+      [
+        req.session?.userId || null,
+        action,
+        entityType,
+        entityId ? String(entityId) : null,
+        tvId,
+        JSON.stringify(details)
+      ]
+    );
+  } catch (error) {
+    console.error("Erro ao registrar auditoria:", error.message);
+  }
+}
+
 // NOVOS VÍDEOS
 function extrairIdDoIframe(iframe) {
   try {
@@ -196,24 +220,125 @@ setInterval(() => {
 // AUTENTICAÇÃO
 //==================
 
-app.post("/login", (req, res) => {
-
+app.post("/login", async (req, res) => {
     const { username, password } = req.body;
-    console.log("LOGIN", username, password);
 
-    if (username === "smartPanel" && password === "sdppLuisa26") {
-        req.session.authenticated = true;
-        console.log(req.session);
-        req.session.save(() => {res.json({ success: true }); });
-    } else {
-        res.json({ success: false });
+    if (typeof username !== "string" || typeof password !== "string") {
+      return res.status(400).json({
+        success: false,
+        erro: "Usuário e senha são obrigatórios"
+      });
+    }
+
+    try {
+      const resultado = await pool.query(
+        `SELECT id, username, password_hash, role
+         FROM users
+         WHERE username = $1 AND active = TRUE`,
+        [username.trim()]
+      );
+
+      const usuario = resultado.rows[0];
+      const senhaValida = usuario
+        ? await bcrypt.compare(password, usuario.password_hash)
+        : false;
+
+      if (!senhaValida) {
+        await registrarAuditoria(req, "LOGIN_FAILED", "user", username.trim());
+        return res.json({ success: false });
       }
 
+      req.session.authenticated = true;
+      req.session.userId = usuario.id;
+      req.session.username = usuario.username;
+      req.session.role = usuario.role;
+
+      await pool.query(
+        "UPDATE users SET last_login_at = now(), updated_at = now() WHERE id = $1",
+        [usuario.id]
+      );
+      await registrarAuditoria(req, "LOGIN_SUCCESS", "user", usuario.id);
+
+      req.session.save(error => {
+        if (error) {
+          console.error("Erro ao salvar sessão:", error.message);
+          return res.status(500).json({ success: false });
+        }
+
+        res.json({
+          success: true,
+          user: {
+            id: usuario.id,
+            username: usuario.username,
+            role: usuario.role
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Erro no login:", error.message);
+      res.status(500).json({
+        success: false,
+        erro: "Não foi possível realizar o login"
+      });
+    }
+});
+
+// CADASTRO PÚBLICO: a conta aguarda aprovação do administrador
+app.post("/account/register", async (req, res) => {
+  const { username, password } = req.body;
+  const nome = typeof username === "string" ? username.trim() : "";
+  const senha = typeof password === "string" ? password : "";
+
+  if (!nome || nome.length > 80 || senha.length < 8) {
+    return res.status(400).json({
+      erro: "Usuário é obrigatório e a senha deve ter pelo menos 8 caracteres"
+    });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(senha, 12);
+    const resultado = await pool.query(
+      `INSERT INTO users
+        (username, password_hash, role, active)
+       VALUES ($1, $2, 'visualizador', FALSE)
+       RETURNING id, username`,
+      [nome, passwordHash]
+    );
+
+    res.status(201).json({
+      ok: true,
+      mensagem: "Cadastro enviado. Aguarde a aprovação do administrador.",
+      user: resultado.rows[0]
+    });
+    await registrarAuditoria(req, "USER_REGISTERED", "user", resultado.rows[0].id, {
+      username: resultado.rows[0].username,
+      status: "pending"
+    });
+  } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({ erro: "Usuário já existe" });
+    }
+
+    console.error("Erro no cadastro:", error.message);
+    res.status(500).json({ erro: "Não foi possível concluir o cadastro" });
+  }
 });
 
 // servir páginas e assets do painel
 app.get("/controller-tester.html", verificarAuth, (req, res) => {
   res.sendFile(path.join(ROOT_DIR, "controller-tester.html"));
+});
+
+app.get("/profile-tester.html", verificarAuth, (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "profile-tester.html"));
+});
+
+app.get("/users-tester.html", verificarAdmin, (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "users-tester.html"));
+});
+
+app.get("/register-tester.html", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "register-tester.html"));
 });
 
 app.get("/viewer-tester.html", (req, res) => {
@@ -232,6 +357,22 @@ app.get("/login", (req, res) => {
   res.redirect("/login/login.html")
 });
 
+app.post("/logout", (req, res) => {
+  if (!req.session) {
+    return res.json({ ok: true });
+  }
+
+  req.session.destroy(error => {
+    if (error) {
+      console.error("Erro ao encerrar sessão:", error.message);
+      return res.status(500).json({ erro: "Não foi possível encerrar a sessão" });
+    }
+
+    res.clearCookie("connect.sid");
+    res.json({ ok: true });
+  });
+});
+
 // middleware de proteção
 function verificarAuth(req, res, next) {
 
@@ -242,6 +383,134 @@ function verificarAuth(req, res, next) {
   }
 }
 
+function verificarAdmin(req, res, next) {
+  if (!req.session || !req.session.authenticated) {
+    return res.status(401).json({ erro: "Autenticação necessária" });
+  }
+
+  if (req.session.role !== "admin") {
+    return res.status(403).json({ erro: "Acesso restrito ao administrador" });
+  }
+
+  next();
+}
+
+app.get("/me", verificarAuth, async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, username, role, active, created_at, last_login_at
+       FROM users
+       WHERE id = $1`,
+      [req.session.userId]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    res.json({ user: resultado.rows[0] });
+  } catch (error) {
+    console.error("Erro ao carregar perfil:", error.message);
+    res.status(500).json({ erro: "Não foi possível carregar o perfil" });
+  }
+});
+
+// CRIAR USUÁRIO
+app.post("/users", verificarAdmin, async (req, res) => {
+  const { username, password, role = "editor" } = req.body;
+  const nome = typeof username === "string" ? username.trim() : "";
+  const senha = typeof password === "string" ? password : "";
+  const perfisPermitidos = ["admin", "editor", "visualizador"];
+
+  if (!nome || nome.length > 80 || senha.length < 8) {
+    return res.status(400).json({
+      erro: "Usuário é obrigatório e a senha deve ter pelo menos 8 caracteres"
+    });
+  }
+
+  if (!perfisPermitidos.includes(role)) {
+    return res.status(400).json({ erro: "Perfil inválido" });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(senha, 12);
+    const resultado = await pool.query(
+      `INSERT INTO users
+        (username, password_hash, role, active, created_by)
+       VALUES ($1, $2, $3, TRUE, $4)
+       RETURNING id, username, role, active, created_at`,
+      [nome, passwordHash, role, req.session.userId]
+    );
+
+    res.status(201).json({
+      ok: true,
+      user: resultado.rows[0]
+    });
+    await registrarAuditoria(req, "USER_CREATED", "user", resultado.rows[0].id, {
+      username: resultado.rows[0].username,
+      role: resultado.rows[0].role
+    });
+  } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({ erro: "Usuário já existe" });
+    }
+
+    console.error("Erro ao criar usuário:", error.message);
+    res.status(500).json({ erro: "Não foi possível criar o usuário" });
+  }
+});
+
+// LISTAR E ALTERAR ACESSO DOS USUÁRIOS
+app.get("/users", verificarAdmin, async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, username, role, active, created_at, last_login_at
+       FROM users
+       ORDER BY created_at DESC`
+    );
+    res.json({ users: resultado.rows });
+  } catch (error) {
+    console.error("Erro ao listar usuários:", error.message);
+    res.status(500).json({ erro: "Não foi possível listar os usuários" });
+  }
+});
+
+app.patch("/users/:id/access", verificarAdmin, async (req, res) => {
+  const userId = Number(req.params.id);
+  const { active, role } = req.body;
+  const perfisPermitidos = ["admin", "editor", "visualizador"];
+
+  if (!Number.isInteger(userId) || typeof active !== "boolean" || !perfisPermitidos.includes(role)) {
+    return res.status(400).json({ erro: "Dados de acesso inválidos" });
+  }
+
+  if (userId === req.session.userId && !active) {
+    return res.status(400).json({ erro: "O administrador não pode bloquear a própria conta" });
+  }
+
+  try {
+    const resultado = await pool.query(
+      `UPDATE users
+       SET active = $1, role = $2, updated_at = now()
+       WHERE id = $3
+       RETURNING id, username, role, active, updated_at`,
+      [active, role, userId]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    res.json({ ok: true, user: resultado.rows[0] });
+    await registrarAuditoria(req, active ? "USER_APPROVED" : "USER_BLOCKED", "user", userId, {
+      role: role
+    });
+  } catch (error) {
+    console.error("Erro ao alterar acesso:", error.message);
+    res.status(500).json({ erro: "Não foi possível alterar o acesso" });
+  }
+});
+
 app.use(express.static(ROOT_DIR))
 
 //==================
@@ -249,7 +518,7 @@ app.use(express.static(ROOT_DIR))
 //==================
 
 // ADICIONAR ÀS PLAYLISTS
-app.post("/playlist/add", (req,res)=>{
+app.post("/playlist/add", verificarAuth, async (req,res)=>{
 
     const { tv, items } = req.body;
     let playlists = readPlaylists();
@@ -270,6 +539,9 @@ app.post("/playlist/add", (req,res)=>{
 
     playlists.tvPlaylists[tv].items.push(...items);
     savePlaylists(playlists);
+    await registrarAuditoria(req, "PLAYLIST_ITEMS_ADDED", "tv_playlist", tv, {
+      itemCount: items.length
+    }, tv);
     res.json({ok:true});
 
 });
@@ -288,7 +560,7 @@ app.get("/playlist-tv/:tv", (req,res)=>{
 });
 
 // REORDENAR PLAYLIST ATUAL
-app.post("/playlist/reorder", (req,res)=>{
+app.post("/playlist/reorder", verificarAuth, async (req,res)=>{
 
   const { tv, items } = req.body;
 
@@ -313,6 +585,9 @@ app.post("/playlist/reorder", (req,res)=>{
     playlists.tvPlaylists[tv].items = items;
 
     savePlaylists(playlists);
+    await registrarAuditoria(req, "PLAYLIST_REORDERED", "tv_playlist", tv, {
+      itemCount: items.length
+    }, tv);
 
     res.json({sucesso:true});
 
@@ -376,7 +651,7 @@ app.post("/register", (req, res) => {
 })
 
 // UPDATE 
-app.post("/update", verificarAuth, (req, res) => {
+app.post("/update", verificarAuth, async (req, res) => {
 
   let { tv, pagina, intervalo } = req.body
   let state = readState();
@@ -400,6 +675,10 @@ app.post("/update", verificarAuth, (req, res) => {
 }
 
   saveState(state)
+  await registrarAuditoria(req, "TV_PAGE_UPDATED", "tv", tv, {
+    pagina: state[tv].pagina,
+    intervalo: state[tv].intervalo
+  }, tv);
 
   res.json({ status: "ok" })
 })
@@ -490,6 +769,10 @@ app.post("/videos", verificarAuth, async (req, res) => {
   playlists.videosCustomizados.push(novoVideo);
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "VIDEO_CREATED", "video", novoVideo.id, {
+    titulo: novoVideo.titulo,
+    duracao: novoVideo.duracao
+  });
 
   res.json({ ok: true });
   console.log("adição concluída")
@@ -504,22 +787,26 @@ app.get("/videos", verificarAuth, (req, res) => {
 });
 
 // DELETAR VÍDEO
-app.delete("/videos/:id", (req, res) => {
+app.delete("/videos/:id", verificarAuth, async (req, res) => {
 
     const id = req.params.id;
 
     let playlists = readPlaylists();
 
+    const video = playlists.videosCustomizados.find(v => v.id === id);
     playlists.videosCustomizados = playlists.videosCustomizados.filter(v => v.id !== id);
 
     savePlaylists(playlists);
+    await registrarAuditoria(req, "VIDEO_DELETED", "video", id, {
+      titulo: video?.titulo || null
+    });
 
     res.json({ ok: true });
 
 });
 
 // EDITAR VÍDEO
-app.put("/videos/:id", verificarAuth, (req, res) => {
+app.put("/videos/:id", verificarAuth, async (req, res) => {
 
   const { id } = req.params;
   const { titulo, duracao } = req.body;
@@ -549,6 +836,10 @@ app.put("/videos/:id", verificarAuth, (req, res) => {
   }
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "VIDEO_UPDATED", "video", id, {
+    titulo: video.titulo,
+    duracao: video.duracao
+  });
 
   res.json({
     ok: true,
@@ -564,7 +855,7 @@ app.get("/avisos", verificarAuth, (req,res)=>{
 });
 
 // ADICIONAR AVISO 
-app.post("/avisos", verificarAuth, upload.single("arquivo"), (req, res) => {
+app.post("/avisos", verificarAuth, upload.single("arquivo"), async (req, res) => {
 
   let playlists = readPlaylists();
 
@@ -593,6 +884,10 @@ app.post("/avisos", verificarAuth, upload.single("arquivo"), (req, res) => {
   playlists.avisosCustomizados.push(aviso);
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "NOTICE_CREATED", "notice", aviso.id, {
+    titulo: aviso.titulo,
+    tipo: aviso.tipo
+  });
 
   res.json({
     ok: true,
@@ -601,7 +896,7 @@ app.post("/avisos", verificarAuth, upload.single("arquivo"), (req, res) => {
 });
 
 // EDITAR AVISOS
-app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
+app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), async (req,res)=>{
   const playlists = readPlaylists();
   const aviso = playlists.avisosCustomizados.find(
     a => a.id === req.params.id
@@ -627,19 +922,27 @@ app.put("/avisos/:id", verificarAuth, upload.single("arquivo"), (req,res)=>{
         :"imagem";
   }
   savePlaylists(playlists);
+  await registrarAuditoria(req, "NOTICE_UPDATED", "notice", req.params.id, {
+    titulo: aviso.titulo,
+    tipo: aviso.tipo
+  });
   res.json({ok:true});
 });
 
 //EXCLUIR AVISOS
-app.delete("/avisos/:id", verificarAuth, (req,res)=>{
+app.delete("/avisos/:id", verificarAuth, async (req,res)=>{
 
     const playlists = readPlaylists();
 
+    const aviso = playlists.avisosCustomizados.find(a => a.id === req.params.id);
     playlists.avisosCustomizados = playlists.avisosCustomizados.filter(
       a => a.id !== req.params.id
     );
 
     savePlaylists(playlists);
+    await registrarAuditoria(req, "NOTICE_DELETED", "notice", req.params.id, {
+      titulo: aviso?.titulo || null
+    });
     res.json({ok:true});
 
 });
@@ -669,7 +972,7 @@ app.get("/playlist", (req,res)=>{
 });
 
 // ADICIONAR / ALTERAR MAPA
-app.post("/mapa", verificarAuth, upload.single("mapa"), (req, res) => {
+app.post("/mapa", verificarAuth, upload.single("mapa"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
       erro: "Arquivo não enviado"
@@ -712,6 +1015,9 @@ app.post("/mapa", verificarAuth, upload.single("mapa"), (req, res) => {
     });
   }
   savePlaylists(playlists);
+  await registrarAuditoria(req, mapaExistente ? "MAP_UPDATED" : "MAP_CREATED", "map", "mapa", {
+    src
+  });
   res.json({ok: true, src});
 });
 
@@ -732,7 +1038,7 @@ app.get("/playlists-salvas", (req, res) => {
 });
 
 //CRIAR NOVAS PLAYLISTS
-app.post("/playlists-salvas", verificarAuth, (req, res) => {
+app.post("/playlists-salvas", verificarAuth, async (req, res) => {
 
   const { titulo, items } = req.body;
 
@@ -759,11 +1065,15 @@ app.post("/playlists-salvas", verificarAuth, (req, res) => {
   );
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "PLAYLIST_CREATED", "playlist", novaPlaylist.id, {
+    titulo: novaPlaylist.titulo,
+    itemCount: novaPlaylist.items.length
+  });
   res.json({ok: true,playlist: novaPlaylist});
 });
 
 //EDITAR PLAYLISTS PRONTAS
-app.put("/playlists-salvas/:id", verificarAuth, (req, res) => {
+app.put("/playlists-salvas/:id", verificarAuth, async (req, res) => {
 
   const playlists = readPlaylists();
 
@@ -781,23 +1091,31 @@ app.put("/playlists-salvas/:id", verificarAuth, (req, res) => {
   playlist.titulo = req.body.titulo;
   playlist.items = Array.isArray(req.body.items) ? req.body.items : [];
   savePlaylists(playlists);
+  await registrarAuditoria(req, "PLAYLIST_UPDATED", "playlist", req.params.id, {
+    titulo: playlist.titulo,
+    itemCount: playlist.items.length
+  });
   res.json({ok: true});
 });
 
 //EXCLUIR PLAYLISTS PRONTAS
-app.delete("/playlists-salvas/:id", verificarAuth, (req, res) => {
+app.delete("/playlists-salvas/:id", verificarAuth, async (req, res) => {
   const playlists = readPlaylists();
+  const playlist = playlists.playlistsSalvas.find(p => p.id === req.params.id);
   playlists.playlistsSalvas =
     playlists.playlistsSalvas.filter(
       p => p.id !== req.params.id
     );
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "PLAYLIST_DELETED", "playlist", req.params.id, {
+    titulo: playlist?.titulo || null
+  });
   res.json({ok: true});
 });
 
 //APLICAR PLAYLISTS PRONTAS
-app.post("/playlist/aplicar", verificarAuth, (req, res) => {
+app.post("/playlist/aplicar", verificarAuth, async (req, res) => {
   const { tv, playlistId } = req.body;
   const playlists = readPlaylists();
   const state = readState();
@@ -829,6 +1147,10 @@ app.post("/playlist/aplicar", verificarAuth, (req, res) => {
     STATE_FILE,
     JSON.stringify(state, null, 2)
   );
+  await registrarAuditoria(req, "PLAYLIST_APPLIED", "playlist", playlistId, {
+    titulo: playlist.titulo,
+    itemCount: playlist.items.length
+  }, tv);
 
   res.json({ok: true});
 });
@@ -918,7 +1240,7 @@ app.get("/conteudos", (req, res) => {
 });
 
 // SAVE PLAYLIST 
-app.post("/save-playlist", verificarAuth, (req, res) => {
+app.post("/save-playlist", verificarAuth, async (req, res) => {
 
     const { tv, items } = req.body;
     if (!tv) {
@@ -941,11 +1263,15 @@ app.post("/save-playlist", verificarAuth, (req, res) => {
 
     playlists.tvPlaylists[tv].items = Array.isArray(items) ? items : [];
     savePlaylists(playlists);
+    await registrarAuditoria(req, "TV_PLAYLIST_SAVED", "tv_playlist", tv, {
+      type: req.body.type || "playlist",
+      itemCount: Array.isArray(items) ? items.length : 0
+    }, tv);
     res.json({ok: true});
 });
 
 // UPDATE ALL 
-app.post("/update-all", verificarAuth, (req, res) => {
+app.post("/update-all", verificarAuth, async (req, res) => {
 
   const { items } = req.body;
 
@@ -981,6 +1307,11 @@ app.post("/update-all", verificarAuth, (req, res) => {
   );
 
   savePlaylists(playlists);
+  await registrarAuditoria(req, "CONTENT_APPLIED_TO_ALL_TVS", "tv_playlist", "all", {
+    type: req.body.type || "playlist",
+    itemCount: Array.isArray(req.body.items) ? req.body.items.length : 0,
+    tvCount: Object.keys(state).length
+  });
   res.json({ ok:true });
 });
 

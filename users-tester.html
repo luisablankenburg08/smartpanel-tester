@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários</title>
+  <link rel="stylesheet" href="users-tester.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+      <div class="container-fluid">
+
+        <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
+        <div class="d-flex align-items-center gap-2">
+          <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
+        </div>
+
+      </div>
+    </nav>
+
+  <main class="users-page">
+    <a href="/profile-tester.html">Voltar ao perfil</a>
+
+    <section class="users-panel">
+      <h1>Criar usuário</h1>
+      <p>Cadastre uma conta para acessar o painel.</p>
+
+      <form id="userForm">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" maxlength="80" required>
+
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" minlength="8" required>
+
+        <label for="role">Perfil</label>
+        <select id="role" name="role">
+          <option value="editor">Editor</option>
+          <option value="visualizador">Visualizador</option>
+          <option value="admin">Administrador</option>
+        </select>
+
+        <button type="submit">Criar usuário</button>
+        <p id="mensagem" role="status"></p>
+      </form>
+    </section>
+
+    <section class="users-panel">
+      <h2>Contas e permissões</h2>
+      <p>Contas novas ficam bloqueadas até serem aprovadas.</p>
+      <div id="lista-usuarios"></div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwxHj09JcYn3nv7wiPVlz7YYwJrW2Jv7wTQ5c8a0c1sQK7F8D6" crossorigin="anonymous"></script>
+  <script src="users-tester.js"></script>
+</body>
+</html>

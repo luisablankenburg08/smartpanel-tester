@@ -148,6 +148,17 @@ body {
 }
 
 
+.link-cadastro {
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+}
+
+.link-cadastro a {
+    color: #003049;
+    font-weight: bold;
+}
+
 @media (max-width: 480px) {
     .login-container {padding: 15px;}
     .login-card {padding: 30px 25px; border-radius: 16px;}

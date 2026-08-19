@@ -5,18 +5,11 @@
       "titulo": "f",
       "items": [
         {
-          "id": "1783539112629",
-          "titulo": "Informativo Banheiro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
-          "duracao": 30
-        },
-        {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
         }
       ]
     },
@@ -168,6 +161,13 @@
       "tipo": "canva",
       "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
       "duracao": 30
+    },
+    {
+      "id": "1787162927821",
+      "titulo": "auditoria",
+      "tipo": "texto",
+      "conteudo": "teste de auditoria",
+      "duracao": 15
     }
   ],
   "playlistsSalvas": [
