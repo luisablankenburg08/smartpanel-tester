@@ -1,6 +1,6 @@
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
@@ -10,29 +10,32 @@ body {
     align-items: center;
     justify-content: center;
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient( 135deg, #f1f1f8 0%,#e9e8f5 50%, #dfdff1 100%);
+    background: linear-gradient( 135deg, #f1f8f2 0%,#e8f5e9 50%, #dff1e1 100%);
 }
 
-
+h1 {
+  color: rgb(25, 135, 84);
+}
 .users-panel {
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(67, 160, 71, 0.10);
   max-width: 430px;
 }
 
 .recado {
-    justify-content: center;
-    text-align: center;
-    align-items: center;
+  text-align: center;
+  margin-bottom: 30px
 }
 
 .recado a {
-   color: #003049; 
+   color: rgb(25, 135, 84);; 
    font-weight: bold;
 }
+
+
 label {
   display: block;
   margin-top: 18px;
@@ -49,7 +52,7 @@ button {
     border: 1px solid #d1d5db;
     border-radius: 10px;
     background: #ffffff;
-    color: #1f2933;
+    color: rgb(25, 135, 84);
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -59,13 +62,18 @@ input::placeholder {
     color: #9ca3af;
 }
 
+input:focus {
+    border-color: rgb(25, 135, 84);
+    box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
+}
+
 button {
     margin-top: 24px;
     width: 100%;
     height: 52px;
     border: none;
     border-radius: 10px;
-    background: #003049;
+    background: rgb(25, 135, 84);
     color: #ffffff;
     font-size: 1rem;
     font-weight: 700;

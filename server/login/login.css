@@ -10,7 +10,7 @@ body {
     align-items: center;
     justify-content: center;
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient( 135deg, #f1f1f8 0%,#e9e8f5 50%, #dfdff1 100%);
+    background: linear-gradient( 135deg, #f1f8f2 0%,#e8f5e9 50%, #dff1e1 100%);
 }
 
 .login-container {
@@ -35,7 +35,7 @@ body {
 
 .login-header h1 {
     margin: 0;
-    color: #1f2933;
+    color: rgb(25, 135, 84);;
     font-size: 1.8rem;
     font-weight: 700;
 }
@@ -66,14 +66,14 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 10px;
     background: #ffffff;
-    color: #1f2933;
+    color: rgb(25, 135, 84);;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .campo-login input:focus {
-    border-color: #003049;
+    border-color: rgb(25, 135, 84);
     box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
 }
 
@@ -101,7 +101,7 @@ body {
 .lembrar-login input {
     width: 17px;
     height: 17px;
-    accent-color: #003049;
+    accent-color: rgb(25, 135, 84);;
     cursor: pointer;
 }
 
@@ -111,7 +111,7 @@ body {
     height: 52px;
     border: none;
     border-radius: 10px;
-    background: #003049;
+    background: rgb(25, 135, 84);;
     color: #ffffff;
     font-size: 1rem;
     font-weight: 700;
@@ -149,14 +149,20 @@ body {
 
 
 .link-cadastro {
+    margin-top:2vh;
     justify-content: center;
     text-align: center;
     align-items: center;
 }
 
 .link-cadastro a {
-    color: #003049;
+    margin-top: 0;
+    color: rgb(25, 135, 84);;
     font-weight: bold;
+}
+
+.link-cadastro p {
+    margin: 0
 }
 
 @media (max-width: 480px) {

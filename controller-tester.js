@@ -229,7 +229,7 @@ function renderizarPlaylist(tv) {
           </span>
         </div>
 
-        <span class="playlist-duracao">${duracao}s</span>
+        <span class="playlist-duracao">| ${duracao}s</span>
       </div>
 
       ${modoEdicao ? `

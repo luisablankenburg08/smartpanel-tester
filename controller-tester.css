@@ -125,50 +125,51 @@ fieldset legend {
   display: none;
 }
 
-#perfil {
-  font-weight: bold;
+#perfil-img {
+  max-width: 4vh;
+  margin: 0;
+  border: 2px solid #198754;
+  border-radius: 20vw;
 }
 
 /* field TV central */
 .tv{ 
-  width: 70vw;
+  width: 60vw;
   height: auto;
+  margin-top: 2vh;
   min-height: 90vh;
   overflow: visible;
   justify-content: center;
   border:1px solid white;
   border-radius:1vw;
   padding:15px;
-  
 } 
 
 .mensagemtv{
   font-size: 24px;
-  color: #13307f;
+  color: rgb(25, 135, 84);
   font-weight: bold;
   margin-top: 5vw;
 }
 
 .tv-preview-frame {
-  display: flex;
-  width: 66vw;
+  width: 50vw;
   height: 30vw;
   border: 0.1vw solid #000;
-  margin-top: 3vh;
-  margin-left: 1.5vw;
-  overflow: hidden;
+  margin-left: 4vw;
 }
 
 #tv-atual{
   display:flex;
   justify-content:center;
+  align-items: center;
   
 }
 
 /* título TV */
 .tv h2 {
-  color: #5b81e7; 
-  font-size:2vw;
+  color: #198754; 
+  font-size:40px;
   text-decoration: underline;
   font-weight: bold;
   text-transform: uppercase;  
@@ -185,11 +186,21 @@ fieldset legend {
 
 }
 
+#playlist {
+  border: 2px solid rgb(0,0,0,0.1);
+  margin-left: 4vw;
+  margin-top: 1vh;
+  border-radius: 1vw;
+  max-width: 50vw;
+}
+
 .btn-editar {
   width: 5vw;
+  border-radius: 1vw;
   border: none;
-  background-color: rgb(243, 233, 233);
-  color: #003049;
+  padding: 1vh;
+  background-color: rgb(25, 135, 84, 0.5);
+  color: black;
   cursor: pointer;
 }
 
@@ -200,9 +211,9 @@ fieldset legend {
 
 .titulo-playlist-atual {
   margin: 0;
-  font-size: 1.2vw;
+  font-size: 25px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #003049;
+  color: #198754;
 }
 
 .listaPlaylistAtual{
@@ -213,15 +224,13 @@ fieldset legend {
 
 .listaPlaylistAtual li{
   display: flex;
-  align-items: center;
-  height: 0.5vh;
-  width: 35vw;
+  max-width: 30vw;
   margin: 1vh;
-  padding: 1vw;
-  background: #abb1d4 ;
+  padding: 0.8vh;
+  background-color: rgb(25, 135, 84, 0.5) ;
+  color: black;
   border-radius: 1vw;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 600;
 }
 
 .playlist-item{
@@ -234,6 +243,7 @@ fieldset legend {
   gap: 1vw;
 
 }
+
 .btn-remover{
   margin-left:auto;
   border:none;
@@ -334,7 +344,7 @@ fieldset legend {
 }
 
 .item-tv-navbar.selecionada {
-  background-color: #003049;
+  background-color: #198754;
   color: white;
   font-weight: bold;
 }

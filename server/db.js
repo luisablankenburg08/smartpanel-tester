@@ -1,7 +1,8 @@
 const { Pool } = require("pg");
 
-const connectionString = process.env.DATABASE_URL;
+DATABASE_URL= "postgresql://admin:sdpp26@191.36.56.92:5432/painel" ;
 
+const connectionString = DATABASE_URL;
 if (!connectionString) {
 	throw new Error("DATABASE_URL não configurada");
 }

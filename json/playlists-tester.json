@@ -5,11 +5,19 @@
       "titulo": "f",
       "items": [
         {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
+        },
+        {
+          "tipo": "ensalamento",
+          "id": "ensalamento-segunda",
+          "dia": 0,
+          "titulo": "Ensalamento: Segunda-feira",
+          "duracao": 30,
+          "src": "/playlists/verEnsalamento.html"
         }
       ]
     },
@@ -163,10 +171,10 @@
       "duracao": 30
     },
     {
-      "id": "1787162927821",
-      "titulo": "auditoria",
+      "id": "1787670541486",
+      "titulo": "teste",
       "tipo": "texto",
-      "conteudo": "teste de auditoria",
+      "conteudo": "teste",
       "duracao": 15
     }
   ],
@@ -188,26 +196,6 @@
           "tipo": "texto",
           "conteudo": "Smart Digital Panel Project",
           "duracao": 15
-        }
-      ]
-    },
-    {
-      "id": "1785527135800",
-      "titulo": "f",
-      "items": [
-        {
-          "id": "1783539112629",
-          "titulo": "Informativo Banheiro",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHEOnstFEU/LeY0OrlmJjtyVnvfaf1vug/view?embed",
-          "duracao": 30
-        },
-        {
-          "id": "1783082743473",
-          "titulo": "Joaquim - Combo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNZqkWpqE/26pc9VLaYE1RypeDBqwTFg/view?embed",
-          "duracao": 30
         }
       ]
     }
