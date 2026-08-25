@@ -427,8 +427,8 @@
 #aviso-link:focus,
 #aviso-titulo:focus,
 #aviso-duracao:focus{
-    outline:none;
-    border:.15vw solid #198754;
+  outline:none;
+  border:.15vw solid #198754;
 }
 
 .cards-avisos{
@@ -464,7 +464,6 @@
   font-weight: 500;
   color: rgb(80, 79, 79);
 }
-
 
 #paginacao-avisos .page-item.active .page-link {
   font-weight: 700;
