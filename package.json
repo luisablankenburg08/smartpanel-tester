@@ -1,0 +1,14 @@
+{
+  "name": "smart-digital-panel",
+  "version": "1.0.0",
+  "main": "server/server-tester.js",
+  "scripts": {
+    "start": "node server/server-tester.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
+    "youtubei.js": "^15.0.0"
+  }
+}

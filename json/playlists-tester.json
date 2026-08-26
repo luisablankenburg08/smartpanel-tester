@@ -5,11 +5,11 @@
       "titulo": "f",
       "items": [
         {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
         },
         {
           "tipo": "ensalamento",
@@ -24,11 +24,11 @@
     "tv2": {
       "items": [
         {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
+          "id": "1783082579283",
+          "titulo": "Solicitação de Conteúdo",
+          "tipo": "canva",
+          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
+          "duracao": 30
         }
       ]
     }
@@ -123,7 +123,7 @@
       "id": "mapa",
       "tipo": "mapa",
       "titulo": "Mapa do Campus",
-      "src": "/playlists/mapa-floripa.jpg",
+      "src": "/uploads/mapa-campus.jpg",
       "duracao": 30
     }
   ],
@@ -178,26 +178,5 @@
       "duracao": 15
     }
   ],
-  "playlistsSalvas": [
-    {
-      "id": "1784925827181",
-      "titulo": "teste",
-      "items": [
-        {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
-        },
-        {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
-        }
-      ]
-    }
-  ]
+  "playlistsSalvas": []
 }

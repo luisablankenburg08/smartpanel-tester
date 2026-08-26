@@ -10,17 +10,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+
 .users-page {
   width: min(100% - 32px, 620px);
   margin: 32px auto;
 }
 
 .users-page > a {
-  display: inline-block;
-  margin-bottom: 18px;
-  color: #003049;
-  font-weight: 700;
+  display: block;
+  max-width: 7vw;
+  padding: 0.8vh;
+  background-color:#e4fce4;;;
+  border-radius: 1vw;
+  color: #198754;;
+  font-weight: bold;
   text-decoration: none;
+  margin-bottom: 2vh;
+  text-align: center;
 }
 
 .users-panel {
@@ -35,7 +41,7 @@ body {
 .users-panel h1,
 .users-panel h2 {
   margin: 0 0 12px;
-  color: #003049;
+  color: #198754;
   text-align: center;
 }
 
@@ -67,9 +73,10 @@ select {
   transition: border-color .2s, box-shadow .2s;
 }
 
+
 input:focus,
 select:focus {
-  border-color: #003049;
+  border-color: #198754;
   box-shadow: 0 0 0 3px rgba(67, 160, 71, .15);
 }
 
@@ -84,7 +91,7 @@ input::placeholder {
   padding: 0 16px;
   border: 0;
   border-radius: 10px;
-  background: #003049;
+  background: #198754;
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -122,7 +129,7 @@ input::placeholder {
   margin-top: 0;
   border: 0;
   border-radius: 10px;
-  background: #003049;
+  background: #198754;
   color: #fff;
   font: inherit;
   font-weight: 700;

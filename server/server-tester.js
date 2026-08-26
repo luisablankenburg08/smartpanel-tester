@@ -8,12 +8,13 @@ const app = express()
 const bcrypt = require("bcrypt");
 const { pool } = require("./db");
 
-const UPLOADS_DIR = path.join(__dirname, "uploads");
+
+const ROOT_DIR = path.resolve(__dirname, "..");
+const UPLOADS_DIR = path.join(ROOT_DIR, "uploads");
 
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
-const ROOT_DIR = path.resolve(__dirname, "..");
 const PLAYLIST_FILE = path.join(ROOT_DIR, "json", "playlists-tester.json"); //salvar conteúdos em playlists-tester.json
 const STATE_FILE = path.join(ROOT_DIR, "json", "state.json"); // salvar tvs em state.json
 const LOGIN_DIR = path.join(__dirname, "login");
@@ -972,53 +973,69 @@ app.get("/playlist", (req,res)=>{
 });
 
 // ADICIONAR / ALTERAR MAPA
-app.post("/mapa", verificarAuth, upload.single("mapa"), async (req, res) => {
+app.post("/mapa", verificarAuth, upload.single("mapa"), (req, res) => {
+
   if (!req.file) {
     return res.status(400).json({
       erro: "Arquivo não enviado"
     });
   }
 
-  const src = "/uploads/" + req.file.filename;
-  const playlists = readPlaylists();
-
-  if (!Array.isArray(playlists.mapa)) {
-    playlists.mapa = [];
-  }
-
-  const mapaExistente = playlists.mapa.find(item => item.id === "mapa");
-
-  if (mapaExistente && mapaExistente.src && mapaExistente.src.startsWith("/uploads/")) {
-    const arquivoAntigo = path.join(UPLOADS_DIR, path.basename(mapaExistente.src));
-
-    if (fs.existsSync(arquivoAntigo)) {
-      try {
-        fs.unlinkSync(arquivoAntigo);
-      } catch (erro) {
-        console.warn(
-          "Não foi possível remover o mapa antigo:",
-          erro.message
-        );
-      }
+  try {
+    const playlists = readPlaylists();
+    if (!Array.isArray(playlists.mapa)) {
+      playlists.mapa = [];
     }
-  }
 
-  if (mapaExistente) {
-    mapaExistente.src = src;
-  } else {
-    playlists.mapa.push({
-      id: "mapa",
-      tipo: "mapa",
-      titulo: "Mapa do Campus",
-      src,
-      duracao: 30
-    });
+    let mapa = playlists.mapa.find(item => item.id === "mapa");
+
+    if (mapa && mapa.src && mapa.src.startsWith("/uploads/")) {
+
+      const arquivoAntigo = path.join(UPLOADS_DIR, path.basename(mapa.src));
+
+      if (fs.existsSync(arquivoAntigo)) {
+        try {
+          fs.unlinkSync(arquivoAntigo);
+          console.log("Mapa antigo removido:", arquivoAntigo);
+        } catch (erro) {
+          console.warn("Não foi possível remover mapa antigo:", erro.message);
+        }}
+    }
+
+    const extensao = path.extname(req.file.originalname).toLowerCase();
+    const nomeArquivo = "mapa-campus" + extensao;
+    const caminhoNovo = path.join(UPLOADS_DIR, nomeArquivo);
+
+    if (fs.existsSync(caminhoNovo)) {
+      fs.unlinkSync(caminhoNovo);
+    }
+
+    fs.renameSync(req.file.path, caminhoNovo);
+    const src = "/uploads/" + nomeArquivo;
+
+
+    if (mapa) {
+      mapa.src = src;
+    } else {
+      mapa = {
+        id: "mapa",
+        tipo: "mapa",
+        titulo: "Mapa do Campus",
+        src,
+        duracao: 30
+      };
+
+      playlists.mapa.push(mapa);
+    }
+
+    savePlaylists(playlists);
+    console.log("Novo mapa:", src);
+    res.json({ ok: true, src});
+
+  } catch (erro) {
+    console.error("Erro ao atualizar mapa:", erro);
+    res.status(500).json({erro: "Erro interno ao atualizar o mapa." });
   }
-  savePlaylists(playlists);
-  await registrarAuditoria(req, mapaExistente ? "MAP_UPDATED" : "MAP_CREATED", "map", "mapa", {
-    src
-  });
-  res.json({ok: true, src});
 });
 
 // CARREGAR MAPA

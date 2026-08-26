@@ -1,187 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa do Campus</title>
-    <link rel="stylesheet" href="style-playlists.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Mapa do Campus</title>
+ <link rel="stylesheet" href="style-playlists.css">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+ <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
   <div class="container-fluid">
-
     <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
+
     <div class="d-flex align-items-center gap-2">
       <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
     </div>
-
   </div>
 </nav>
 
-  <div class="card-mapa">
-    <img id="mapa-campus" src="/playlists/mapa-floripa.jpg" alt="Mapa do Campus">
+<div class="card-mapa">
+  <img
+    id="mapa-campus"
+    src="/playlists/mapa-floripa.jpg"
+    alt="Mapa do Campus">
 
-    <div class="acoes-card-mapa">
-      <button class="btn-playlist" onclick="aplicarMapa()">Aplicar</button>
-      <button class="btn-editar" onclick="alterarMapa()">Alterar</button>
-    </div>
+  <p id="nome-mapa"> Mapa do Campus</p>
+
+  <div class="acoes-card-mapa">
+    <button class="btn-playlist" onclick="aplicarMapa()">Aplicar</button>
+    <button class="btn-editar" onclick="alterarMapa()">Alterar</button>
   </div>
+</div>
 
 <input type="file" id="arquivo-mapa" accept=".png,.jpg,.jpeg,.webp" style="display:none">
 
-  <div id="tv-modal" class="modal-tv">
+<div id="tv-modal" class="modal-tv">
   <div class="modal-tv-content">
     <h2>Escolha uma TV</h2>
     <div id="lista-tvs-modal"></div>
-    <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+    <button class="btn-playlist" onclick="fecharModalTV()">Cancelar </button>
   </div>
 </div>
 
 <script>
 
-let params = new URLSearchParams(window.location.search);
-let tv = params.get("tv");
-let mapaAtual = "/playlists/mapa-floripa.jpg";
+const MAPA_PADRAO = "/playlists/mapa-floripa.jpg";
+let mapaAtual = MAPA_PADRAO;
 
-async function obterTVs(){
-  const res = await fetch("/state");
-  const state = await res.json();
-  return Object.keys(state);
+async function obterTVs() {
+  try {
+    const res = await fetch("/state", {cache: "no-store"});
+
+    if (!res.ok) {
+      throw new Error("Erro ao obter TVs.");
+    }
+
+    const state = await res.json();
+    return Object.keys(state);
+  } catch (erro) {
+    console.error( "Erro ao obter TVs:", erro);
+    return [];
+  }
 }
 
-function fecharModalTV(){
+function fecharModalTV() {
   document.getElementById("tv-modal").style.display = "none";
 }
 
-async function escolherTV(){
+async function escolherTV() {
+  const tvs = await obterTVs();
+  if (tvs.length === 0) {
+    alert("Nenhuma TV está conectada.");
+    return null;
+  }
 
-  return new Promise(async resolve => {
-
-    const tvs = await obterTVs();
-
-    const lista =
-      document.getElementById("lista-tvs-modal");
-
+  return new Promise(resolve => {
+    const lista = document.getElementById("lista-tvs-modal");
     lista.innerHTML = "";
 
     tvs.forEach(tv => {
-
-      const btn =
-        document.createElement("button");
-
-      btn.className = "btn-tv-modal";
+      const btn =document.createElement("button");
+      btn.className ="btn-tv-modal";
       btn.textContent = tv;
-
       btn.onclick = () => {
         fecharModalTV();
         resolve(tv);
       };
-
       lista.appendChild(btn);
     });
 
-    document.getElementById("tv-modal").style.display =
-      "flex";
+    document.getElementById("tv-modal").style.display = "flex";
   });
 }
 
 async function carregarMapa() {
   try {
-    const res = await fetch("/mapa", {
-      cache: "no-store"
-    });
+    const res = await fetch("/mapa", {cache: "no-store"});
 
     if (!res.ok) {
-      throw new Error("Erro ao carregar o mapa.");
+      throw new Error("Erro ao carregar mapa.");
     }
 
-    const dados = await res.json();
-    mapaAtual = dados.src;
-    document.getElementById("mapa-campus").src = mapaAtual + "?t=" + Date.now();
-  } 
-  catch (erro) {
+    const dados =await res.json();
+    mapaAtual = dados.src || MAPA_PADRAO;
+    atualizarImagemMapa();
+  } catch (erro) {
     console.error("Erro ao carregar mapa:", erro);
-    document.getElementById("mapa-campus").src = "/playlists/mapa-floripa.jpg";
+    mapaAtual = MAPA_PADRAO;
+    atualizarImagemMapa();
   }
 }
 
-//APLICAR MAPA
-async function aplicarMapa(){
+function atualizarImagemMapa() {
+  const imagem = document.getElementById("mapa-campus");
+  imagem.src = mapaAtual + "?t=" + Date.now();
+}
+
+function alterarMapa() {
+  const input = document.getElementById("arquivo-mapa");
+  input.click();
+}
+
+document.getElementById("arquivo-mapa").addEventListener("change", async function () {
+      const arquivo = this.files[0];
+      if (!arquivo) {
+        return;
+      }
+      const tiposPermitidos = [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+      ];
+
+      if (!tiposPermitidos.includes(arquivo.type)) {
+        alert("Selecione uma imagem PNG, JPG, JPEG ou WEBP.");
+        this.value = "";
+        return;
+      }
+
+      const tamanhoMaximo = 10 * 1024 * 1024;
+
+      if (arquivo.size > tamanhoMaximo) {
+        alert("A imagem deve ter no máximo 10 MB.");
+        this.value = "";
+        return;
+      }
+
+      const form = new FormData();
+      form.append("mapa", arquivo);
+
+      try {
+        const res = await fetch( "/mapa", {
+              method: "POST",
+              body: form
+            }
+          );
+
+        if (!res.ok) {
+          let mensagem = "Erro ao enviar mapa.";
+          try {
+            const erro = await res.json();
+            if (erro.erro) {
+              mensagem =  erro.erro;
+            }
+          } catch {}
+          throw new Error(mensagem);
+        }
+
+        const dados = await res.json();
+        if (!dados.src) {
+          throw new Error( "Servidor não retornou o caminho do mapa.");
+        }
+
+        mapaAtual =  dados.src;
+        atualizarImagemMapa();
+        alert("Mapa atualizado com sucesso.");
+      } catch (erro) {
+        console.error("Erro ao alterar mapa:", erro);
+        alert(erro.message || "Não foi possível alterar o mapa.");
+      }
+      this.value = "";
+    }
+  );
+
+async function obterPlaylistTV(tv) {
+  const res = await fetch(`/playlist-tv/${encodeURIComponent(tv)}`,{cache: "no-store"} );
+
+  if (!res.ok) {
+    throw new Error("Erro ao obter playlist da TV.");
+  }
+
+  const playlist = await res.json();
+  return Array.isArray(playlist)
+    ? playlist
+    : [];
+}
+
+async function aplicarMapa() {
   const tv = await escolherTV();
 
-  if(!tv)
-    return;
-
-  const mapa = {
-    tipo:"mapa",
-    titulo:"Mapa do Campus",
-    src: mapaAtual,
-    duracao:30
-  };
-
-  await fetch("/playlist/add",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      tv,
-      items:[mapa]
-    })
-  });
-
-  await fetch("/update",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      tv,
-      refresh:Date.now()
-    })
-  });
-  alert("Mapa aplicado.");
-  window.location.href = "/controller-tester.html";
-}
-
-async function alterarMapa(){
-  document.getElementById("arquivo-mapa").click();
-}
-
-document.getElementById("arquivo-mapa").addEventListener("change", async function() {
-
-  const arquivo = this.files[0];
-  if (!arquivo) {
+  if (!tv) {
     return;
   }
 
-  const form = new FormData();
-  form.append("mapa", arquivo);
   try {
-    const res = await fetch("/mapa", {
-      method: "POST",
-      body: form
-    });
+    const playlist = await obterPlaylistTV(tv);
+
+    const mapa = {
+      id: "mapa",
+      tipo: "mapa",
+      titulo: "Mapa do Campus",
+      src: mapaAtual,
+      duracao: 30
+    };
+
+    const indiceMapa = playlist.findIndex(item => item &&
+          (item.id === "mapa" || item.tipo === "mapa") );
+
+    if (indiceMapa >= 0) {
+      playlist[indiceMapa] = mapa;
+    } else {
+      playlist.push(mapa);
+    }
+
+    const res = await fetch("/save-playlist", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ tv, items: playlist})
+        });
+
 
     if (!res.ok) {
-      throw new Error("Erro ao enviar o mapa.");
+      throw new Error("Erro ao salvar playlist.");
     }
-    const dados = await res.json();
-    mapaAtual = dados.src;
-    document.getElementById("mapa-campus").src = mapaAtual + "?t=" + Date.now();
-    alert("Mapa atualizado com sucesso.");
-  } 
-  catch (erro) {
-    console.error("Erro ao alterar mapa:", erro);
-    alert("Não foi possível alterar o mapa.");
-  }
-  this.value = "";
-});
 
+    const update = await fetch("/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json"},
+          body: JSON.stringify({tv, refresh: Date.now()})
+        });
 
-async function voltar(){
-  window.location.href = "/controller-tester.html"; 
+    if (!update.ok) {
+      throw new Error("Playlist salva, mas não foi possível atualizar a TV.");
+    }
+
+    alert( `Mapa aplicado à ${tv}.` );
+    window.location.href = "/controller-tester.html";
+  } catch (erro) {
+    console.error("Erro ao aplicar mapa:", erro);
+    alert(erro.message || "Não foi possível aplicar o mapa.")};
 }
 
+// INICIALIZAÇÃO
 carregarMapa();
 </script>
 </body>

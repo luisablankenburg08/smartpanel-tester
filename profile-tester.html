@@ -14,6 +14,7 @@
 
         <a class="navbar-brand fw-bold" href="/controller-tester.html">Painel de Controle</a>
         <div class="d-flex align-items-center gap-2">
+          <button id="logout-button" type="button">Encerrar Sessão</button>
           <a href="/controller-tester.html" class="btn btn-outline-secondary">← Voltar</a>
         </div>
 
@@ -30,12 +31,11 @@
         <div><dt>Criado em</dt><dd id="profile-created">Carregando...</dd></div>
         <div><dt>Último login</dt><dd id="profile-last-login">Carregando...</dd></div>
       </dl>
-        <button id="logout-button" type="button">Encerrar Sessão</button>
       <p id="mensagem" role="status"></p>
     </section>
 
     <section id="admin-panel" class="profile-panel" hidden>
-      <h2>Administração de usuários</h2>
+      <h2>Administração de usuários</h2> 
       <p>Analise solicitações, aprove contas e defina os perfis de acesso.</p>
       <a class="admin-link" href="/users-tester.html">Gerenciar usuários e solicitações</a>
     </section>

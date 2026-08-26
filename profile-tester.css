@@ -31,7 +31,7 @@ body {
 
 .profile-panel h2 {
   margin: 0 0 12px;
-  color: #003049;
+  color: #198754;
   text-align: center;
 }
 
@@ -51,7 +51,7 @@ body {
 }
 
 dt {
-  color: #003049;
+  color: #198754;
   font-weight: 700;
 }
 
@@ -66,7 +66,7 @@ dd {
   margin: 20px auto 0;
   padding: 14px 24px;
   border-radius: 12px;
-  background: #003049;
+  background: #198754;
   color: #fff;
   font-weight: 700;
   text-decoration: none;
@@ -89,12 +89,12 @@ dd {
 #logout-button {
   display: block;
   width: fit-content;
-  min-width: 140px;
+  max-width: 10vw;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 0.8vh;
   border: 0;
   border-radius: 12px;
-  background: #e92222;
+  background: #003049;
   color: #fff;
   font: inherit;
   font-weight: 700;
