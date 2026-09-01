@@ -5,13 +5,6 @@
       "titulo": "f",
       "items": [
         {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
-        },
-        {
           "tipo": "ensalamento",
           "id": "ensalamento-segunda",
           "dia": 0,
@@ -178,5 +171,30 @@
       "duracao": 15
     }
   ],
-  "playlistsSalvas": []
+  "playlistsSalvas": [
+    {
+      "id": "1788265347656",
+      "titulo": "teste",
+      "items": [
+        {
+          "id": "TjxfN_tIv6o",
+          "titulo": "MCC INFO25: Apresentações",
+          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
+          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
+          "duracao": 67,
+          "tipo": "video",
+          "live": false
+        },
+        {
+          "id": "qCFeUspzav8",
+          "titulo": "TURISMO BASE COMUNITÁRIA GAROPABA",
+          "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
+          "duracao": 490,
+          "tipo": "video",
+          "live": false
+        }
+      ]
+    }
+  ]
 }

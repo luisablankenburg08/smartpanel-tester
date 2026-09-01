@@ -76,16 +76,16 @@ function saveState(state){
 // REMOVER TV DO JSON
 function removerTV(tvId) {
   try {
-    let state = readState();
+    const state = readState();
 
     if (state[tvId]) {
-      delete state[tvId]
-      saveState(state)
-      tvHeartbeats.delete(tvId)
-      console.log(`❌ TV ${tvId} removida`)
+      state[tvId].status = "inativa";
+      saveState(state);
+      tvHeartbeats.delete(tvId);
+      console.log(`TV ${tvId} marcada como inativa`);
     }
   } catch (e) {
-    console.error(`Erro ao remover TV ${tvId}:`, e)
+    console.error(`Erro ao desconectar TV ${tvId}:`, e);
   }
 }
 
@@ -120,6 +120,7 @@ function savePlaylists(data){
   fs.writeFileSync(PLAYLIST_FILE, JSON.stringify(data, null, 2));
 }
 
+// AUDITORIA
 async function registrarAuditoria(req, action, entityType, entityId, details = {}, tvId = null) {
   try {
     await pool.query(
@@ -610,79 +611,114 @@ app.post("/playlist/reorder", verificarAuth, async (req,res)=>{
 // REGISTRO
 app.post("/register", (req, res) => {
 
-  let { tv } = req.body
-  let state = readState();
-
-  const HEARTBEAT_TIMEOUT = 30000; // ms
+  let { tv } = req.body;
+  const state = readState();
+  const HEARTBEAT_TIMEOUT = 30000;
 
   if (tv) {
-    // If TV id exists and has a recent heartbeat, treat it as in-use and assign a new id
     const last = tvHeartbeats.get(tv);
+
     if (state[tv] && last && (Date.now() - last) < HEARTBEAT_TIMEOUT) {
-      console.log(`TV id ${tv} is active; issuing a new id for this connection`);
-      tv = null; // force creation of a new id below
-    }
-  }
+      console.log(`TV ${tv} já está ativa. Criando novo identificador.`);
+      tv = null;
+    } else {
 
-  if (tv) {
-    if (!state[tv]) {
-      state[tv] = {
-        status: "ativa"
+      if (state[tv]) {
+        state[tv].status = "ativa";
+      } else {
+        state[tv] = {
+          nome: tv,
+          status: "ativa",
+          pagina: null,
+          intervalo: 2000,
+          refresh: Date.now()
+        };
       }
-      saveState(state)
+      saveState(state);
+      tvHeartbeats.set(tv, Date.now());
+      console.log(`TV conectada: ${tv}`);
+      return res.json({ tv });
     }
-
-    tvHeartbeats.set(tv, Date.now())
-    return res.json({ tv })
   }
 
-  let numero = 1
-  while (state[`tv${numero}`]) numero++
-
-  let newTv = `tv${numero}`
+  let numero = 1;
+  while (state[`tv${numero}`]) {
+    numero++;
+  }
+  const newTv = `tv${numero}`;
 
   state[newTv] = {
-    status: "ativa"
+    nome: newTv,
+    status: "ativa",
+    pagina: null,
+    intervalo: 2000,
+    refresh: Date.now()
+  };
+
+  saveState(state);
+  tvHeartbeats.set(newTv, Date.now());
+  console.log(`Nova TV registrada: ${newTv}`);
+  res.json({tv: newTv});
+});
+
+//RENOMEAR
+app.post("/tv/renomear", verificarAuth, async (req, res) => {
+  const { tv, nome } = req.body;
+
+  if (!tv || !nome) {
+    return res.status(400).json({
+      erro: "TV e nome são obrigatórios."
+    });
   }
 
-  saveState(state)
-  tvHeartbeats.set(newTv, Date.now())
+  const state = readState();
 
-  res.json({ tv: newTv })
-})
+  if (!state[tv]) {
+    return res.status(404).json({
+      erro: "TV não encontrada."
+    });
+  }
+
+  state[tv].nome = nome.trim();
+  saveState(state);
+
+  await registrarAuditoria(req, "TV_RENAMED", "tv", tv, {nome: state[tv].nome}, tv);
+  res.json({ok: true, tv, nome: state[tv].nome});
+});
 
 // UPDATE 
 app.post("/update", verificarAuth, async (req, res) => {
 
-  let { tv, pagina, intervalo } = req.body
-  let state = readState();
+  const { tv, pagina, intervalo } = req.body;
+  const state = readState();
 
   if (!state[tv]) {
-    return res.status(404).send("TV não encontrada")
+    return res.status(404).send("TV não encontrada");
   }
 
   if (typeof state[tv] === "string") {
     state[tv] = {
+      nome: tv,
+      status: "ativa",
       pagina: state[tv],
       intervalo: 2000,
       refresh: Date.now()
-     }
+    };
+
   }
 
-  state[tv] = {
-  pagina: pagina ?? state[tv].pagina,
-  intervalo: intervalo ?? state[tv].intervalo,
-  refresh: Date.now()
-}
+  state[tv].pagina = pagina ?? state[tv].pagina;
+  state[tv].intervalo = intervalo ?? state[tv].intervalo;
+  state[tv].refresh = Date.now();
+  saveState(state);
 
-  saveState(state)
   await registrarAuditoria(req, "TV_PAGE_UPDATED", "tv", tv, {
-    pagina: state[tv].pagina,
-    intervalo: state[tv].intervalo
-  }, tv);
+      pagina: state[tv].pagina,
+      intervalo: state[tv].intervalo
+    }, tv);
 
-  res.json({ status: "ok" })
-})
+  res.json({status: "ok"});
+});
 
 // STATE
 app.get("/state", (req, res) => {

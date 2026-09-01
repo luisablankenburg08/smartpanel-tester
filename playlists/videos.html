@@ -73,7 +73,6 @@
 <div id="tv-modal" class="modal-tv">
   <div class="modal-tv-content">
     <h2>Escolha uma TV</h2>
-    <p class="text-muted">Selecione em qual TV deseja aplicar os vídeos.</p>
     <div id="lista-tvs-modal"></div>
     <button class="btn btn-outline-secondary mt-3" onclick="fecharModalTV()">Cancelar</button>
   </div>
@@ -93,47 +92,58 @@ let paginaAtual = 1;
 const params = new URLSearchParams(window.location.search);
 const tv = params.get("tv");
 
-async function obterTVs(){
+async function obterTVs() {
+  const res = await fetch("/state", {cache: "no-store"});
 
-  const res = await fetch("/state");
-  const state = await res.json();
-
-  return Object.keys(state);
+  if (!res.ok) {
+    throw new Error("Erro ao obter as TVs.");
+  }
+  return await res.json();
 }
 
 function fecharModalTV(){
   document.getElementById("tv-modal").style.display = "none";
 }
 
-async function escolherTV(){
+async function escolherTV() {
 
-  return new Promise(async resolve => {
+  const estado = await obterTVs();
+  const tvsOnline = Object.entries(estado).filter(
+    ([tvId, dadosTV]) => dadosTV.status === "ativa"
+  );
 
-    const tvs = await obterTVs();
 
+  if (tvsOnline.length === 0) {
     const lista = document.getElementById("lista-tvs-modal");
 
+    lista.innerHTML = `
+      <div class="mensagem-sem-tv">
+        Nenhuma TV está online no momento.
+      </div>`;
+
+    document.getElementById("tv-modal").style.display = "flex";
+    return null;
+  }
+
+  return new Promise(resolve => {
+    const lista = document.getElementById("lista-tvs-modal");
     lista.innerHTML = "";
 
-    tvs.forEach(tv => {
-
+    tvsOnline.forEach(([tvId, dadosTV]) => {
       const btn = document.createElement("button");
-
       btn.className = "btn-tv-modal";
-      btn.textContent = tv;
+      const nomeTV = dadosTV.nome || tvId;
+      btn.textContent = nomeTV;
 
       btn.onclick = () => {
         fecharModalTV();
-        resolve(tv);
+        resolve(tvId);
       };
-       mostrarAcoesPlaylist(); 
       lista.appendChild(btn);
-
     });
 
     document.getElementById("tv-modal").style.display = "flex";
   });
-
 }
 
 // EXTRAIR ID

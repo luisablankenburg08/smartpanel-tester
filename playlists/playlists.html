@@ -74,7 +74,7 @@
     <div class="modal-tv-content">
       <h2>Escolha uma TV</h2>
       <div id="lista-tvs-modal"></div>
-      <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+      <button class="btn btn-outline-secondary mt-3" onclick="fecharModalTV()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -92,35 +92,52 @@ let itensOrdenados = [];
 const params = new URLSearchParams(window.location.search);
 const tv = params.get("tv");
 
-//ESCOLHER TVS PARA APLICAR
-async function obterTVs(){
+async function obterTVs() {
+  const res = await fetch("/state", {cache: "no-store"});
 
-  const res = await fetch("/state");
-  const state = await res.json();
-
-  return Object.keys(state);
+  if (!res.ok) {
+    throw new Error("Erro ao obter as TVs.");
+  }
+  return await res.json();
 }
 
 function fecharModalTV(){
   document.getElementById("tv-modal").style.display = "none";
 }
 
-async function escolherTV(){
-  return new Promise(async resolve => {
+async function escolherTV() {
 
-    const tvs = await obterTVs();
+  const estado = await obterTVs();
+  const tvsOnline = Object.entries(estado).filter(
+    ([tvId, dadosTV]) => dadosTV.status === "ativa"
+  );
+
+
+  if (tvsOnline.length === 0) {
     const lista = document.getElementById("lista-tvs-modal");
 
-    lista.innerHTML = "";
-    tvs.forEach(tv => {
+    lista.innerHTML = `
+      <div class="mensagem-sem-tv">
+        Nenhuma TV está online no momento.
+      </div>`;
 
+    document.getElementById("tv-modal").style.display = "flex";
+    return null;
+  }
+
+  return new Promise(resolve => {
+    const lista = document.getElementById("lista-tvs-modal");
+    lista.innerHTML = "";
+
+    tvsOnline.forEach(([tvId, dadosTV]) => {
       const btn = document.createElement("button");
       btn.className = "btn-tv-modal";
-      btn.textContent = tv;
+      const nomeTV = dadosTV.nome || tvId;
+      btn.textContent = nomeTV;
 
       btn.onclick = () => {
         fecharModalTV();
-        resolve(tv);
+        resolve(tvId);
       };
       lista.appendChild(btn);
     });

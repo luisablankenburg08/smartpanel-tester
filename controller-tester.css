@@ -309,6 +309,66 @@ fieldset legend {
   transition: transform 0.2s ease;
 }
 
+.tv-titulo-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.btn-renomear-tv {
+  border-radius: 5vw;
+  border: none;
+  padding: 5px 10px;
+  background: rgb(25, 135, 84, 0.5);
+  cursor: pointer;
+  font-size: 0.8vw;
+}
+
+.status-tv-detalhado {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.status-online {
+  color: #198754;
+}
+
+.status-offline {
+  color: #dc3545;
+}
+
+.item-tv-navbar.tv-inativa {
+  opacity: 0.75;
+}
+
+.status-tv-menu {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.tv-offline-container {
+  max-width: 50vw;
+  margin-left: 4vw;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px dashed #dc3545;
+  border-radius: 10px;
+  color: #dc3545;
+  background: #fff5f5;
+}
+
+.tv-offline-icone {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+
 .menu-tvs-navbar {
   position: absolute;
   top: calc(100% + 5px);

@@ -38,7 +38,7 @@
     <div class="modal-tv-content">
       <h2>Escolha uma TV</h2>
       <div id="lista-tvs-modal"></div>
-      <button class="btn-playlist" onclick="fecharModalTV()">Cancelar</button>
+      <button class="btn btn-outline-secondary mt-3" onclick="fecharModalTV()">Cancelar</button>
     </div>
   </div>
 
@@ -97,53 +97,60 @@ let ensalamentos = [...DIAS_ENSALAMENTO];
 let indiceEdicao = null;
 let ensalamentoSelecionado = null;
 
-//OBTER TVS ATIVAS
 async function obterTVs() {
-  const resposta = await fetch("/state");
-  const estado = await resposta.json();
-  return Object.keys(estado);
+  const res = await fetch("/state", {cache: "no-store"});
+
+  if (!res.ok) {
+    throw new Error("Erro ao obter as TVs.");
+  }
+  return await res.json();
 }
 
-//MODAL TV
-function fecharModalTV() {
+function fecharModalTV(){
   document.getElementById("tv-modal").style.display = "none";
 }
 
 async function escolherTV() {
-    return new Promise(
-      async resolve => {
-        try {
-          const tvs = await obterTVs();
-          const lista = document.getElementById("lista-tvs-modal");
-          lista.innerHTML = "";
 
-          if (tvs.length === 0) {
-            lista.innerHTML = "<p>Nenhuma TV encontrada.</p>";
-            return;
-          }
+  const estado = await obterTVs();
+  const tvsOnline = Object.entries(estado).filter(
+    ([tvId, dadosTV]) => dadosTV.status === "ativa"
+  );
 
-          tvs.forEach(
-            nomeTV => {
-              const botao = document.createElement("button");
-              botao.className = "btn-tv-modal";
-              botao.textContent = nomeTV;
-              botao.onclick = () => {
-                fecharModalTV();
-                resolve(nomeTV);
-              };
 
-              lista.appendChild(botao);
-            }
-          );
-          document.getElementById("tv-modal").style.display = "flex";
-        } catch (erro) {
-          console.error(erro);
-          alert("Não foi possível carregar as TVs.");
-          resolve(null);
-        }
-      }
-    );
+  if (tvsOnline.length === 0) {
+    const lista = document.getElementById("lista-tvs-modal");
+
+    lista.innerHTML = `
+      <div class="mensagem-sem-tv">
+        Nenhuma TV está online no momento.
+      </div>`;
+
+    document.getElementById("tv-modal").style.display = "flex";
+    return null;
   }
+
+  return new Promise(resolve => {
+    const lista = document.getElementById("lista-tvs-modal");
+    lista.innerHTML = "";
+
+    tvsOnline.forEach(([tvId, dadosTV]) => {
+      const btn = document.createElement("button");
+      btn.className = "btn-tv-modal";
+      const nomeTV = dadosTV.nome || tvId;
+      btn.textContent = nomeTV;
+
+      btn.onclick = () => {
+        fecharModalTV();
+        resolve(tvId);
+      };
+      lista.appendChild(btn);
+    });
+
+    document.getElementById("tv-modal").style.display = "flex";
+  });
+}
+
 
 // RENDERIZAR CARDS
 function renderizarCards() {
