@@ -1,6 +1,7 @@
 {
   "tv1": {
-    "status": "inativa",
-    "nome": "TV TESTE"
+    "status": "ativa",
+    "nome": "TV TESTE",
+    "refresh": 1788266755331
   }
 }

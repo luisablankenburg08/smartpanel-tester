@@ -5,6 +5,13 @@
       "titulo": "f",
       "items": [
         {
+          "id": "1783077286617",
+          "titulo": "Projeto",
+          "tipo": "texto",
+          "conteudo": "Smart Digital Panel Project",
+          "duracao": 15
+        },
+        {
           "tipo": "ensalamento",
           "id": "ensalamento-segunda",
           "dia": 0,

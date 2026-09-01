@@ -6,6 +6,51 @@ let playlistAtual = [];
 let modoEdicao = false;
 let dragIndex = null;
 let estadoTVs = {};
+const PLAYLIST_SYNC_KEY = "viewer-playlist-sync";
+
+function formatarTempo(segundos) {
+  const total = Math.max(0, Number(segundos) || 0);
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function obterEstadoSincronizacao() {
+  try {
+    return JSON.parse(localStorage.getItem(PLAYLIST_SYNC_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function atualizarTempoExibicaoTV() {
+  const timer = document.getElementById("tempo-exibicao-tv");
+
+  if (!timer || !tvSelecionada) {
+    return;
+  }
+
+  const sync = obterEstadoSincronizacao();
+
+  if (!sync || sync.tv !== tvSelecionada || !Number.isInteger(sync.index) || !Array.isArray(playlistAtual)) {
+    timer.textContent = "Tempo: --:--";
+    return;
+  }
+
+  const itemAtual = playlistAtual[sync.index];
+
+  if (!itemAtual) {
+    timer.textContent = "Tempo: --:--";
+    return;
+  }
+
+  const duracaoSegundos = Number(itemAtual.duracao || itemAtual.intervalo || 10);
+  const duracaoMs = duracaoSegundos * 1000;
+  const restanteMs = Math.max(0, (sync.startedAt || Date.now()) + duracaoMs - Date.now());
+  const restanteSegundos = Math.ceil(restanteMs / 1000);
+
+  timer.textContent = `Tempo: ${formatarTempo(restanteSegundos)} / ${formatarTempo(duracaoSegundos)}`;
+}
 
 // CONFIGURAÇÃO DA TV SELECIONADA
 const CHAVE_TV_SELECIONADA = "tvSelecionada";
@@ -310,6 +355,7 @@ async function mostrarTV(tv) {
             <p>Esta televisão está cadastrada no sistema,mas não está conectada no momento.</p>
           </div>`}
 
+
     <div id="playlist">
       <div class="playlist-header">
 
@@ -332,6 +378,8 @@ async function mostrarTV(tv) {
 
     playlistAtual = await resposta.json();
     renderizarPlaylist(tv);
+    atualizarTempoExibicaoTV();
+    setInterval(atualizarTempoExibicaoTV, 250);
   } catch (erro) {
     console.error("Erro ao carregar playlist da TV:",erro);
   }
