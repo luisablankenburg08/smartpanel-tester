@@ -36,3 +36,25 @@ form.addEventListener("submit", async event => {
     botao.disabled = false;
   }
 });
+
+
+document.querySelectorAll(".toggle-senha").forEach(botao => {
+
+  botao.addEventListener("click", function () {
+    const idCampo = this.dataset.target;
+    const campo = document.getElementById(idCampo);
+    const icone = this.querySelector("i");
+    const senhaEstaVisivel = campo.type === "text";
+    campo.type = senhaEstaVisivel ? "password" : "text";
+
+    if (senhaEstaVisivel) {
+      icone.classList.remove("bi-eye-slash");
+      icone.classList.add("bi-eye");
+      this.setAttribute("aria-label", "Mostrar senha");
+    } else {
+      icone.classList.remove("bi-eye");
+      icone.classList.add("bi-eye-slash");
+      this.setAttribute("aria-label", "Ocultar senha");
+    }
+  });
+});

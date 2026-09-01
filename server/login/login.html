@@ -6,6 +6,7 @@
 <title>Login</title>
 <link rel="stylesheet" href="login.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="icon" type="image/png" href="https://www.ifsc.edu.br/o/ifsc-internet-lf6_2-theme/images/favicon.ico">
 </head>
 
@@ -25,7 +26,13 @@
 
         <div class="campo-login">
           <label for="floatingPassword">Senha</label>
-          <input type="password" id="floatingPassword" placeholder="Digite sua senha" autocomplete="current-password" required>
+
+          <div class="campo-senha">
+            <input type="password" id="floatingPassword" placeholder="Digite sua senha" autocomplete="current-password" required>
+            <button type="button" class="btn-olho" id="toggleSenha" aria-label="Mostrar senha">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
         </div>
 
         <div id="mensagem-erro">Usuário ou senha incorretos.</div>
@@ -82,6 +89,19 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         botao.disabled = false;
         botao.textContent = "Entrar";
     }
+});
+
+const campoSenha = document.getElementById("floatingPassword");
+const botaoOlho = document.getElementById("toggleSenha");
+const iconeOlho = botaoOlho.querySelector("i");
+
+botaoOlho.addEventListener("click", function () {
+
+  const senhaVisivel = campoSenha.type === "text";
+  campoSenha.type = senhaVisivel ? "password" : "text";
+  iconeOlho.classList.toggle("bi-eye", senhaVisivel);
+  iconeOlho.classList.toggle("bi-eye-slash", !senhaVisivel);
+  botaoOlho.setAttribute("aria-label", senhaVisivel ? "Mostrar senha": "Ocultar senha");
 });
 
 </script>

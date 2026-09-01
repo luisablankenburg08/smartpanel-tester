@@ -169,3 +169,33 @@ body {
     .login-card {padding: 30px 25px; border-radius: 16px;}
     .login-header h1 {font-size: 1.5rem;}
 }
+
+
+.campo-senha {
+  position: relative;
+  width: 100%;
+}
+
+.campo-senha input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.btn-olho {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+}
+
+.btn-olho:hover {
+  color: #000;
+}
