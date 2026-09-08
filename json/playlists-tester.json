@@ -1,36 +1,7 @@
 {
   "tvPlaylists": {
     "tv1": {
-      "playlistId": "1785527135800",
-      "titulo": "f",
-      "items": [
-        {
-          "id": "1783077286617",
-          "titulo": "Projeto",
-          "tipo": "texto",
-          "conteudo": "Smart Digital Panel Project",
-          "duracao": 15
-        },
-        {
-          "tipo": "ensalamento",
-          "id": "ensalamento-segunda",
-          "dia": 0,
-          "titulo": "Ensalamento: Segunda-feira",
-          "duracao": 30,
-          "src": "/playlists/verEnsalamento.html"
-        }
-      ]
-    },
-    "tv2": {
-      "items": [
-        {
-          "id": "1783082579283",
-          "titulo": "Solicitação de Conteúdo",
-          "tipo": "canva",
-          "conteudo": "https://www.canva.com/design/DAHNksivLzQ/3m4rkzegCaN0XZ8VY3jWHA/view?embed",
-          "duracao": 30
-        }
-      ]
+      "items": []
     }
   },
   "videosCustomizados": [
@@ -176,19 +147,26 @@
       "tipo": "texto",
       "conteudo": "teste",
       "duracao": 15
+    },
+    {
+      "id": "1788347030696",
+      "titulo": "teste aviso",
+      "tipo": "texto",
+      "conteudo": "aviso de teste",
+      "duracao": 10
     }
   ],
   "playlistsSalvas": [
     {
-      "id": "1788265347656",
+      "id": "1788365206125",
       "titulo": "teste",
       "items": [
         {
-          "id": "TjxfN_tIv6o",
-          "titulo": "MCC INFO25: Apresentações",
-          "iframe": "https://www.youtube.com/embed/TjxfN_tIv6o?autoplay=1&mute=1&playsinline=1",
-          "thumb": "https://img.youtube.com/vi/TjxfN_tIv6o/hqdefault.jpg",
-          "duracao": 67,
+          "id": "1GiXd3lAjrE",
+          "titulo": "Institucional do IFSC - REDE",
+          "iframe": "https://www.youtube.com/embed/1GiXd3lAjrE?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/1GiXd3lAjrE/hqdefault.jpg",
+          "duracao": 60,
           "tipo": "video",
           "live": false
         },
@@ -198,6 +176,15 @@
           "iframe": "https://www.youtube.com/embed/qCFeUspzav8?autoplay=1&mute=1",
           "thumb": "https://img.youtube.com/vi/qCFeUspzav8/hqdefault.jpg",
           "duracao": 490,
+          "tipo": "video",
+          "live": false
+        },
+        {
+          "id": "OXIAp2zgips",
+          "titulo": "MOTIVOS PARA ESTUDAR NO IFSC",
+          "iframe": "https://www.youtube.com/embed/OXIAp2zgips?autoplay=1&mute=1",
+          "thumb": "https://img.youtube.com/vi/OXIAp2zgips/hqdefault.jpg",
+          "duracao": 230,
           "tipo": "video",
           "live": false
         }

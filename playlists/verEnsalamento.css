@@ -51,7 +51,7 @@ h1 {
 }
 
 .turno-header { 
-    background: #dfefff; 
+    background: #e8f5e9; 
     color: #123; 
     font-weight: bold; 
     width: 120px; 
@@ -69,8 +69,8 @@ h1 {
 .cell .badge { 
     height: 8vh; 
     display: block; 
-    background: #e8f0fe; 
-    color: #0b5fff; 
+    background: rgba(232, 236, 245, 0.8); 
+    color: rgb(25, 60, 135);
     padding: 2px 6px; 
     border-radius: 4px; 
     text-align: center;

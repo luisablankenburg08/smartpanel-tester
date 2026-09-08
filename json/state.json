@@ -1,7 +1,9 @@
 {
   "tv1": {
+    "nome": "PC LUISA CHROME",
     "status": "inativa",
-    "nome": "TV TESTE",
-    "refresh": 1788266755331
+    "pagina": null,
+    "intervalo": 2000,
+    "refresh": 1788366988197
   }
 }
